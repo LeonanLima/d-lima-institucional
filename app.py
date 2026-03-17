@@ -8,6 +8,6 @@ def index():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    # O Render exige host 0.0.0.0 e a porta da variável de ambiente
+    # Isso aqui é o que impede o erro 502 no Render
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
