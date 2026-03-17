@@ -76,12 +76,15 @@
                         <div className="absolute top-0 right-0 w-[300px] md:w-[800px] h-[300px] md:h-[800px] bg-[#B89B5E] opacity-5 rounded-full -mr-40 -mt-40 blur-[80px] md:blur-[120px]"></div>
                         <div className="max-w-7xl mx-auto relative z-10">
                             <div className="mb-8 md:mb-12">
-                                {/* LINHA CORRIGIDA PARA O CAMINHO DIRETO */}
+                                {/* CAMINHO FORÇADO PARA A LOGO NA PASTA STATIC */}
                                 <img
-                                    src="/static/minha-logo.png"
+                                    src="/static/minha-logo.png?v=3"
                                     className="h-44 md:h-80 w-auto object-contain mx-auto drop-shadow-2xl"
                                     alt="D'LIMA Engenharia"
-                                    onError={(e) => { e.target.src='https://via.placeholder.com/400x200?text=D+LIMA+ENGENHARIA'; }}
+                                    onError={(e) => {
+                                        console.log("Erro ao carregar a logo");
+                                        e.target.src='https://via.placeholder.com/400x200?text=D+LIMA+ENGENHARIA';
+                                    }}
                                 />
                             </div>
                             <h1 className="text-3xl md:text-6xl font-light mb-6 tracking-tight px-2">
