@@ -1,13 +1,13 @@
 import os
 from flask import Flask, render_template
 
-app = Flask(__name__)
+# Forçamos o Flask a entender que a pasta static e templates estão na raiz do projeto
+app = Flask(__name__, static_folder='static', template_folder='templates')
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    # Isso aqui é o que impede o erro 502 no Render
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
