@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0F120F">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192x192.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>D'LIMA Engenharia | Excelência e Abundância</title>
@@ -13,12 +16,14 @@
     <style>
         body { font-family: 'Inter', sans-serif; scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
         h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; }
+        .transition-all { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
+        {% raw %}
         const { useState, useEffect } = React;
 
         const Icon = ({ name, className }) => {
@@ -29,63 +34,70 @@
         };
 
         const App = () => {
+            const logoBgColor = "#0F120F";
             const [copied, setCopied] = useState(false);
+
             const copyEmail = () => {
-                navigator.clipboard.writeText("contato@dlimaengenharia.org").then(() => {
+                const email = "contato@dlimaengenharia.org";
+                navigator.clipboard.writeText(email).then(() => {
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2500);
                 });
             };
 
             const values = [
-                { title: "Mentalidade de Abundância", desc: "Acreditamos que para crescer é preciso contribuir.", icon: "heart" },
-                { title: "Decisões Baseadas em Dados", desc: "Utilizamos inteligência de mercado e dados.", icon: "bar-chart-3" },
-                { title: "Disciplina Processual", desc: "A ordem e a padronização são os alicerces.", icon: "shield-check" },
-                { title: "Crescimento Sustentado", desc: "Buscamos previsibilidade e escala.", icon: "trending-up" }
+                { title: "Mentalidade de Abundância", desc: "Acreditamos que para crescer é preciso contribuir. Rejeitamos a ideia de que para um ganhar o outro deve perder.", icon: "heart" },
+                { title: "Decisões Baseadas em Dados", desc: "Não operamos na sorte. Utilizamos inteligência de mercado e dados para garantir rentabilidade e segurança.", icon: "bar-chart-3" },
+                { title: "Disciplina Processual", desc: "Processos claros geram resultados replicáveis. A ordem e a padronização são os alicerces da nossa escala.", icon: "shield-check" },
+                { title: "Crescimento Sustentado", desc: "Buscamos a tríade: Previsibilidade financeira, Resistência e Escala em todos os nossos projetos.", icon: "trending-up" }
             ];
 
             return (
                 <div className="min-h-screen bg-[#F9F8F6] text-[#2D3A2C] overflow-x-hidden">
-                    <header className="bg-[#0F120F] text-[#EFEBE0] py-12 md:py-32 px-4 text-center">
-                        <div className="max-w-7xl mx-auto">
+                    <header style={{ backgroundColor: logoBgColor }} className="text-[#EFEBE0] py-12 md:py-32 px-4 relative overflow-hidden text-center">
+                        <div className="absolute top-0 right-0 w-[300px] md:w-[800px] h-[300px] md:h-[800px] bg-[#B89B5E] opacity-5 rounded-full -mr-40 -mt-40 blur-[80px] md:blur-[120px]"></div>
+                        <div className="max-w-7xl mx-auto relative z-10">
                             <div className="mb-8 md:mb-12">
-                                {/* CAMINHO QUE FUNCIONA NA HOSTINGER */}
                                 <img
-                                    src="static/minha-logo.png"
+                                    src="/static/minha-logo.png"
                                     className="h-44 md:h-80 w-auto object-contain mx-auto drop-shadow-2xl"
                                     alt="D'LIMA Engenharia"
+                                    onError={(e) => { e.target.src='https://via.placeholder.com/400x200?text=D+LIMA+ENGENHARIA'; }}
                                 />
                             </div>
-                            <h1 className="text-3xl md:text-6xl font-light mb-6">
+                            <h1 className="text-3xl md:text-6xl font-light mb-6 tracking-tight px-2">
                                 Excelência em <span className="font-bold text-[#B89B5E]">Engenharia</span>
                             </h1>
+                            <p className="text-base md:text-xl text-[#7C8B7A] max-w-2xl mx-auto font-medium px-4 leading-relaxed">
+                                Construindo as bases do <span className="text-[#B89B5E]">próximo nível</span> com clareza, estratégia e mentalidade de abundância.
+                            </p>
                         </div>
                     </header>
 
-                    <section className="py-16 px-6 max-w-6xl mx-auto grid md:grid-cols-3 gap-10">
-                        <div className="bg-white p-8 rounded-[2rem] shadow-sm border text-center">
-                            <Icon name="target" className="text-[#B89B5E] mx-auto mb-4" />
-                            <h3 className="text-xl font-bold mb-3">Missão</h3>
-                            <p className="text-gray-600 text-sm">Transformar o cenário da engenharia.</p>
+                    <section className="py-16 md:py-24 px-6 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
+                        <div className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-sm border border-[#EFEBE0] hover:border-[#B89B5E] transition-all group text-center">
+                            <Icon name="target" className="text-[#B89B5E] w-12 h-12 mx-auto mb-6" />
+                            <h3 className="text-xl md:text-2xl font-bold mb-3">Missão</h3>
+                            <p className="text-gray-600 text-sm">Transformar o cenário da engenharia através de processos eficientes.</p>
                         </div>
-                        <div className="bg-white p-8 rounded-[2rem] shadow-sm border text-center">
-                            <Icon name="eye" className="text-[#B89B5E] mx-auto mb-4" />
-                            <h3 className="text-xl font-bold mb-3">Visão</h3>
-                            <p className="text-gray-600 text-sm">Ser a referência em inteligência na gestão.</p>
+                        <div className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-sm border border-[#EFEBE0] hover:border-[#B89B5E] transition-all group text-center">
+                            <Icon name="eye" className="text-[#B89B5E] w-12 h-12 mx-auto mb-6" />
+                            <h3 className="text-xl md:text-2xl font-bold mb-3">Visão</h3>
+                            <p className="text-gray-600 text-sm">Ser a referência em inteligência na gestão operacional no Brasil.</p>
                         </div>
-                        <div className="bg-white p-8 rounded-[2rem] shadow-sm border text-center">
-                            <Icon name="users" className="text-[#B89B5E] mx-auto mb-4" />
-                            <h3 className="text-xl font-bold mb-3">Cultura</h3>
+                        <div className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-sm border border-[#EFEBE0] hover:border-[#B89B5E] transition-all group text-center">
+                            <Icon name="users" className="text-[#B89B5E] w-12 h-12 mx-auto mb-6" />
+                            <h3 className="text-xl md:text-2xl font-bold mb-3">Cultura</h3>
                             <p className="text-gray-600 text-sm">Pautada na abundância e fé em Deus.</p>
                         </div>
                     </section>
 
-                    <section id="contato" className="py-12 px-6 max-w-6xl mx-auto">
-                        <div className="bg-white rounded-[2rem] p-8 md:p-16 shadow-xl border flex flex-col items-center gap-6">
-                            <h2 className="text-3xl font-bold">Entre em <span className="text-[#B89B5E]">Contato</span></h2>
+                    <section id="contato" className="py-12 md:py-24 px-4 md:px-6 max-w-6xl mx-auto">
+                        <div className="bg-white rounded-[2rem] p-8 md:p-16 shadow-xl border border-[#B89B5E]/20 flex flex-col items-center gap-10">
+                            <h2 className="text-3xl md:text-4xl font-bold">Entre em <span className="text-[#B89B5E]">Contato</span></h2>
                             <div className="flex flex-wrap justify-center gap-4">
-                                <a href="https://wa.me/5528999646592" className="bg-[#B89B5E] text-white px-8 py-3 rounded-xl font-bold">WhatsApp</a>
-                                <button onClick={copyEmail} className="border-2 border-[#B89B5E] text-[#B89B5E] px-8 py-3 rounded-xl font-bold">
+                                <a href="https://wa.me/5528999646592" target="_blank" className="bg-[#B89B5E] text-white px-8 py-4 rounded-xl font-semibold">WhatsApp</a>
+                                <button onClick={copyEmail} className="border-2 border-[#B89B5E] text-[#B89B5E] px-8 py-4 rounded-xl font-semibold">
                                     {copied ? "E-mail Copiado!" : "Copiar E-mail"}
                                 </button>
                             </div>
@@ -97,6 +109,7 @@
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
+        {% endraw %}
     </script>
 </body>
 </html>
