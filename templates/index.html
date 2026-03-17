@@ -26,7 +26,6 @@
         {% raw %}
         const { useState, useEffect } = React;
 
-        // Componente para renderizar os ícones Lucide no padrão CDN
         const Icon = ({ name, className }) => {
             useEffect(() => {
                 if (window.lucide) { window.lucide.createIcons(); }
@@ -77,8 +76,9 @@
                         <div className="absolute top-0 right-0 w-[300px] md:w-[800px] h-[300px] md:h-[800px] bg-[#B89B5E] opacity-5 rounded-full -mr-40 -mt-40 blur-[80px] md:blur-[120px]"></div>
                         <div className="max-w-7xl mx-auto relative z-10">
                             <div className="mb-8 md:mb-12">
+                                {/* LINHA CORRIGIDA ABAIXO */}
                                 <img
-                                    src="/static/minha%20logo.png"
+                                    src="{{ url_for('static', filename='minha-logo.png') }}"
                                     className="h-44 md:h-80 w-auto object-contain mx-auto drop-shadow-2xl"
                                     alt="D'LIMA Engenharia"
                                     onError={(e) => { e.target.src='https://via.placeholder.com/400x200?text=D+LIMA+ENGENHARIA'; }}
@@ -150,20 +150,6 @@
                     </section>
 
                     {/* PILARES */}
-                    <section className="py-24 px-6 max-w-6xl mx-auto text-center">
-                        <h2 className="text-4xl font-bold mb-16">Nossos <span className="text-[#B89B5E]">Pilares</span></h2>
-                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 text-left">
-                            {values.map((v, i) => (
-                                <div key={i} className="bg-white p-8 rounded-3xl border border-[#EFEBE0] hover:border-[#B89B5E] transition-all">
-                                    <div className="mb-6"><Icon name={v.icon} className="w-6 h-6 text-[#B89B5E]" /></div>
-                                    <h4 className="font-bold text-xl mb-3">{v.title}</h4>
-                                    <p className="text-gray-500 text-sm leading-relaxed">{v.desc}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-
-                    {/* PILARES */}
                     <section className="py-16 md:py-24 px-6 max-w-6xl mx-auto text-center">
                         <h2 className="text-3xl md:text-4xl font-bold mb-12">Nossos <span className="text-[#B89B5E]">Pilares</span></h2>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 text-left">
@@ -227,16 +213,11 @@
         {% endraw %}
     </script>
     <script>
-      // Registra o Service Worker
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-              console.log('ServiceWorker registrado com sucesso, escopo:', registration.scope);
-            })
-            .catch(error => {
-              console.log('Falha ao registrar o ServiceWorker:', error);
-            });
+            .then(registration => { console.log('ServiceWorker OK'); })
+            .catch(error => { console.log('ServiceWorker Falhou', error); });
         });
       }
     </script>
