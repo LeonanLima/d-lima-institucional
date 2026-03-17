@@ -46,14 +46,32 @@
             };
 
             const values = [
-                { title: "Mentalidade de Abundância", desc: "Acreditamos que para crescer é preciso contribuir. Rejeitamos a ideia de que para um ganhar o outro deve perder.", icon: "heart" },
-                { title: "Decisões Baseadas em Dados", desc: "Não operamos na sorte. Utilizamos inteligência de mercado e dados para garantir rentabilidade e segurança.", icon: "bar-chart-3" },
-                { title: "Disciplina Processual", desc: "Processos claros geram resultados replicáveis. A ordem e a padronização são os alicerces da nossa escala.", icon: "shield-check" },
-                { title: "Crescimento Sustentado", desc: "Buscamos a tríade: Previsibilidade financeira, Resistência e Escala em todos os nossos projetos.", icon: "trending-up" }
+                {
+                    title: "Mentalidade de Abundância",
+                    desc: "Acreditamos que para crescer é preciso contribuir. Rejeitamos a ideia de que para um ganhar o outro deve perder.",
+                    icon: "heart"
+                },
+                {
+                    title: "Decisões Baseadas em Dados",
+                    desc: "Não operamos na sorte. Utilizamos inteligência de mercado e dados para garantir rentabilidade e segurança.",
+                    icon: "bar-chart-3"
+                },
+                {
+                    title: "Disciplina Processual",
+                    desc: "Processos claros geram resultados replicáveis. A ordem e a padronização são os alicerces da nossa escala.",
+                    icon: "shield-check"
+                },
+                {
+                    title: "Crescimento Sustentado",
+                    desc: "Buscamos a tríade: Previsibilidade financeira, Resistência e Escala em todos os nossos projetos.",
+                    icon: "trending-up"
+                }
             ];
 
             return (
                 <div className="min-h-screen bg-[#F9F8F6] text-[#2D3A2C] overflow-x-hidden">
+
+                    {/* HERO */}
                     <header style={{ backgroundColor: logoBgColor }} className="text-[#EFEBE0] py-12 md:py-32 px-4 relative overflow-hidden text-center">
                         <div className="absolute top-0 right-0 w-[300px] md:w-[800px] h-[300px] md:h-[800px] bg-[#B89B5E] opacity-5 rounded-full -mr-40 -mt-40 blur-[80px] md:blur-[120px]"></div>
                         <div className="max-w-7xl mx-auto relative z-10">
@@ -62,7 +80,9 @@
                                     src="/static/minha-logo.png"
                                     className="h-44 md:h-80 w-auto object-contain mx-auto drop-shadow-2xl"
                                     alt="D'LIMA Engenharia"
-                                    onError={(e) => { e.target.src='https://via.placeholder.com/400x200?text=D+LIMA+ENGENHARIA'; }}
+                                    onError={(e) => {
+                                        e.target.src='https://via.placeholder.com/400x200?text=D+LIMA+ENGENHARIA';
+                                    }}
                                 />
                             </div>
                             <h1 className="text-3xl md:text-6xl font-light mb-6 tracking-tight px-2">
@@ -74,35 +94,117 @@
                         </div>
                     </header>
 
+                    {/* MISSÃO, VISÃO, CULTURA */}
                     <section className="py-16 md:py-24 px-6 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
                         <div className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-sm border border-[#EFEBE0] hover:border-[#B89B5E] transition-all group text-center">
-                            <Icon name="target" className="text-[#B89B5E] w-12 h-12 mx-auto mb-6" />
+                            <div className="w-12 h-12 bg-[#F9F8F6] border border-[#B89B5E]/20 rounded-xl flex items-center justify-center mb-6 mx-auto group-hover:bg-[#B89B5E] transition-all">
+                                <Icon name="target" className="text-[#B89B5E] group-hover:text-white" />
+                            </div>
                             <h3 className="text-xl md:text-2xl font-bold mb-3">Missão</h3>
-                            <p className="text-gray-600 text-sm">Transformar o cenário da engenharia através de processos eficientes.</p>
+                            <p className="text-gray-600 text-sm leading-relaxed">
+                                Transformar o cenário da <span className="text-[#B89B5E] font-semibold">engenharia</span> através de processos eficientes com software de performance, gerando valor real para investidores e sociedade.
+                            </p>
                         </div>
+
                         <div className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-sm border border-[#EFEBE0] hover:border-[#B89B5E] transition-all group text-center">
-                            <Icon name="eye" className="text-[#B89B5E] w-12 h-12 mx-auto mb-6" />
+                            <div className="w-12 h-12 bg-[#F9F8F6] border border-[#B89B5E]/20 rounded-xl flex items-center justify-center mb-6 mx-auto group-hover:bg-[#B89B5E] transition-all">
+                                <Icon name="eye" className="text-[#B89B5E] group-hover:text-white" />
+                            </div>
                             <h3 className="text-xl md:text-2xl font-bold mb-3">Visão</h3>
-                            <p className="text-gray-600 text-sm">Ser a referência em inteligência na gestão operacional no Brasil.</p>
+                            <p className="text-gray-600 text-sm leading-relaxed">
+                                Ser a referência em <span className="text-[#B89B5E] font-semibold">inteligência na gestão</span> e excelência operacional no mercado imobiliário brasileiro.
+                            </p>
                         </div>
+
                         <div className="bg-white p-8 md:p-10 rounded-[2.5rem] shadow-sm border border-[#EFEBE0] hover:border-[#B89B5E] transition-all group text-center">
-                            <Icon name="users" className="text-[#B89B5E] w-12 h-12 mx-auto mb-6" />
+                            <div className="w-12 h-12 bg-[#F9F8F6] border border-[#B89B5E]/20 rounded-xl flex items-center justify-center mb-6 mx-auto group-hover:bg-[#B89B5E] transition-all">
+                                <Icon name="users" className="text-[#B89B5E] group-hover:text-white" />
+                            </div>
                             <h3 className="text-xl md:text-2xl font-bold mb-3">Cultura</h3>
-                            <p className="text-gray-600 text-sm">Pautada na abundância e fé em Deus.</p>
+                            <p className="text-gray-600 text-sm leading-relaxed">
+                                Nossa cultura é pautada na <span className="text-[#B89B5E] font-semibold">abundância</span>. Crescemos à medida que contribuímos para o todo, com fé e obediência a Deus.
+                            </p>
                         </div>
                     </section>
 
-                    <section id="contato" className="py-12 md:py-24 px-4 md:px-6 max-w-6xl mx-auto">
-                        <div className="bg-white rounded-[2rem] p-8 md:p-16 shadow-xl border border-[#B89B5E]/20 flex flex-col items-center gap-10">
-                            <h2 className="text-3xl md:text-4xl font-bold">Entre em <span className="text-[#B89B5E]">Contato</span></h2>
-                            <div className="flex flex-wrap justify-center gap-4">
-                                <a href="https://wa.me/5528999646592" target="_blank" className="bg-[#B89B5E] text-white px-8 py-4 rounded-xl font-semibold">WhatsApp</a>
-                                <button onClick={copyEmail} className="border-2 border-[#B89B5E] text-[#B89B5E] px-8 py-4 rounded-xl font-semibold">
-                                    {copied ? "E-mail Copiado!" : "Copiar E-mail"}
-                                </button>
+                    {/* FILOSOFIA */}
+                    <section className="bg-[#EFEBE0] py-24 px-6 relative">
+                        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+                            <div>
+                                <h2 className="text-4xl font-bold mb-8">Nossa Filosofia: <br/><span className="text-[#B89B5E]">Abundância</span> sobre Escassez</h2>
+                                <p className="text-[#2D3A2C]/80 mb-8 text-lg leading-relaxed">
+                                    Na D'LIMA Engenharia, rejeitamos a escassez. Nossos processos são desenhados para que todos prosperem.
+                                </p>
+                            </div>
+                            <div className="bg-white p-12 rounded-[3.5rem] shadow-2xl border-t-8 border-[#B89B5E]">
+                                <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-[#B89B5E] mb-8 text-center">Tripé da Expansão</h4>
+                                <div className="space-y-6">
+                                    {["Sustentação", "Resistência", "Escala"].map((t, i) => (
+                                        <div key={i} className="flex gap-4 items-center">
+                                            <div className="w-10 h-10 rounded-full border-2 border-[#B89B5E] flex items-center justify-center font-bold text-[#B89B5E]">{i+1}</div>
+                                            <p className="text-[#2D3A2C] font-bold text-lg">{t}</p>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </section>
+
+                    {/* PILARES */}
+                    <section className="py-16 md:py-24 px-6 max-w-6xl mx-auto text-center">
+                        <h2 className="text-3xl md:text-4xl font-bold mb-12">Nossos <span className="text-[#B89B5E]">Pilares</span></h2>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 text-left">
+                            {values.map((v, i) => (
+                                <div key={i} className="bg-white p-6 rounded-2xl border border-[#EFEBE0] hover:border-[#B89B5E] transition-all">
+                                    <Icon name={v.icon} className="w-6 h-6 text-[#B89B5E] mb-4" />
+                                    <h4 className="font-bold text-lg mb-2">{v.title}</h4>
+                                    <p className="text-gray-500 text-xs md:text-sm leading-relaxed">{v.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    {/* CONTATO */}
+                    <section id="contato" className="py-12 md:py-24 px-4 md:px-6 max-w-6xl mx-auto">
+                        <div className="bg-white rounded-[2rem] md:rounded-[3rem] p-8 md:p-16 shadow-xl border border-[#B89B5E]/20 flex flex-col lg:flex-row items-center justify-between gap-10">
+                            <div className="text-center lg:text-left">
+                                <h2 className="text-3xl md:text-4xl font-bold mb-4">Entre em <span className="text-[#B89B5E]">Contato</span></h2>
+                                <p className="text-gray-500 text-sm md:text-base">Prontos para viabilizar seu próximo projeto com rentabilidade e segurança absoluta.</p>
+                            </div>
+                            <div className="flex flex-col gap-3 w-full md:w-auto min-w-[280px]">
+                                <a href="https://wa.me/5528999646592" target="_blank" className="flex items-center gap-3 bg-[#B89B5E] text-white px-6 py-4 rounded-xl hover:scale-105 transition-all shadow-md font-semibold justify-center w-full">
+                                    <Icon name="message-circle" className="w-5 h-5" /> WhatsApp
+                                </a>
+
+                                <button onClick={copyEmail} className={`flex items-center gap-3 border-2 px-6 py-4 rounded-xl transition-all font-semibold justify-center w-full ${copied ? 'border-green-500 text-green-500' : 'border-[#B89B5E] text-[#B89B5E]'}`}>
+                                    <Icon name={copied ? "check" : "copy"} className="w-5 h-5" />
+                                    {copied ? "E-mail Copiado!" : "Copiar E-mail Profissional"}
+                                </button>
+
+                                <a href="https://www.instagram.com/leonan.dlima/" target="_blank" className="flex items-center gap-3 bg-[#2D3A2C] text-white px-6 py-4 rounded-xl hover:opacity-90 transition-all font-semibold justify-center w-full">
+                                    <Icon name="instagram" className="w-5 h-5" /> Instagram
+                                </a>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* FOOTER */}
+                    <footer className="text-[#7C8B7A] py-12 px-6 border-t border-[#B89B5E]/10" style={{ backgroundColor: logoBgColor }}>
+                        <div className="max-w-6xl mx-auto flex flex-col items-center gap-8">
+                            <div className="text-center">
+                                <span className="text-[#EFEBE0] font-bold text-lg tracking-tighter uppercase">D'LIMA <span className="text-[#B89B5E]">Engenharia</span></span>
+                                <div className="flex gap-8 mt-6 justify-center">
+                                    <a href="https://wa.me/5528999646592" target="_blank"><Icon name="phone" className="w-5 h-5" /></a>
+                                    <a href="https://www.instagram.com/leonan.dlima/" target="_blank"><Icon name="instagram" className="w-5 h-5" /></a>
+                                    <button onClick={copyEmail}><Icon name="mail" className="w-5 h-5" /></button>
+                                </div>
+                            </div>
+                            <div className="text-center border-t border-[#7C8B7A]/20 pt-8 w-full">
+                                <p className="text-[10px] md:text-xs">© 2026 D'LIMA Engenharia. Todos os direitos reservados.</p>
+                                <p className="mt-2 text-[#B89B5E] italic text-[9px] tracking-[0.2em] uppercase">"Abundância é estratégia"</p>
+                            </div>
+                        </div>
+                    </footer>
                 </div>
             );
         };
