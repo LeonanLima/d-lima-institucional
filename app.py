@@ -1,12 +1,22 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
-# Forçamos o Flask a entender que a pasta static e templates estão na raiz do projeto
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(__name__)
 
 @app.route('/')
-def index():
+def home():
     return render_template('index.html')
+
+@app.route('/cadastro', methods=['POST'])
+def cadastro():
+    if request.method == 'POST':
+        nome = request.form.get('nome')
+        telefone = request.form.get('telefone')
+        renda = request.form.get('renda')
+        
+        print(f"Novo Cadastro D'LIMA - MCMV: {nome}, Tel: {telefone}, Renda: {renda}")
+        
+        return render_template('index.html', sucesso=True)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
