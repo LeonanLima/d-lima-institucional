@@ -56,8 +56,13 @@ def convert_drawing():
     try:
         try:
             doc = ezdxf.readfile(tmp_path)
-        except ezdxf.DXFError as e:
+        except (ezdxf.DXFError, OSError) as e:
             msg = str(e)
+            if 'not a DXF file' in msg:
+                return jsonify({
+                    'error': 'Arquivo DWG não pode ser lido diretamente. '
+                             'Salve como DXF no AutoCAD/LibreCAD e tente novamente.'
+                }), 400
             if 'version' in msg.lower() or 'AC1' in msg:
                 return jsonify({
                     'error': 'Formato DWG muito antigo (anterior a R2004). '
