@@ -8,30 +8,35 @@
 
 ## 1. Fonte de dados — Apostila Alvenaria (Drive Leonan)
 
-**Tabela 4.3 — Traço de argamassa em baldes de 12L (adaptado da apostila latas 18L, mesmas proporções):**
+**Tabela 4.3 — Traço de argamassa em LATAS DE 18L (Apostila Alvenaria, conforme Carini):**
 
-| Serviço | Traço (cim:cal:areia) | Rend./saco cimento | Junta/Esp. |
-|---|---|---|---|
-| Tijolo maciço | 1:2:8 | 10 m² | junta 1cm |
-| Tijolo furado/baiano | 1:2:8 | 16 m² | junta 1cm |
-| Bloco de concreto | 1:0.5:6 | 30 m² | junta 1-2cm |
-| Chapisco | 1:3 (sem cal) | ~8 m² | 5mm |
-| Emboço externo | 1:1:6 | ~4 m² | 20mm |
-| Emboço interno | 1:2:8 | ~5 m² | 15mm |
+Rendimento por saco de cimento (50kg = 1.85 latas 18L):
 
-**Por m² (balde de 12L):**
-- Tijolo furado 1:2:8: 0.17 balde cim + 0.34 balde cal + 1.37 balde areia + ~1.4L água
-- Tijolo maciço 1:2:8: 0.27 balde cim + 0.54 balde cal + 2.2 balde areia
-- Chapisco 1:3: 0.33 balde cim + 1.0 balde areia
+| Serviço | Traço (cim:cal:areia) | Rend./saco | Rend./lata 18L cim | Junta/Esp. |
+|---|---|---|---|---|
+| Tijolo maciço | 1:2:8 | 10 m² | ~5.4 m² | junta 1cm |
+| Tijolo furado/baiano | 1:2:8 | 16 m² | ~8.6 m² | junta 1cm |
+| Bloco de concreto | 1:0.5:6 | 30 m² | ~16.2 m² | junta 1-2cm |
+| Chapisco | 1:3 (sem cal) | ~8 m² | ~4.3 m² | 5mm |
+| Emboço externo | 1:1:6 | ~4 m² | ~2.2 m² | 20mm |
+| Emboço interno | 1:2:8 | ~5 m² | ~2.7 m² | 15mm |
 
-**Concreto armado in loco (por m³) — baldes de 12L:**
+**Por traçada (1 lata 18L de cimento):**
+- Traço 1:2:8: 1 lata cimento + 2 latas cal + 8 latas areia + ~1 lata água (18L)
+- Traço 1:3: 1 lata cimento + 3 latas areia + ~0.8 lata água (14L)
+- Traço 1:0.5:6: 1 lata cimento + 0.5 lata cal + 6 latas areia + ~1 lata água (18L)
 
-| fck | Traço | Cim | Areia | Brita | Água |
-|---|---|---|---|---|---|
-| C15 | 1:3:4.5 | 1 balde | 3 baldes | 4.5 baldes | 0.6L/kg cim |
-| C20 | 1:2.5:3.5 | 1 balde | 2.5 baldes | 3.5 baldes | 0.55L/kg cim |
-| C25 | 1:2:3 | 1 balde | 2 baldes | 3 baldes | 0.5L/kg cim |
-| C30 | 1:1.5:2.5 | 1 balde | 1.5 baldes | 2.5 baldes | 0.45L/kg cim |
+**Por m² (em latas de 18L) — tijolo furado:**
+- Cimento: 0.12 lata · Cal: 0.23 lata · Areia: 0.93 lata · Água: ~0.09 lata (≈1.7L)
+
+**Concreto armado in loco — LATAS DE 18L (por traçada, adicionar conforme volume):**
+
+| fck | Traço (cim:areia:brita) | Água/lata cim |
+|---|---|---|
+| C15 | 1 lata : 3 latas : 4.5 latas | ~1 lata (18L) |
+| C20 | 1 lata : 2.5 latas : 3.5 latas | ~0.9 lata (16L) |
+| C25 | 1 lata : 2 latas : 3 latas | ~0.8 lata (14L) |
+| C30 | 1 lata : 1.5 latas : 2.5 latas | ~0.7 lata (13L) |
 
 ---
 
@@ -60,8 +65,8 @@ Cada item de quantitativo que possui argamassa exibe, na linha expandida:
 
 ```
 ▼ Alvenaria tijolo furado — 24.5 m²
-  Traço: 1 balde cimento : 2 baldes cal : 8 baldes areia (por traçada de 12L)
-  Por m²: 0.17 balde cimento · 0.34 balde cal · 1.37 balde areia · 1.4L água
+  Traço: 1 lata cimento (18L) : 2 latas cal : 8 latas areia : ~1 lata água (por traçada)
+  Por m²: 0.12 lata cimento · 0.23 lata cal · 0.93 lata areia · ~0.09 lata água
   ⭐ Definir como traço favorito para este serviço
 ```
 
