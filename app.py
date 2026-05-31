@@ -37,6 +37,15 @@ def serve_static(path):
     return send_from_directory('static', path)
 
 
+@app.route('/cadastro', methods=['POST'])
+def cadastro():
+    nome = request.form.get('nome')
+    telefone = request.form.get('telefone')
+    renda = request.form.get('renda')
+    print(f"Novo Cadastro D'LIMA - MCMV: {nome}, Tel: {telefone}, Renda: {renda}")
+    return render_template('index.html', sucesso=True)
+
+
 @app.route('/api/convert-drawing', methods=['POST'])
 def convert_drawing():
     if 'file' not in request.files:
