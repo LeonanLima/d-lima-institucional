@@ -1,0 +1,1052 @@
+# D'LIMA Referência Técnica PWA — Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** PWA de referência técnica de concreto armado com busca por palavra-chave, instalável em PC e celular, funcionando offline.
+
+**Architecture:** Uma rota Flask `/referencia` serve `templates/referencia.html` — arquivo autocontido com CSS, JS e o array `SECTIONS` embutido. Busca client-side com scoring. `static/sw.js` e `static/manifest.json` atualizados para cache offline e instalação PWA.
+
+**Tech Stack:** Flask (Python), HTML5/CSS3/JS vanilla, Service Worker API, Web App Manifest
+
+---
+
+## File Map
+
+| Arquivo | Ação | Responsabilidade |
+|---|---|---|
+| `app.py` | Modificar | Adicionar rota `GET /referencia` (+2 linhas) |
+| `templates/referencia.html` | Criar | App completo: layout, busca, SECTIONS, render |
+| `static/manifest.json` | Modificar | Manifesto PWA apontando para `/referencia` |
+| `static/sw.js` | Modificar | Cache offline com lista correta de URLs |
+| `tests/test_app.py` | Criar | Testes pytest das rotas Flask |
+
+---
+
+### Task 1: Rota Flask + HTML esqueleto + testes
+
+**Files:**
+- Modify: `app.py`
+- Create: `templates/referencia.html`
+- Create: `tests/test_app.py`
+
+- [ ] **Passo 1: Criar `tests/test_app.py`**
+
+```python
+import pytest
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from app import app
+
+@pytest.fixture
+def client():
+    app.config['TESTING'] = True
+    with app.test_client() as c:
+        yield c
+
+def test_referencia_returns_200(client):
+    r = client.get('/referencia')
+    assert r.status_code == 200
+
+def test_referencia_contains_search_input(client):
+    r = client.get('/referencia')
+    assert b'id="search"' in r.data
+
+def test_index_still_works(client):
+    r = client.get('/')
+    assert r.status_code == 200
+    assert b"D'LIMA" in r.data
+```
+
+- [ ] **Passo 2: Rodar testes — verificar FAIL**
+
+```bash
+python -m pytest tests/test_app.py -v
+```
+Esperado: `FAILED test_referencia_returns_200 — 404 NOT FOUND`
+
+- [ ] **Passo 3: Adicionar rota em `app.py`**
+
+Após a rota `/cadastro` (linha ~47), inserir:
+
+```python
+@app.route('/referencia')
+def referencia():
+    return render_template('referencia.html')
+```
+
+- [ ] **Passo 4: Criar `templates/referencia.html` esqueleto**
+
+```html
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D'LIMA Referência Técnica</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#0056b3">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>/* TASK 5 */</style>
+</head>
+<body>
+  <header id="app-header">
+    <span>🏗 D'LIMA Referência Técnica</span>
+    <button id="install-btn" style="display:none">⬇ Instalar</button>
+  </header>
+  <div id="search-bar">
+    <input id="search" type="search"
+      placeholder="buscar... ex: fck, torção, estribo" autocomplete="off">
+  </div>
+  <main id="results"></main>
+  <script>
+    /* TASK 3 — SECTIONS */
+    /* TASK 4 — search() */
+    /* TASK 5 — render */
+    /* TASK 6 — install */
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/static/sw.js');
+    }
+  </script>
+</body>
+</html>
+```
+
+- [ ] **Passo 5: Rodar testes — verificar PASS**
+
+```bash
+python -m pytest tests/test_app.py -v
+```
+Esperado: 3 testes `PASSED`
+
+- [ ] **Passo 6: Commit**
+
+```bash
+git add app.py templates/referencia.html tests/test_app.py
+git commit -m "feat: rota /referencia + skeleton HTML + testes Flask"
+```
+
+---
+
+### Task 2: Manifest + Service Worker
+
+**Files:**
+- Modify: `static/manifest.json`
+- Modify: `static/sw.js`
+
+- [ ] **Passo 1: Substituir `static/manifest.json` completo**
+
+```json
+{
+  "name": "D'LIMA Referência Técnica",
+  "short_name": "Referência",
+  "description": "Referência de concreto armado NBR 6118 — Carini + Bastos",
+  "start_url": "/referencia",
+  "display": "standalone",
+  "theme_color": "#0056b3",
+  "background_color": "#f4f4f9",
+  "icons": [
+    { "src": "/static/minha-logo.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/static/minha-logo.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
+```
+
+- [ ] **Passo 2: Substituir `static/sw.js` completo**
+
+```js
+const CACHE_NAME = 'dlima-ref-v1';
+const ASSETS = ['/', '/referencia', '/static/manifest.json', '/static/minha-logo.png'];
+
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(ASSETS)));
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', e => {
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+});
+```
+
+- [ ] **Passo 3: Verificar no browser**
+
+```bash
+python app.py
+```
+Abrir `http://localhost:10000/referencia`. DevTools → Application → Service Workers: status "Activated and is running". Application → Manifest: nome "D'LIMA Referência Técnica".
+
+- [ ] **Passo 4: Rodar testes**
+
+```bash
+python -m pytest tests/test_app.py -v
+```
+Esperado: 3 `PASSED`
+
+- [ ] **Passo 5: Commit**
+
+```bash
+git add static/manifest.json static/sw.js
+git commit -m "feat: manifest PWA e service worker para /referencia"
+```
+
+---
+
+### Task 3: SECTIONS — array de conteúdo
+
+**Files:**
+- Modify: `templates/referencia.html` (substituir `/* TASK 3 — SECTIONS */`)
+
+- [ ] **Passo 1: Substituir `/* TASK 3 — SECTIONS */` pelo array completo**
+
+```js
+const SECTIONS = [
+  {
+    id: 'materiais-resistencias',
+    title: '1.1 Concreto — Resistências',
+    parent: '1. Materiais',
+    badge: 'CB',
+    tags: ['fck','fctm','fctd','resistência','compressão','tração','C25','C30','C20','C35','C40','fct'],
+    content: `fck = fcm − 1,65s   (fcm = média, s = desvio padrão)
+Classes: C20 C25 C30 C35 C40 C45 C50 | C55 C60 C70 C80 C90 C100
+fck mínimo: CAA I→20 | CAA II→25 | CAA III→30 | CAA IV→40 MPa
+
+Resistência à tração (fck ≤ 50 MPa):
+  fct,m    = 0,3 × fck^(2/3)    [MPa]
+  fctk,inf = 0,7 × fct,m         (ELU geral)
+  fctk,sup = 1,3 × fct,m         (ancoragem)
+  fctd     = 0,15 × fck^(2/3)   [MPa]
+
+  fck=20: fct,m=1,899 | fctk,inf=1,330 | fctk,sup=2,469
+  fck=25: fct,m=2,565 | fctk,inf=1,795 | fctk,sup=3,334
+  fck=30: fct,m=2,896 | fctk,inf=2,027 | fctk,sup=3,765
+
+[B] Concreto resiste ~1/10 à tração vs compressão.
+Sem armadura: ruptura frágil após primeira fissura.`
+  },
+  {
+    id: 'materiais-modulo',
+    title: '1.2 Módulo de Elasticidade',
+    parent: '1. Materiais',
+    badge: 'CB',
+    tags: ['Eci','Ecs','módulo','elasticidade','αE','basalto','granito','calcário','αi','Ecs'],
+    content: `Módulo inicial: Eci = αE × 5600 × √fck   [MPa]
+  αE: Basalto/diabásio=1,2 | Granito=1,0 | Calcário=0,9 | Arenito=0,7
+
+Módulo secante (ELS): αi = 0,8 + 0,2×(fck/80) ≤ 1,0
+  Ecs = αi × Eci
+
+  fck=25 basalto: Eci=33.600 | αi=0,863 | Ecs=28.980 MPa
+  fck=25 granito: Eci=28.000 | αi=0,863 | Ecs=24.150 MPa
+  fck=30 basalto: Eci=36.806 | αi=0,875 | Ecs=32.205 MPa
+
+G = Ecs / 2,4   (ν=0,2)
+
+[B] αE varia pois microestrutura do agregado controla transmissão de tensão.`
+  },
+  {
+    id: 'materiais-diagramas',
+    title: '1.3 Diagramas Tensão-Deformação',
+    parent: '1. Materiais',
+    badge: 'CB',
+    tags: ['diagrama','parábola','retângulo','εcu','εc2','λ','αc','ηc','bloco','ELU','fcd','Rüsch'],
+    content: `PARÁBOLA-RETÂNGULO (fck ≤ 50 MPa):
+  εc ≤ 2,0‰: σc = 0,85×fcd×[1−(1−εc/2,0‰)²]
+  εc > 2,0‰: σc = 0,85×fcd  (patamar plástico)
+  εcu = 3,5‰
+
+BLOCO RETANGULAR (ELU — NBR 6118, 17.2.2):
+  fck ≤ 50 MPa: λ=0,80 | αc=0,85 | ηc=1,0
+  fcd = fck / 1,4
+
+  C55–C90:
+    λ = 0,80 − (fck−50)/400
+    αc = 0,85 × [1 − (fck−50)/200]
+
+[B] εcu=3,5‰: deformação máxima antes de esmagar.
+x/d ≤ 0,45 → aço escoa ANTES → viga AVISA antes de romper.
+Efeito Rüsch: resistência longa duração ≈ 85% → αc=0,85.`
+  },
+  {
+    id: 'materiais-reologicas',
+    title: '1.4 Retração e Fluência',
+    parent: '1. Materiais',
+    badge: 'CB',
+    tags: ['retração','fluência','creep','φ','flecha diferida','deformação','tempo','w∞'],
+    content: `RETRAÇÃO: redução de volume por perda de água — independente de carga.
+→ Fissuras em lajes de piso. Controle: juntas + cura + a/c baixo.
+
+FLUÊNCIA: aumento de deformação sob tensão constante ao longo do tempo.
+  φ = 2,5  (simplificado NBR 6118)
+  w∞ = (1 + φ) × w0 = 3,5 × w0
+
+[B] Carga permanente age décadas → deformação final ≈ 3,5× imediata.
+Sempre verificar flecha DIFERIDA, não só imediata.`
+  },
+  {
+    id: 'materiais-aco',
+    title: '1.5 Aço CA-25/50/60/70',
+    parent: '1. Materiais',
+    badge: 'CB',
+    tags: ['aço','CA-50','CA-60','CA-25','CA-70','fyk','fyd','Es','bitola','φ','área','peso','diâmetro'],
+    content: `Propriedades gerais: ρ=7850 kg/m³ | αt=10⁻⁵/°C | Es=210.000 MPa
+
+  CA-25: fyk=250 MPa | fyd=217 MPa
+  CA-50: fyk=500 MPa | fyd=435 MPa  ← padrão
+  CA-60: fyk=600 MPa | fyd=522 MPa  (vigotas)
+  CA-70: fyk=700 MPa | fyd=609 MPa
+
+  fyd = fyk/1,15 | εyd = 2,07‰ (CA-50)
+
+Áreas (cm²):
+  Ø6,3=0,312 | Ø8=0,503 | Ø10=0,785 | Ø12,5=1,227
+  Ø16=2,011  | Ø20=3,142 | Ø25=4,909 | Ø32=8,042
+
+Pesos (kg/m):
+  Ø6,3=0,245 | Ø8=0,395 | Ø10=0,617 | Ø12,5=0,963
+  Ø16=1,578  | Ø20=2,466 | Ø25=3,853
+
+[B] αt aço = αt concreto = 10⁻⁵/°C → dilatam juntos → sem tensões térmicas.`
+  },
+  {
+    id: 'materiais-caa',
+    title: '1.6 CAA e Cobrimentos',
+    parent: '1. Materiais',
+    badge: 'CB',
+    tags: ['CAA','cobrimento','agressividade','passivação','corrosão','carbonatação','cnom','cloreto'],
+    content: `NBR 6118, Tabela 6.1+7.2 | ∆c=5mm (controle padrão)
+
+  CAA I   — fraca:       fck≥20 | c_laje=2,0 | c_viga/pilar=2,5 cm
+  CAA II  — moderada:    fck≥25 | c_laje=2,5 | c_viga/pilar=3,0 cm  ← residencial
+  CAA III — forte:       fck≥30 | c_laje=3,5 | c_viga/pilar=4,0 cm  ← litoral
+  CAA IV  — muito forte: fck≥40 | c_laje=4,5 | c_viga/pilar=5,0 cm
+
+[B] pH>12 (concreto íntegro) → aço forma camada passivante → protege.
+Carbonatação/cloretos reduzem pH → corrosão → expansão → spalling.`
+  },
+  {
+    id: 'materiais-coeficientes',
+    title: '1.7 Coeficientes de Ponderação',
+    parent: '1. Materiais',
+    badge: 'N',
+    tags: ['γc','γs','γf','coeficiente','ponderação','ELU','ELS','ψ','combinação'],
+    content: `ELU — combinação normal:
+  γc=1,4 (concreto) | γs=1,15 (aço) | γf=1,4 (ações desfavoráveis)
+  fcd=fck/1,4 | fyd=fyk/1,15
+
+ELS — combinação quase permanente (flechas):
+  Fd,qp = Σgk + Σ(ψ2i × qk)
+  ψ2: residencial=0,3 | escritórios=0,4 | garagem=0,6
+
+Coeficientes ψ (NBR 6118, Tabela 11.2):
+  Residencial: ψ0=0,5 | ψ1=0,4 | ψ2=0,3
+  Comercial:   ψ0=0,7 | ψ1=0,6 | ψ2=0,4
+  Vento:       ψ0=0,6 | ψ1=0,3 | ψ2=0,0`
+  },
+  {
+    id: 'cargas',
+    title: '2. Cargas e Ações',
+    parent: '2. Cargas',
+    badge: 'C',
+    tags: ['carga','ação','peso','sobrecarga','kN','alvenaria','parede','NBR 6120','permanente','variável','fd'],
+    content: `Pesos específicos (kN/m³) — NBR 6120:2019:
+  Concreto armado=25,0 | Argamassa cimento+areia=21,0
+  Argamassa cal+cimento=19,0 | Aço=77,8
+
+Sobrecargas mínimas (kN/m²):
+  Dormitórios/salas=1,5 | Área serviço=2,0
+  Corredores comuns=3,0 | Garagem (≤30kN)=3,0
+  Cobertura (manutenção)=1,0 | Sacadas=2,5
+
+Paredes sobre vigas (NBR 16868-1:2020):
+  q_parede = γ_alv × h_parede   [kN/m]
+  Bloco cerâmico 9cm  c/reboco: γ_alv ≈ 1,9 kN/m²
+  Bloco cerâmico 14cm c/reboco: γ_alv ≈ 2,4 kN/m²
+  Bloco concreto 19cm c/reboco: γ_alv ≈ 4,0 kN/m²
+
+fd = 1,4×gk + 1,4×qk   (ELU combinação normal)`
+  },
+  {
+    id: 'predim',
+    title: '3. Pré-dimensionamento',
+    parent: '3. Pré-dimensionamento',
+    badge: 'C',
+    tags: ['pré-dimensionamento','predim','altura','espessura','laje','viga','pilar','estimativa','L/12','L/10'],
+    content: `LAJES MACIÇAS: h ≈ lx/40 | h_mín=8cm | balanço: h≈lx/30
+LAJES TRELIÇADAS: h ≈ lx/20 | capa mínima=4cm
+  Alturas comerciais: 12, 14, 16, 20, 25 cm
+
+VIGAS:
+  Simplesmente apoiada: h = L/10
+  Contínua: h = L/12   ← mais comum
+  Balanço: h = L/5
+  h_mín=25cm | b=largura do bloco (14, 19, 25cm)
+
+PILARES (b_mín=19cm):
+  Intermediário:    Ac ≥ 0,6×Nk / (0,42×fck)
+  Extremidade/canto: Ac ≥ 0,6×(1,4×Nk) / (0,42×fck)
+
+  fck=25, Nk=500kN (intermediário): Ac ≥ 286 cm² → 14×19=266 ou 19×19=361
+
+Taxas de aço (orçamento):
+  Vigas: 80–120 kg/m³ | Pilares: 60–100 kg/m³ | Lajes: 50–80 kg/m³`
+  },
+  {
+    id: 'lajes-casos',
+    title: '4.1–4.2 Lajes — Vão Efetivo e Casos',
+    parent: '4. Lajes',
+    badge: 'C',
+    tags: ['laje','vão','efetivo','caso','vinculação','apoiada','engastada','bidirecional','unidirecional'],
+    content: `Vão efetivo: lef = l0 + a1 + a2
+  a = min(t/2 ; 0,3h)
+
+Classificação: ly/lx ≤ 2 → BIDIRECIONAL | ly/lx > 2 → UNIDIRECIONAL
+
+Casos BIDIRECIONAIS:
+  Caso 1: 4 apoiadas
+  Caso 2: 3ap+1eng(ly) | Caso 2A: 3ap+1eng(lx)
+  Caso 3: 2ap+2eng opostos(ly) | Caso 4: 2ap+2eng adjacentes
+  Caso 5: 1ap+3eng | Caso 6: 4 engastadas
+
+Critério: engastada = laje adjacente de mesma espessura do outro lado.
+
+Casos UNIDIRECIONAIS:
+  Caso 7: biapoiada | Caso 8: ap+eng
+  Caso 9: bi-engastada | Caso 10: balanço`
+  },
+  {
+    id: 'lajes-momentos',
+    title: '4.3 Lajes — Momentos e Reações',
+    parent: '4. Lajes',
+    badge: 'C',
+    tags: ['momento','reação','coeficiente','mx','my','mxe','mye','rx','ry','tabela','laje','fd'],
+    content: `Notação: fd=1,4×(gk+qk) | λ=ly/lx
+  Mdx=mx×fd×lx² | Mdy=my×fd×lx²  (positivos)
+  Mdxe=mxe×fd×lx² | Mdye=mye×fd×lx²  (negativos)
+  Rdx=rx×fd×lx | Rdy=ry×fd×lx  (reações)
+
+Coeficientes (λ=1,0):
+  Caso 1: mx=0,1075 | my=0,0434 | rx=0,1103 | ry=0,4299
+  Caso 2: mx=0,0660 | my=0,0190 | mye=-0,1173 | ry=0,3520 | rye=0,5867
+  Caso 4: mx=0,0605 | my=0,0244 | mxe=-0,1075 | mye=-0,0434
+  Caso 6: mxe=-0,0716 | mye=-0,0289
+
+Lajes unidirecionais:
+  Caso 7: Md=fd×lx²/8  | Rd=fd×lx/2
+  Caso 8: Md+=fd×lx²/14,22 | Md-=-fd×lx²/8
+  Caso 9: Md+=fd×lx²/24 | Md-=-fd×lx²/12
+  Caso 10: Md=-fd×lx²/2 | Rd=fd×lx`
+  },
+  {
+    id: 'lajes-armadura',
+    title: '4.4 Lajes — ELU Armadura',
+    parent: '4. Lajes',
+    badge: 'C',
+    tags: ['armadura','laje','ELU','As','x/d','mínima','ρmín','cortante','VRd1','espaçamento'],
+    content: `d = h−c−φ/2 (φ≈1cm) | b=100cm/m
+fcd=fck/1,4 | fyd=fyk/1,15
+
+x = 1,25d × [1 − √(1 − Md/(0,425×b×d²×fcd))]
+Verificar: x/d ≤ 0,45  (ductilidade)
+As = 0,85×fcd×0,80×x×b / fyd   [cm²/m]
+
+Armadura mínima CA-50, fck=25: ρmín=0,15% → As,mín=1,5×h [cm²/m]
+
+As por espaçamento (cm²/m):
+       s=10  s=15  s=20  s=25
+Ø5,0: 1,96  1,64  1,40  1,31
+Ø6,3: 3,12  2,60  2,23  2,08
+Ø8,0: 5,03  4,19  3,59  3,35
+Ø10:  7,85  6,54  5,61  5,24
+
+Cortante sem armadura:
+  VRd1 = 0,25×fctd×(1,2+40ρ1)×bw×d
+  Se VSd > VRd1 → aumentar h`
+  },
+  {
+    id: 'lajes-flecha',
+    title: '4.5 Lajes — ELS Flecha',
+    parent: '4. Lajes',
+    badge: 'C',
+    tags: ['flecha','ELS','L/250','fluência','φ','Ig','Ecs','verificação','deformação'],
+    content: `Flecha imediata (unidirecional caso 7):
+  w0 = 5×fd,ser×lx⁴ / (384×Ecs×Ig)   Ig=100×h³/12
+
+Flecha diferida: w∞ = 3,5×w0  (φ=2,5)
+
+Limites NBR 6118, Tabela 13.3:
+  Balanço: L/125 | Demais: L/250
+
+fd,ser = gk + ψ2×qk  (ψ2: residencial=0,3)`
+  },
+  {
+    id: 'vigas-fundamento',
+    title: '5.1 Vigas — Fundamento Físico (Bastos)',
+    parent: '5. Vigas',
+    badge: 'B',
+    tags: ['fundamento','ductilidade','redistribuição','análise','linear','instabilidade','lateral','h=L/12','βfl','δ'],
+    content: `Viga = flexão preponderante | comprimento > 3× maior dimensão seção.
+
+Análise estrutural:
+  Linear (Hooke, Ecs) → base para ELU e ELS
+  Linear com redistribuição → reduz M nos apoios, mais econômico
+  Plástica → rígido-plástico perfeito, só ELU
+
+Ductilidade (x/d ≤ 0,45 para fck≤50):
+  x/d < 0,45 → aço escoa ANTES → viga AVISA antes de romper ✓
+  x/d > 0,45 → concreto esmaga SEM aviso → PROIBIDO ✗
+
+Redistribuição:
+  δ = M_redist/M_original ≥ 0,75 (geral) | ≥ 0,90 (nós móveis)
+  x/d ≤ (δ−0,44)/1,25  para fck ≤ 50 MPa
+
+Instabilidade lateral (NBR 6118, 15.10):
+  b ≥ L₀/50  e  b ≥ 0,40×h  (seção retangular)
+  Com laje solidária: estável por definição.
+
+Estimativa: h = L/12 para C20–C25, pequeno porte.`
+  },
+  {
+    id: 'vigas-modelo',
+    title: '5.2–5.5 Vigas — Cargas e Modelo Estrutural',
+    parent: '5. Vigas',
+    badge: 'CB',
+    tags: ['viga','contínua','modelo','rigidez','mola','engastamento','Mep','correção','apoio indireto','suspensão','vão efetivo'],
+    content: `Vão efetivo: lef = l0 + a1 + a2  |  a = min(t/2 ; 0,3h)
+
+Cargas: PP=b×h×25 [kN/m] | q_alv=γ_alv×h_parede | fd=1,4×gk
+
+Correções vigas contínuas (NBR 6118, 14.6.6.1):
+  a) M_vão ≥ fd×L²/16  (mín. engastamento perfeito)
+  b) b_int > ie/4 → M_neg ≥ M_ep
+  c) Apoios extremos — método das rigidezes:
+     r = 2I/L_equiv  |  K_mola = K_sup + K_inf
+     M_lig = M_ep × r_vig / (r_inf + r_sup + r_vig)
+
+Armadura de suspensão (apoio indireto, NBR 6118, 18.3.6):
+  R_tt = R_apoio × h₁/h₂   (h₁=viga apoiada, h₂=suporte)
+  Sem ela: fissuras diagonais na alma da viga-suporte.
+
+Esforços biapoiada: Md=fd×L²/8 | Vd=fd×L/2
+VSd,red = VSd − fd×d  (redução na face do apoio)`
+  },
+  {
+    id: 'vigas-cortante',
+    title: '5.6 Vigas — ELU Cisalhamento',
+    parent: '5. Vigas',
+    badge: 'CB',
+    tags: ['cortante','cisalhamento','estribo','Vc','VRd2','VRd3','biela','treliça','Modelo I','Modelo II','αv2','fctd','Asw'],
+    content: `[B] 5 mecanismos: arco (20–40%) + concreto comprimido + engrenamento
+  de agregados (33–50%) + ação de pino (15–25%) + tensões residuais.
+  → Vc da NBR captura todos.
+
+Bielas (máximo, NBR 6118, 17.4.2.2):
+  αv2 = 1−fck/250 | fcd=fck/1,4/10 [kN/cm²]
+  VRd2 = 0,27×αv2×fcd×bw×d
+  Se VSd > VRd2 → aumentar seção
+
+Parcela concreto:
+  fctd = 0,15×fck^(2/3)/10 [kN/cm²]
+  Vc = 0,6×fctd×bw×d [kN]
+
+Armadura mínima:
+  fctm=0,3×fck^(2/3) [MPa] | fywd=min(fyk/1,15;435 MPa)
+  Asw/s_mín = 0,2×fctm/fywd × bw [cm²/cm]
+
+Se VSd > VRd3_mín:
+  Asw/s = (VSd−Vc)/(0,9d×fywd)
+  s ≤ min(0,6d ; 30cm)
+  Estribo 2 ramos: s = 2Aφ / (Asw/s)
+
+[B] Treliça θ=45° (Modelo I) = conservador.
+Treliça 30°≤θ≤45° (Modelo II) = menos estribos, mais arm. longitudinal.`
+  },
+  {
+    id: 'vigas-flexao',
+    title: '5.7 Vigas — ELU Flexão',
+    parent: '5. Vigas',
+    badge: 'C',
+    tags: ['flexão','momento','armadura','simples','dupla','seção T','x/d','linha neutra','As','domínio','fcd','fyd'],
+    content: `d = h−c−φ_est−φ_long/2 (≈ h−5cm)
+fcd=fck/1,4/10 | fyd=fyk/1,15/10  [kN/cm²]
+
+Limite dúctil: x_duc=0,45d | λ=0,80 | αc=0,85
+Md,duc = 0,85×fcd×0,80×x_duc×b×(d−0,80×x_duc/2)
+
+SIMPLES (Md ≤ Md,duc):
+  x = 1,25d×[1−√(1−Md/(0,425×b×d²×fcd))]
+  As = 0,85×fcd×0,80×x×b / fyd  [cm²]
+  As,mín = 0,15/100 × bw × d  (CA-50, C25)
+
+DUPLA (Md > Md,duc):
+  d' = c+φ_est+φ_long/2
+  σs2 = εcu×(x_duc−d')/x_duc × Es
+  As2 = (Md−Md,duc)/(σs2×(d−d'))
+  As1 = (αc×fcd×λ×x_duc×b + As2×σs2)/fyd
+
+SEÇÃO T:
+  bf = bw+2b0  |  b0 ≤ min(lef/10 ; dist_vigas/2)
+  Se λx ≤ hf (laje) → As=0,85×fcd×0,80×x×bf/fyd`
+  },
+  {
+    id: 'vigas-flecha',
+    title: '5.8 Vigas — ELS Flecha (Branson)',
+    parent: '5. Vigas',
+    badge: 'C',
+    tags: ['flecha','ELS','Branson','Mr','Ie','Iii','fissuração','estádio','L/250','fluência'],
+    content: `αe=Es/Ecs | Mr=1,2×fctm×Ig/(Yt×1000) [kNm] | Yt=h/2 | Ig=bw×h³/12
+
+LN fissurada:
+  bw/2×x²+αe×As2×(x−d')−αe×As1×(d−x)=0
+  Iii=bw×x³/3+αe×As2×(x−d')²+αe×As1×(d−x)²
+
+Inércia de Branson:
+  Ie=(Mr/Ma)³×Ig+[1−(Mr/Ma)³]×Iii
+
+Flecha imediata: δi=5×q_ser×L⁴/(384×Ecs×Ie) [mm]
+Flecha diferida: δt=δi×(1+2,0)  [φ≈2,0]
+Limite: δt ≤ L/250`
+  },
+  {
+    id: 'vigas-fissuracao',
+    title: '5.9 Vigas — ELS Fissuração',
+    parent: '5. Vigas',
+    badge: 'C',
+    tags: ['fissuração','wk','abertura','ELS','CAA','σs','ρr','Acr','limite'],
+    content: `σs=Ma×(d−x)/Iii/10  [MPa, tensão no aço Estádio II]
+Acr=bw×(c+φ_est+φ_long/2+3,5×φ_long)
+ρr=As/Acr
+
+wk=φ_long×σs/(12,5×ηi×Es)×(4/ρr+45)  [mm]
+
+Limites wlim (NBR 6118, Tabela 13.4):
+  CAA I→0,4mm | CAA II→0,3mm | CAA III→0,2mm
+
+Se wk > wlim → aumentar As ou reduzir espaçamento.`
+  },
+  {
+    id: 'pilares-esbeltez',
+    title: '6.1–6.3 Pilares — Esbeltez e Excentricidades',
+    parent: '6. Pilares',
+    badge: 'C',
+    tags: ['pilar','esbeltez','λ','λ1','curto','esbelto','e1','e2','excentricidade','pilar-padrão','Mep','rigidez'],
+    content: `Esbeltez: λ=le/i  |  i=h/3,46  |  le=H (biapoiado) | le=2H (balanço)
+  λ≤35 → CURTO (e2=0)
+  35<λ≤90 → ESBELTO (pilar-padrão)
+  λ>90 → muito esbelto / não-linear
+
+λ1=25+12,5×(αb×e1,A/h)  |  αb=0,60+0,40×(e1,B/e1,A)≥0,40
+
+Distribuição de momentos:
+  Mep=fd×L²/12 | r=2I/L_equiv
+  M_pilar=Mep×r_pilar/(r_sup+r_inf+Σr_vig)
+
+Excentricidade 1ª ordem:
+  e1=M/Nd  |  e1,mín=1,5+0,03×h [cm]
+  e1,C=max(0,6×e1,A+0,4×e1,B ; 0,4×e1,A)
+
+Excentricidade 2ª ordem (pilar-padrão, λ>λ1):
+  ν=Nd/(Ac×fcd)
+  e2=0,0005×λ²×h/(0,5+ν) [cm]  (só na seção C)`
+  },
+  {
+    id: 'pilares-armadura',
+    title: '6.4 Pilares — Armadura e Estribos',
+    parent: '6. Pilares',
+    badge: 'C',
+    tags: ['pilar','armadura','flexo-compressão','oblíqua','envoltória','As','mínima','máxima','estribo','s_red'],
+    content: `Flexo-compressão oblíqua (NBR 6118, 17.2.5):
+  (Mx/MRdxx)^1,2 + (My/MRdyy)^1,2 ≤ 1
+
+As,mín=max(0,15×Nd/fyd ; 0,40%×Ac)
+As,máx=8%×Ac (seção) | 4%×Ac (emendas)
+Ø_long: 10mm ≤ Ø ≤ min(hx;hy)/8
+
+Estribos:
+  Ø_est ≥ max(5mm ; Ø_long/4)
+  s ≤ min(b_mín ; 20×Ø_long ; 30cm)
+  s_red=0,6×s: fundação (≥50cm), emendas, nós viga-pilar
+  Ganchos: 135° (preferencial)`
+  },
+  {
+    id: 'torcao',
+    title: '7. Torção',
+    parent: '7. Torção',
+    badge: 'B',
+    tags: ['torção','equilíbrio','compatibilidade','TRd2','TRd3','TRd4','estribo fechado','Ae','he','TSd','laje balanço'],
+    content: `[B] Torção → fissuras helicoidais nas 4 faces → estribo ABERTO ineficaz.
+Seção cheia ≈ seção oca parede fina (Bredt: τ×t=T/(2Ae)=constante).
+
+Equilíbrio vs Compatibilidade:
+  Equilíbrio: necessária p/ estática → OBRIGATÓRIO dimensionar
+  Compatibilidade: pode DESPREZAR se VSd ≤ 0,7×VRd2
+
+Geometria:
+  he=A/u ≥ 2c₁  |  A=bw×h  |  u=2(bw+h)
+  Ae=(bw−he)×(h−he)  |  ue=2[(bw−he)+(h−he)]
+
+Bielas: TRd,2=0,5×αv2×fcd×Ae×he  (θ=45°)
+  Se TSd > TRd,2 → aumentar seção
+
+Estribos (1 ramo): As,90/s=TSd/(2×Ae×fywd)
+  Estribos FECHADOS + ganchos 45° + barra em cada vértice
+
+Armadura longitudinal: Asi/ue=TSd/(2×Ae×fywd)
+  ≥4 barras | espaçamento ≤35cm
+
+Combinação T+V:
+  VSd/VRd2 + TSd/TRd2 ≤ 1
+  Arm. total = Asw/s (cortante) + 2×As,90/s (torção)`
+  },
+  {
+    id: 'detalhamento',
+    title: '8. Detalhamento',
+    parent: '8. Detalhamento',
+    badge: 'C',
+    tags: ['ancoragem','emenda','traspasse','lb','gancho','pele','borda','distribuição','espaçamento','Ø','aderência'],
+    content: `Ancoragem (NBR 6118, §9.4):
+  fbd=η1×fctd  |  η1=1,0(boa) | η1=0,7(má)
+  lb,bas=(φ/4)×(fyd/fbd)
+  lb,nec=lb,bas×(As,calc/As,ef) ≥ max(0,3×lb,bas;10Ø;10cm)
+
+  CA-50, C25, boa aderência:
+    Ø10=37,7cm | Ø12,5=47,1cm | Ø16=60,3cm | Ø20=75,3cm
+  Com gancho:
+    Ø10=26,4cm | Ø12,5=33,0cm | Ø16=42,2cm | Ø20=52,7cm
+
+Emendas por traspasse (NBR 6118, §9.5):
+  lt=α1×lb,nec
+  α1=1,0(≤25%) | α1=1,4(25–50%) | α1=2,0(>50%)
+  Proibido Ø>32mm
+
+Lajes: Ø_máx≤h/8 | s_máx≤min(2h;20cm)
+  Arm. negativa: Lm/4 de cada lado do apoio
+  Arm. de borda: 0,67×As,mín ≥ 1cm²/m
+
+Vigas: pele (h>60cm): 0,10%×Ac/face | s≤20cm
+  Estribo: comp=2(A+B)+ΔC
+  ΔC: Ø5=8,3 | Ø6,3=8,6 | Ø8=10,0 | Ø10=12,5 cm
+
+Pilares: s_red=0,6×s em fundação, emendas e nós.`
+  },
+  {
+    id: 'sintese',
+    title: '9. Síntese Carini × Bastos',
+    parent: '9. Síntese',
+    badge: 'CB',
+    tags: ['síntese','resumo','Carini','Bastos','comparação','por que','como'],
+    content: `COMO CALCULAR [C]  →  POR QUE FUNCIONA [B]
+
+fck=fcm−1,65s  →  ruptura estatística, 95% de probabilidade
+fct,m=0,3×fck^(2/3)  →  concreto resiste 1/10 à tração → precisa do aço
+Ecs=αi×Eci  →  fissuração reduz rigidez → usar secante no ELS
+αE varia  →  microestrutura do agregado controla transmissão de tensão
+αt=10⁻⁵/°C  →  aço e concreto dilatam juntos → sem tensões térmicas
+αc=0,85  →  Efeito Rüsch: longa duração reduz 15% a resistência
+Cobrimento por CAA  →  passivação do aço em pH alto
+x/d ≤ 0,45  →  viga AVISA antes de romper (aço escoa primeiro)
+δ ≥ 0,75 (redistrib.)  →  rotação plástica disponível nos apoios
+h = L/12  →  deformabilidade e flecha diferida (φ=2,5)
+Vc=0,6×fctd×bw×d  →  5 mecanismos: arco, concreto, agregado, pino, residual
+VRd2 (bielas)  →  bielas esmagam se σcd > αv2×fcd
+Estribo fechado (torção)  →  fluxo de Bredt exige circuito fechado
+Armadura de suspensão  →  apoio indireto: carga chega ao banzo inferior`
+  }
+];
+```
+
+- [ ] **Passo 2: Verificar no console do browser**
+
+```js
+console.log(SECTIONS.length);                          // 28
+console.log(SECTIONS[0].tags.includes('fck'));          // true
+console.log(SECTIONS.find(s=>s.id==='torcao').badge);  // 'B'
+```
+
+- [ ] **Passo 3: Commit**
+
+```bash
+git add templates/referencia.html
+git commit -m "feat: SECTIONS array com 28 seções da referência técnica"
+```
+
+---
+
+### Task 4: Algoritmo de busca
+
+**Files:**
+- Modify: `templates/referencia.html` (substituir `/* TASK 4 — search() */`)
+
+- [ ] **Passo 1: Substituir `/* TASK 4 — search() */`**
+
+```js
+function search(query) {
+  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (!terms.length) return [];
+  return SECTIONS
+    .map(s => {
+      let score = 0;
+      const titleL = s.title.toLowerCase();
+      const contentL = s.content.toLowerCase();
+      terms.forEach(term => {
+        if (titleL.includes(term)) score += 3;
+        s.tags.forEach(tag => {
+          if (tag.toLowerCase() === term) score += 2;
+          else if (tag.toLowerCase().includes(term)) score += 1;
+        });
+        score += Math.min((contentL.match(new RegExp(term, 'g')) || []).length, 3);
+      });
+      return { section: s, score };
+    })
+    .filter(r => r.score > 0)
+    .sort((a, b) => b.score - a.score);
+}
+```
+
+- [ ] **Passo 2: Verificar no console**
+
+```js
+const r = search('fck');
+console.assert(r[0].section.id === 'materiais-resistencias', 'fck: seção errada');
+console.assert(r[0].score >= 8, 'fck: score baixo');
+console.assert(search('torcao')[0].section.id === 'torcao', 'torção não encontrada');
+console.assert(search('fck C25').length > 0, 'multi-termo falhou');
+console.assert(search('xxxxxxxxx').length === 0, 'busca inválida retornou resultado');
+console.log('✓ search() OK');
+```
+
+- [ ] **Passo 3: Commit**
+
+```bash
+git add templates/referencia.html
+git commit -m "feat: algoritmo de busca com scoring primário/secundário"
+```
+
+---
+
+### Task 5: CSS + Layout + Cards + Render
+
+**Files:**
+- Modify: `templates/referencia.html` (substituir `/* TASK 5 */` no CSS e `/* TASK 5 — render */` no script)
+
+- [ ] **Passo 1: Substituir `/* TASK 5 */` pelo CSS completo**
+
+```css
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f4f4f9;color:#333}
+#app-header{position:sticky;top:0;z-index:10;background:#0056b3;color:white;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;font-weight:bold;font-size:16px}
+#install-btn{background:white;color:#0056b3;border:none;padding:6px 12px;
+  border-radius:4px;cursor:pointer;font-size:13px;font-weight:bold}
+#search-bar{position:sticky;top:48px;z-index:9;background:white;
+  padding:10px 16px;border-bottom:1px solid #ddd}
+#search{width:100%;padding:10px 12px;border:2px solid #0056b3;
+  border-radius:6px;font-size:16px;outline:none}
+#search:focus{border-color:#003d82}
+#results{padding:12px 16px}
+.group-label{font-size:11px;font-weight:bold;color:#666;text-transform:uppercase;
+  letter-spacing:1px;margin:16px 0 6px;padding:0 4px}
+.card{background:white;border-radius:8px;margin-bottom:8px;
+  overflow:hidden;border:1px solid #ddd}
+.card.primary{border-left:4px solid #0056b3}
+.card.secondary{border-left:4px solid #bbb}
+.card-header{display:flex;align-items:center;gap:8px;padding:12px;
+  cursor:pointer;user-select:none}
+.card-header:hover{background:#f9f9f9}
+.card-title{flex:1;font-weight:bold;font-size:14px}
+.card-arrow{font-size:12px;color:#888;transition:transform .2s}
+.card.open .card-arrow{transform:rotate(90deg)}
+.badge{font-size:10px;font-weight:bold;padding:2px 6px;border-radius:3px;flex-shrink:0}
+.badge-C{background:#dbeafe;color:#1e40af}
+.badge-B{background:#dcfce7;color:#166534}
+.badge-N{background:#f3f4f6;color:#374151}
+.badge-CB{background:linear-gradient(90deg,#dbeafe 50%,#dcfce7 50%);color:#333}
+.card-content{display:none;padding:0 12px 12px}
+.card.open .card-content{display:block}
+pre{background:#f8f8f8;border-radius:4px;padding:8px;font-size:12px;
+  line-height:1.5;overflow-x:auto;white-space:pre-wrap;margin:6px 0}
+table{width:100%;border-collapse:collapse;font-size:12px;overflow-x:auto;display:block}
+th,td{border:1px solid #ddd;padding:4px 8px;text-align:left}
+th{background:#f3f4f6}
+.empty{text-align:center;color:#888;padding:40px 0;font-size:14px}
+.ios-hint{font-size:12px;color:#555;padding:6px 16px;
+  background:#fffbeb;border-bottom:1px solid #fde68a}
+```
+
+- [ ] **Passo 2: Substituir `/* TASK 5 — render */` pelas funções de render e wiring**
+
+```js
+function renderContent(text) {
+  text = text.replace(/`{3}([\s\S]*?)`{3}/g, (_, c) => `<pre>${c.trim()}</pre>`);
+  text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  if (!text.includes('<pre>')) text = '<pre>' + text + '</pre>';
+  return text;
+}
+
+function makeCard(section, cssClass, open) {
+  const div = document.createElement('div');
+  div.className = `card ${cssClass}${open ? ' open' : ''}`;
+  div.innerHTML = `
+    <div class="card-header">
+      <span class="card-title">${section.title}</span>
+      <span class="badge badge-${section.badge}">${section.badge}</span>
+      <span class="card-arrow">▶</span>
+    </div>
+    <div class="card-content">${renderContent(section.content)}</div>`;
+  div.querySelector('.card-header').addEventListener('click', () =>
+    div.classList.toggle('open'));
+  return div;
+}
+
+function renderResults(results) {
+  const c = document.getElementById('results');
+  c.innerHTML = '';
+  if (!results.length) {
+    c.innerHTML = '<div class="empty">Nenhuma seção encontrada.</div>';
+    return;
+  }
+  const primary = results.filter(r => r.score >= 3);
+  const secondary = results.filter(r => r.score < 3);
+  if (primary.length) {
+    const lbl = document.createElement('div');
+    lbl.className = 'group-label'; lbl.textContent = 'Primário';
+    c.appendChild(lbl);
+    primary.forEach(r => c.appendChild(makeCard(r.section, 'primary', true)));
+  }
+  if (secondary.length) {
+    const lbl = document.createElement('div');
+    lbl.className = 'group-label'; lbl.textContent = 'Secundário';
+    c.appendChild(lbl);
+    secondary.forEach(r => c.appendChild(makeCard(r.section, 'secondary', false)));
+  }
+}
+
+function renderAll() {
+  const c = document.getElementById('results');
+  c.innerHTML = '';
+  const byParent = {};
+  SECTIONS.forEach(s => { (byParent[s.parent] = byParent[s.parent] || []).push(s); });
+  Object.entries(byParent).forEach(([parent, sections]) => {
+    const lbl = document.createElement('div');
+    lbl.className = 'group-label'; lbl.textContent = parent;
+    c.appendChild(lbl);
+    sections.forEach(s => c.appendChild(makeCard(s, 'secondary', false)));
+  });
+}
+
+let debounce;
+document.getElementById('search').addEventListener('input', e => {
+  clearTimeout(debounce);
+  debounce = setTimeout(() => {
+    const q = e.target.value.trim();
+    if (!q) renderAll(); else renderResults(search(q));
+  }, 300);
+});
+
+renderAll();
+```
+
+- [ ] **Passo 3: Verificar no browser**
+
+```bash
+python app.py
+```
+Abrir `http://localhost:10000/referencia`:
+- Estado inicial: capítulos listados, seções colapsadas ✓
+- Digitar "fck": seção 1.1 expandida em "Primário", demais em "Secundário" ✓
+- Clicar em card colapsado: expande ✓
+- Apagar query: volta ao estado inicial ✓
+- Redimensionar para 375px: layout legível, `<pre>` com scroll horizontal ✓
+
+- [ ] **Passo 4: Rodar testes**
+
+```bash
+python -m pytest tests/test_app.py -v
+```
+Esperado: 3 `PASSED`
+
+- [ ] **Passo 5: Commit**
+
+```bash
+git add templates/referencia.html
+git commit -m "feat: layout cards expandíveis, busca rankeada, renderização conteúdo"
+```
+
+---
+
+### Task 6: Botão de instalação + dica iOS
+
+**Files:**
+- Modify: `templates/referencia.html` (substituir `/* TASK 6 — install */`)
+
+- [ ] **Passo 1: Substituir `/* TASK 6 — install */`**
+
+```js
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-btn').style.display = 'block';
+});
+document.getElementById('install-btn').addEventListener('click', () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => {
+    deferredPrompt = null;
+    document.getElementById('install-btn').style.display = 'none';
+  });
+});
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-btn').style.display = 'none';
+});
+
+const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+if (isIos && !window.navigator.standalone) {
+  const hint = document.createElement('div');
+  hint.className = 'ios-hint';
+  hint.textContent = '📱 iOS: toque em Compartilhar (⬆) → "Adicionar à Tela de Início"';
+  document.getElementById('search-bar').after(hint);
+}
+```
+
+- [ ] **Passo 2: Verificar no browser**
+
+Chrome desktop: aguardar ~30s na página → botão "⬇ Instalar" aparece no header. Clicar → dialog de instalação nativo. DevTools → Network → Offline → recarregar: página carrega do cache.
+
+- [ ] **Passo 3: Rodar testes**
+
+```bash
+python -m pytest tests/test_app.py -v
+```
+Esperado: 3 `PASSED`
+
+- [ ] **Passo 4: Commit + push**
+
+```bash
+git add templates/referencia.html
+git commit -m "feat: botão de instalação PWA e dica iOS"
+git push
+```
+
+---
+
+## Checklist final (spec)
+
+- [ ] `GET /referencia` → 200: `pytest tests/test_app.py -v`
+- [ ] "fck" → seção 1.1 como PRIMARY, ≥3 SECONDARY
+- [ ] "torção" → seção 7 como PRIMARY
+- [ ] "fck C25" → resultados rankeados
+- [ ] Query vazia → todas as seções por capítulo, colapsadas
+- [ ] Fórmulas em `<pre>` legíveis no mobile (DevTools 375px)
+- [ ] Botão "⬇ Instalar" aparece em Chrome
+- [ ] Offline: DevTools → Network → Offline → `/referencia` carrega do cache
+- [ ] `GET /` → 200, formulário MCMV intocado
