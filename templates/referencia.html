@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D'LIMA Referência Técnica</title>
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#0056b3">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>/* TASK 5 */</style>
+</head>
+<body>
+  <header id="app-header">
+    <span>🏗 D'LIMA Referência Técnica</span>
+    <button id="install-btn" style="display:none">⬇ Instalar</button>
+  </header>
+  <div id="search-bar">
+    <input id="search" type="search"
+      placeholder="buscar... ex: fck, torção, estribo" autocomplete="off">
+  </div>
+  <main id="results"></main>
+  <script>
+    /* TASK 3 — SECTIONS */
+    /* TASK 4 — search() */
+    /* TASK 5 — render */
+    /* TASK 6 — install */
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/static/sw.js');
+    }
+  </script>
+</body>
+</html>

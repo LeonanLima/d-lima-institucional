@@ -46,6 +46,11 @@ def cadastro():
     return render_template('index.html', sucesso=True)
 
 
+@app.route('/referencia')
+def referencia():
+    return render_template('referencia.html')
+
+
 @app.route('/api/convert-drawing', methods=['POST'])
 def convert_drawing():
     if 'file' not in request.files:
