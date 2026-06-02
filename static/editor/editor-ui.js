@@ -20,7 +20,7 @@ export function mostrarBanner(bannerEl, msgs) {
   bannerEl._t = setTimeout(() => { bannerEl.style.display = "none"; }, 6000);
 }
 
-export function renderPainel(painelEl, m, selecionado, cbs) {
+export function renderPainel(painelEl, m, selecionado, cbs, resumo = null, relatorioId = null) {
   const mat = m.material;
   let html = `<h3>Material</h3>
     <label>fck (MPa)</label><input id="p-fck" type="number" value="${mat.fck}">
@@ -35,6 +35,20 @@ export function renderPainel(painelEl, m, selecionado, cbs) {
       <select id="p-tipo">${["viga","pilar","fundacao"].map((t)=>`<option ${t===selecionado.tipo?"selected":""}>${t}</option>`).join("")}</select>
       <div class="row"><div><label>bw (cm)</label><input id="p-bw" type="number" value="${selecionado.secao.bw}"></div>
       <div><label>h (cm)</label><input id="p-h" type="number" value="${selecionado.secao.h}"></div></div>`;
+  }
+
+  if (resumo) {
+    html += `<h3>Resultados</h3>`;
+    if (resumo.deslocamentoMax)
+      html += `<p><b>Desloc. máx:</b> ${resumo.deslocamentoMax.texto}</p>`;
+    html += `<div style="font-size:12px;line-height:1.6">` +
+      resumo.reacoes.map((r) => `<div>Nó ${r.no}: ${r.texto}</div>`).join("") +
+      `</div>`;
+    if (resumo.avisos && resumo.avisos.length)
+      html += resumo.avisos.map((a) =>
+        `<div style="color:#991b1b;margin-top:4px">⚠ ${a}</div>`).join("");
+    if (relatorioId)
+      html += `<button class="primary" id="p-rel" style="background:#0056b3;margin-top:8px">Ver relatório completo →</button>`;
   }
 
   html += `<h3>Arquivo</h3>
@@ -55,4 +69,5 @@ export function renderPainel(painelEl, m, selecionado, cbs) {
   on("#p-import", "click", () => painelEl.querySelector("#p-file").click());
   on("#p-file", "change", (e) => cbs.aoImportar(e.target.files[0]));
   on("#p-calc", "click", () => cbs.aoCalcular());
+  on("#p-rel", "click", () => cbs.aoAbrirRelatorio());
 }
