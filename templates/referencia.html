@@ -8,7 +8,48 @@
   <meta name="theme-color" content="#0056b3">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <style>/* TASK 5 */</style>
+  <style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f4f4f9;color:#333}
+#app-header{position:sticky;top:0;z-index:10;background:#0056b3;color:white;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;font-weight:bold;font-size:16px}
+#install-btn{background:white;color:#0056b3;border:none;padding:6px 12px;
+  border-radius:4px;cursor:pointer;font-size:13px;font-weight:bold}
+#search-bar{position:sticky;top:48px;z-index:9;background:white;
+  padding:10px 16px;border-bottom:1px solid #ddd}
+#search{width:100%;padding:10px 12px;border:2px solid #0056b3;
+  border-radius:6px;font-size:16px;outline:none}
+#search:focus{border-color:#003d82}
+#results{padding:12px 16px}
+.group-label{font-size:11px;font-weight:bold;color:#666;text-transform:uppercase;
+  letter-spacing:1px;margin:16px 0 6px;padding:0 4px}
+.card{background:white;border-radius:8px;margin-bottom:8px;
+  overflow:hidden;border:1px solid #ddd}
+.card.primary{border-left:4px solid #0056b3}
+.card.secondary{border-left:4px solid #bbb}
+.card-header{display:flex;align-items:center;gap:8px;padding:12px;
+  cursor:pointer;user-select:none}
+.card-header:hover{background:#f9f9f9}
+.card-title{flex:1;font-weight:bold;font-size:14px}
+.card-arrow{font-size:12px;color:#888;transition:transform .2s}
+.card.open .card-arrow{transform:rotate(90deg)}
+.badge{font-size:10px;font-weight:bold;padding:2px 6px;border-radius:3px;flex-shrink:0}
+.badge-C{background:#dbeafe;color:#1e40af}
+.badge-B{background:#dcfce7;color:#166534}
+.badge-N{background:#f3f4f6;color:#374151}
+.badge-CB{background:linear-gradient(90deg,#dbeafe 50%,#dcfce7 50%);color:#333}
+.card-content{display:none;padding:0 12px 12px}
+.card.open .card-content{display:block}
+pre{background:#f8f8f8;border-radius:4px;padding:8px;font-size:12px;
+  line-height:1.5;overflow-x:auto;white-space:pre-wrap;margin:6px 0}
+table{width:100%;border-collapse:collapse;font-size:12px;overflow-x:auto;display:block}
+th,td{border:1px solid #ddd;padding:4px 8px;text-align:left}
+th{background:#f3f4f6}
+.empty{text-align:center;color:#888;padding:40px 0;font-size:14px}
+.ios-hint{font-size:12px;color:#555;padding:6px 16px;
+  background:#fffbeb;border-bottom:1px solid #fde68a}
+  </style>
 </head>
 <body>
   <header id="app-header">
@@ -595,7 +636,74 @@ Armadura de suspensão  →  apoio indireto: carga chega ao banzo inferior`
     .filter(r => r.score > 0)
     .sort((a, b) => b.score - a.score);
 }
-    /* TASK 5 — render */
+    function renderContent(text) {
+  text = text.replace(/`{3}([\s\S]*?)`{3}/g, (_, c) => `<pre>${c.trim()}</pre>`);
+  text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  if (!text.includes('<pre>')) text = '<pre>' + text + '</pre>';
+  return text;
+}
+
+function makeCard(section, cssClass, open) {
+  const div = document.createElement('div');
+  div.className = `card ${cssClass}${open ? ' open' : ''}`;
+  div.innerHTML = `
+    <div class="card-header">
+      <span class="card-title">${section.title}</span>
+      <span class="badge badge-${section.badge}">${section.badge}</span>
+      <span class="card-arrow">▶</span>
+    </div>
+    <div class="card-content">${renderContent(section.content)}</div>`;
+  div.querySelector('.card-header').addEventListener('click', () =>
+    div.classList.toggle('open'));
+  return div;
+}
+
+function renderResults(results) {
+  const c = document.getElementById('results');
+  c.innerHTML = '';
+  if (!results.length) {
+    c.innerHTML = '<div class="empty">Nenhuma seção encontrada.</div>';
+    return;
+  }
+  const primary = results.filter(r => r.score >= 3);
+  const secondary = results.filter(r => r.score < 3);
+  if (primary.length) {
+    const lbl = document.createElement('div');
+    lbl.className = 'group-label'; lbl.textContent = 'Primário';
+    c.appendChild(lbl);
+    primary.forEach(r => c.appendChild(makeCard(r.section, 'primary', true)));
+  }
+  if (secondary.length) {
+    const lbl = document.createElement('div');
+    lbl.className = 'group-label'; lbl.textContent = 'Secundário';
+    c.appendChild(lbl);
+    secondary.forEach(r => c.appendChild(makeCard(r.section, 'secondary', false)));
+  }
+}
+
+function renderAll() {
+  const c = document.getElementById('results');
+  c.innerHTML = '';
+  const byParent = {};
+  SECTIONS.forEach(s => { (byParent[s.parent] = byParent[s.parent] || []).push(s); });
+  Object.entries(byParent).forEach(([parent, sections]) => {
+    const lbl = document.createElement('div');
+    lbl.className = 'group-label'; lbl.textContent = parent;
+    c.appendChild(lbl);
+    sections.forEach(s => c.appendChild(makeCard(s, 'secondary', false)));
+  });
+}
+
+let debounce;
+document.getElementById('search').addEventListener('input', e => {
+  clearTimeout(debounce);
+  debounce = setTimeout(() => {
+    const q = e.target.value.trim();
+    if (!q) renderAll(); else renderResults(search(q));
+  }, 300);
+});
+
+renderAll();
     /* TASK 6 — install */
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/static/sw.js');
