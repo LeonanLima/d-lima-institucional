@@ -1,4 +1,5 @@
 import { snap } from "./editor-modelo.js";
+import { formatarReacoes } from "./editor-resultados.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 export const ESCALA = 40;            // px por metro
@@ -44,6 +45,21 @@ export function render(svg, m, estado) {
     const p = metroParaPx(n.x, n.y);
     svg.appendChild(el("circle", { cx: p.px, cy: p.py, r: 6,
       fill: "#1e293b", "data-no": n.id }));
+  }
+  if (estado.resultado) desenharResultados(svg, m, estado.resultado);
+}
+
+export function desenharResultados(svg, m, resultado) {
+  if (!resultado || !resultado.reacoes) return;
+  for (const r of formatarReacoes(resultado.reacoes)) {
+    if (!r.label) continue;
+    const n = noPorId(m, r.no);
+    if (!n) continue;
+    const p = metroParaPx(n.x, n.y);
+    const t = el("text", { x: p.px + 10, y: p.py + 26,
+      fill: "#15803d", "font-size": 12, "font-weight": "bold" });
+    t.textContent = r.label;
+    svg.appendChild(t);
   }
 }
 
