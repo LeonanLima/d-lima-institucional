@@ -1975,7 +1975,11 @@ git commit -m "feat: engine/relatorio — passos Carini, detalhamento, SVG e avi
 - Create: `templates/relatorio.html`
 - Create: `tests/test_api_estrutura.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_api_estrutura.py`**
+> **Desvio implementado (ADRs aprovadas):** estado em **filesystem** (`engine/persistencia.py`)
+> em vez de dict em memória, e rotas em **Blueprint** (`engine/rotas.py`) em vez de no `app.py`.
+> O teste foi alinhado ao design (sem `_ANALISES`). Ver `2026-06-02-motor-decisoes-arquitetura.md`.
+
+- [x] **Passo 1: Escrever teste falho `tests/test_api_estrutura.py`**
 
 ```python
 import sys, os, json
@@ -2037,12 +2041,12 @@ def test_index_intocado(client):
     assert b"D'LIMA" in r.data
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_api_estrutura.py -v`
 Esperado: `ImportError: cannot import name '_ANALISES'`
 
-- [ ] **Passo 3: Adicionar rotas e armazenamento em `app.py`**
+- [x] **Passo 3: Adicionar rotas e armazenamento** (via blueprint + filesystem, ADR)
 
 Inserir após a rota `/referencia` (linha ~51), e adicionar os imports no topo do arquivo (logo após `import tempfile`):
 
@@ -2092,7 +2096,7 @@ def api_relatorio(aid):
     return render_template('relatorio.html', rel=rel)
 ```
 
-- [ ] **Passo 4: Criar `templates/relatorio.html`**
+- [x] **Passo 4: Criar `templates/relatorio.html`**
 
 ```html
 <!DOCTYPE html>
@@ -2190,12 +2194,12 @@ def api_relatorio(aid):
 </html>
 ```
 
-- [ ] **Passo 5: Rodar todos os testes**
+- [x] **Passo 5: Rodar todos os testes** (63 passando)
 
 Run: `.venv/Scripts/python -m pytest tests/ -v`
 Esperado: todos PASSED (materiais 5, modelo 5, rigidez 7, solver 9, dimensionamento 13, detalhamento 4, svg 5, relatorio 4, api 5, app 3 = 60 testes)
 
-- [ ] **Passo 6: Verificação manual no browser**
+- [x] **Passo 6: Verificação manual** (smoke test: reações 25 kN, HTML c/ 2 SVG + matriz + Carini)
 
 ```bash
 .venv/Scripts/python app.py
@@ -2206,7 +2210,7 @@ curl -s -X POST http://localhost:10000/api/estrutura -H "Content-Type: applicati
 ```
 Esperado: JSON com `id`, reações ~25 kN. Abrir `http://localhost:10000/api/relatorio/<id>` → relatório com matriz colorida e SVGs.
 
-- [ ] **Passo 7: Commit + push**
+- [x] **Passo 7: Commit** (push pendente — aguardando o usuário)
 
 ```bash
 git add app.py templates/relatorio.html tests/test_api_estrutura.py
