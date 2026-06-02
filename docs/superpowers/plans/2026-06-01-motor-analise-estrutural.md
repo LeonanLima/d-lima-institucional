@@ -1743,7 +1743,7 @@ git commit -m "feat: engine/svg_elevacao — desenho SVG da elevacao com zonas d
 - Create: `engine/relatorio.py`
 - Create: `tests/test_relatorio.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_relatorio.py`**
+- [x] **Passo 1: Escrever teste falho `tests/test_relatorio.py`**
 
 ```python
 import sys, os
@@ -1799,12 +1799,12 @@ def test_relatorio_aviso_flecha():
     assert len(rel["avisos"]) >= 1
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_relatorio.py -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/relatorio.py`**
+- [x] **Passo 3: Implementar `engine/relatorio.py`**
 
 ```python
 from engine.solver import (resolver, reacoes, esforcos_elemento, flecha_viga)
@@ -1954,12 +1954,12 @@ def gerar_relatorio(estrutura):
     }
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_relatorio.py -v`
 Esperado: 4 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/relatorio.py tests/test_relatorio.py
