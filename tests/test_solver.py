@@ -2,7 +2,7 @@ import sys, os
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from engine.solver import (forcas_equivalentes_distribuida, resolver,
-                           reacoes, esforcos_elemento)
+                           reacoes, esforcos_elemento, flecha_viga)
 from engine.modelo import Estrutura
 
 
@@ -81,3 +81,29 @@ def test_biapoiada_momento_meio_vao():
     # M no meio = qL^2/8 = 0,10*500^2/8 = 3125 kN.cm = 31,25 kNm
     m_meio = esf["M"][5]   # ponto central (indice 5 de 0..10)
     assert abs(abs(m_meio) - 31.25) < 0.5   # kNm
+
+
+def test_flecha_biapoiada_imediata():
+    est = _estrutura_biapoiada()
+    res = resolver(est)
+    fl = flecha_viga(est, res, "V1")
+    # Estadio I (Ig): delta = 5 q L^4 / (384 E Ig)
+    # q=0,10; L=500; E=2898; Ig=74666,67
+    # delta = 5*0,10*500^4/(384*2898*74666,67) = 0,376 cm = 3,76 mm
+    assert abs(fl["imediata"] - 3.76) < 0.2
+
+
+def test_flecha_diferida_maior():
+    est = _estrutura_biapoiada()
+    res = resolver(est)
+    fl = flecha_viga(est, res, "V1")
+    # diferida = imediata * (1 + 2,5) = imediata * 3,5
+    assert abs(fl["diferida"] - fl["imediata"] * 3.5) < 0.01
+
+
+def test_flecha_limite_l250():
+    est = _estrutura_biapoiada()
+    res = resolver(est)
+    fl = flecha_viga(est, res, "V1")
+    # L/250 = 500/250 = 2,0 cm = 20 mm
+    assert abs(fl["limite"] - 20.0) < 0.01

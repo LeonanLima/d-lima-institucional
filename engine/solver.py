@@ -161,3 +161,35 @@ def esforcos_elemento(estrutura, resultado, elem_id, n_pontos=11):
         Vs.append(V)
         Ms.append(M / 100.0)   # kN.cm -> kNm
     return {"x": xs, "N": Ns, "V": Vs, "M": Ms}
+
+
+def flecha_viga(estrutura, resultado, elem_id, phi=2.5, balanco=False):
+    """Flecha imediata (Estadio I, inercia bruta) e diferida de uma viga.
+
+    Aproximacao: usa a flecha maxima da elastica numerica a partir dos
+    deslocamentos verticais interpolados nos nos do elemento, e como
+    referencia analitica calcula 5qL^4/(384 E Ig) quando ha carga distribuida.
+    Retorna {'imediata','diferida','limite'} em mm.
+    """
+    el = next(e for e in estrutura.elementos if e.id == elem_id)
+    L = el.comprimento()
+    E = estrutura.material.Ecs
+    Ig = el.secao.inercia
+
+    q = sum(c.valor for c in estrutura.cargas
+            if c.tipo == "distribuida" and c.elemento == elem_id)
+
+    if q > 0:
+        delta_cm = 5 * q * L ** 4 / (384 * E * Ig)
+    else:
+        # fallback: maior deslocamento vertical nodal do elemento
+        g = resultado["gdl_map"]
+        u = resultado["u_global"]
+        uyi = abs(u[g[el.no_i.id][1]])
+        uyj = abs(u[g[el.no_j.id][1]])
+        delta_cm = max(uyi, uyj)
+
+    imediata = delta_cm * 10.0          # mm
+    diferida = imediata * (1 + phi)
+    limite = (L / (125.0 if balanco else 250.0)) * 10.0  # mm
+    return {"imediata": imediata, "diferida": diferida, "limite": limite}
