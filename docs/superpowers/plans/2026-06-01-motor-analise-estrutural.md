@@ -42,7 +42,7 @@
 - Create: `engine/materiais.py`
 - Create: `tests/test_materiais.py`
 
-- [ ] **Passo 1: Adicionar numpy ao `requirements.txt`**
+- [x] **Passo 1: Adicionar numpy ao `requirements.txt`**
 
 Conteúdo final do arquivo:
 
@@ -55,12 +55,12 @@ matplotlib
 numpy
 ```
 
-- [ ] **Passo 2: Criar `engine/__init__.py` vazio**
+- [x] **Passo 2: Criar `engine/__init__.py` vazio**
 
 ```python
 ```
 
-- [ ] **Passo 3: Escrever teste falho `tests/test_materiais.py`**
+- [x] **Passo 3: Escrever teste falho `tests/test_materiais.py`**
 
 ```python
 import sys, os
@@ -98,12 +98,12 @@ def test_fctm_c25():
     assert abs(m.fctm - 2.565) < 0.01
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar FAIL**
+- [x] **Passo 4: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_materiais.py -v`
 Esperado: `ModuleNotFoundError: No module named 'engine.materiais'`
 
-- [ ] **Passo 5: Implementar `engine/materiais.py`**
+- [x] **Passo 5: Implementar `engine/materiais.py`**
 
 ```python
 from dataclasses import dataclass, field
@@ -142,12 +142,12 @@ class Material:
         self.fctd = (0.15 * self.fck ** (2 / 3)) / 10.0 # kN/cm2
 ```
 
-- [ ] **Passo 6: Rodar teste — verificar PASS**
+- [x] **Passo 6: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_materiais.py -v`
 Esperado: 5 PASSED
 
-- [ ] **Passo 7: Commit**
+- [x] **Passo 7: Commit**
 
 ```bash
 git add requirements.txt engine/__init__.py engine/materiais.py tests/test_materiais.py
