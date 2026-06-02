@@ -42,7 +42,7 @@
 - Create: `engine/materiais.py`
 - Create: `tests/test_materiais.py`
 
-- [ ] **Passo 1: Adicionar numpy ao `requirements.txt`**
+- [x] **Passo 1: Adicionar numpy ao `requirements.txt`**
 
 Conteúdo final do arquivo:
 
@@ -55,12 +55,12 @@ matplotlib
 numpy
 ```
 
-- [ ] **Passo 2: Criar `engine/__init__.py` vazio**
+- [x] **Passo 2: Criar `engine/__init__.py` vazio**
 
 ```python
 ```
 
-- [ ] **Passo 3: Escrever teste falho `tests/test_materiais.py`**
+- [x] **Passo 3: Escrever teste falho `tests/test_materiais.py`**
 
 ```python
 import sys, os
@@ -98,12 +98,12 @@ def test_fctm_c25():
     assert abs(m.fctm - 2.565) < 0.01
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar FAIL**
+- [x] **Passo 4: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_materiais.py -v`
 Esperado: `ModuleNotFoundError: No module named 'engine.materiais'`
 
-- [ ] **Passo 5: Implementar `engine/materiais.py`**
+- [x] **Passo 5: Implementar `engine/materiais.py`**
 
 ```python
 from dataclasses import dataclass, field
@@ -142,12 +142,12 @@ class Material:
         self.fctd = (0.15 * self.fck ** (2 / 3)) / 10.0 # kN/cm2
 ```
 
-- [ ] **Passo 6: Rodar teste — verificar PASS**
+- [x] **Passo 6: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_materiais.py -v`
 Esperado: 5 PASSED
 
-- [ ] **Passo 7: Commit**
+- [x] **Passo 7: Commit**
 
 ```bash
 git add requirements.txt engine/__init__.py engine/materiais.py tests/test_materiais.py
@@ -162,7 +162,7 @@ git commit -m "feat: engine/materiais — propriedades do concreto e aco NBR 611
 - Create: `engine/modelo.py`
 - Create: `tests/test_modelo.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_modelo.py`**
+- [x] **Passo 1: Escrever teste falho `tests/test_modelo.py`**
 
 ```python
 import sys, os
@@ -223,12 +223,12 @@ def test_cobrimento_caa2_viga():
     assert e.elementos[0].cobrimento(caa=2) == 3.0
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_modelo.py -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/modelo.py`**
+- [x] **Passo 3: Implementar `engine/modelo.py`**
 
 ```python
 from dataclasses import dataclass, field
@@ -370,12 +370,12 @@ class Estrutura:
                    elementos=elementos, vinculos=vinculos, cargas=cargas)
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_modelo.py -v`
 Esperado: 5 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/modelo.py tests/test_modelo.py
@@ -390,7 +390,7 @@ git commit -m "feat: engine/modelo — dataclasses e parse do JSON da estrutura"
 - Create: `engine/rigidez.py`
 - Create: `tests/test_rigidez.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_rigidez.py`**
+- [x] **Passo 1: Escrever teste falho `tests/test_rigidez.py`**
 
 ```python
 import sys, os
@@ -435,12 +435,12 @@ def test_matriz_T_vertical():
     assert abs(T[1, 0] - (-1.0)) < 1e-9
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_rigidez.py -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/rigidez.py` (parte 1)**
+- [x] **Passo 3: Implementar `engine/rigidez.py` (parte 1)**
 
 ```python
 import math
@@ -491,12 +491,12 @@ def k_global_elemento(E, A, I, L, angulo) -> np.ndarray:
     return T.T @ kl @ T
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_rigidez.py -v`
 Esperado: 5 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/rigidez.py tests/test_rigidez.py
@@ -511,7 +511,7 @@ git commit -m "feat: engine/rigidez — matriz elementar k_local e transformacao
 - Modify: `engine/rigidez.py`
 - Modify: `tests/test_rigidez.py`
 
-- [ ] **Passo 1: Adicionar teste falho em `tests/test_rigidez.py`**
+- [x] **Passo 1: Adicionar teste falho em `tests/test_rigidez.py`**
 
 ```python
 from engine.rigidez import montar_global
@@ -552,12 +552,12 @@ def test_montar_global_mapa_contribuicoes():
     assert contrib[(0, 0)] == {"V1"}
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_rigidez.py::test_montar_global_dimensao -v`
 Esperado: `ImportError: cannot import name 'montar_global'`
 
-- [ ] **Passo 3: Adicionar `montar_global` em `engine/rigidez.py`**
+- [x] **Passo 3: Adicionar `montar_global` em `engine/rigidez.py`**
 
 ```python
 def gdls_do_no(no_id: int, ordem_nos: list) -> list:
@@ -594,12 +594,12 @@ def montar_global(estrutura):
     return K, gdl_map, contrib
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_rigidez.py -v`
 Esperado: 7 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/rigidez.py tests/test_rigidez.py
@@ -614,7 +614,7 @@ git commit -m "feat: engine/rigidez — montagem K_global com mapa de contribuic
 - Create: `engine/solver.py`
 - Create: `tests/test_solver.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_solver.py`**
+- [x] **Passo 1: Escrever teste falho `tests/test_solver.py`**
 
 ```python
 import sys, os
@@ -639,12 +639,12 @@ def test_forcas_equivalentes_soma_vertical():
     assert abs((f[1] + f[4]) - (-50.0)) < 0.01
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/solver.py` (parte 1)**
+- [x] **Passo 3: Implementar `engine/solver.py` (parte 1)**
 
 ```python
 import numpy as np
@@ -668,12 +668,12 @@ def forcas_equivalentes_distribuida(q: float, L: float,
     return T.T @ f_local
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py -v`
 Esperado: 2 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/solver.py tests/test_solver.py
@@ -688,7 +688,7 @@ git commit -m "feat: engine/solver — forcas nodais equivalentes para carga dis
 - Modify: `engine/solver.py`
 - Modify: `tests/test_solver.py`
 
-- [ ] **Passo 1: Adicionar teste falho (cantilever analítico)**
+- [x] **Passo 1: Adicionar teste falho (cantilever analítico)**
 
 ```python
 from engine.solver import resolver
@@ -724,12 +724,12 @@ def test_cantilever_rotacao_ponta():
     assert abs(rz2 - (-0.00208)) < 0.0001
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py::test_cantilever_deslocamento_ponta -v`
 Esperado: `ImportError: cannot import name 'resolver'`
 
-- [ ] **Passo 3: Adicionar montagem de F e `resolver` em `engine/solver.py`**
+- [x] **Passo 3: Adicionar montagem de F e `resolver` em `engine/solver.py`**
 
 ```python
 def montar_forcas(estrutura, gdl_map, n_gdl):
@@ -803,12 +803,12 @@ def resolver(estrutura):
             "restritos": restritos}
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py -v`
 Esperado: 4 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/solver.py tests/test_solver.py
@@ -823,7 +823,7 @@ git commit -m "feat: engine/solver — montagem de forcas, contorno e solucao do
 - Modify: `engine/solver.py`
 - Modify: `tests/test_solver.py`
 
-- [ ] **Passo 1: Adicionar teste falho (viga biapoiada)**
+- [x] **Passo 1: Adicionar teste falho (viga biapoiada)**
 
 ```python
 from engine.solver import reacoes, esforcos_elemento
@@ -861,12 +861,12 @@ def test_biapoiada_momento_meio_vao():
     assert abs(abs(m_meio) - 31.25) < 0.5   # kNm
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py::test_biapoiada_reacoes -v`
 Esperado: `ImportError: cannot import name 'reacoes'`
 
-- [ ] **Passo 3: Adicionar `reacoes` e `esforcos_elemento` em `engine/solver.py`**
+- [x] **Passo 3: Adicionar `reacoes` e `esforcos_elemento` em `engine/solver.py`**
 
 ```python
 def reacoes(estrutura, resultado):
@@ -942,12 +942,12 @@ def esforcos_elemento(estrutura, resultado, elem_id, n_pontos=11):
     return {"x": xs, "N": Ns, "V": Vs, "M": Ms}
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py -v`
 Esperado: 6 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/solver.py tests/test_solver.py
@@ -962,7 +962,7 @@ git commit -m "feat: engine/solver — reacoes de apoio e diagramas N/V/M"
 - Modify: `engine/solver.py`
 - Modify: `tests/test_solver.py`
 
-- [ ] **Passo 1: Adicionar teste falho**
+- [x] **Passo 1: Adicionar teste falho**
 
 ```python
 from engine.solver import flecha_viga
@@ -994,12 +994,12 @@ def test_flecha_limite_l250():
     assert abs(fl["limite"] - 20.0) < 0.01
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py::test_flecha_biapoiada_imediata -v`
 Esperado: `ImportError`
 
-- [ ] **Passo 3: Adicionar `flecha_viga` em `engine/solver.py`**
+- [x] **Passo 3: Adicionar `flecha_viga` em `engine/solver.py`**
 
 ```python
 def flecha_viga(estrutura, resultado, elem_id, phi=2.5, balanco=False):
@@ -1034,12 +1034,12 @@ def flecha_viga(estrutura, resultado, elem_id, phi=2.5, balanco=False):
     return {"imediata": imediata, "diferida": diferida, "limite": limite}
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py -v`
 Esperado: 9 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/solver.py tests/test_solver.py
@@ -1054,7 +1054,7 @@ git commit -m "feat: engine/solver — flecha imediata e diferida (Branson simpl
 - Create: `engine/dimensionamento.py`
 - Create: `tests/test_dimensionamento.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_dimensionamento.py`**
+- [x] **Passo 1: Escrever teste falho `tests/test_dimensionamento.py`**
 
 ```python
 import sys, os
@@ -1095,12 +1095,12 @@ def test_cisalhamento_bielas_estouram():
     assert r["bielas_ok"] is False
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_dimensionamento.py -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/dimensionamento.py` (parte 1)**
+- [x] **Passo 3: Implementar `engine/dimensionamento.py` (parte 1)**
 
 ```python
 def cisalhamento_viga(material, bw, d, VSd):
@@ -1135,12 +1135,12 @@ def cisalhamento_viga(material, bw, d, VSd):
     }
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_dimensionamento.py -v`
 Esperado: 4 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/dimensionamento.py tests/test_dimensionamento.py
@@ -1155,7 +1155,7 @@ git commit -m "feat: engine/dimensionamento — verificacao ao cortante Modelo I
 - Modify: `engine/dimensionamento.py`
 - Modify: `tests/test_dimensionamento.py`
 
-- [ ] **Passo 1: Adicionar teste falho**
+- [x] **Passo 1: Adicionar teste falho**
 
 ```python
 from engine.dimensionamento import flexao_viga, armadura_pele
@@ -1201,12 +1201,12 @@ def test_armadura_pele_dispensada():
     assert r["necessaria"] is False
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_dimensionamento.py::test_flexao_armadura_simples -v`
 Esperado: `ImportError`
 
-- [ ] **Passo 3: Adicionar `flexao_viga` e `armadura_pele`**
+- [x] **Passo 3: Adicionar `flexao_viga` e `armadura_pele`**
 
 ```python
 def flexao_viga(material, bw, d, Md):
@@ -1257,12 +1257,12 @@ def armadura_pele(material, bw, h, cobrimento, phi_est):
     return {"necessaria": True, "As_face": As_face, "espacamento_max": 20.0}
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_dimensionamento.py -v`
 Esperado: 9 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/dimensionamento.py tests/test_dimensionamento.py
@@ -1277,7 +1277,7 @@ git commit -m "feat: engine/dimensionamento — flexao simples/dupla e armadura 
 - Modify: `engine/dimensionamento.py`
 - Modify: `tests/test_dimensionamento.py`
 
-- [ ] **Passo 1: Adicionar teste falho**
+- [x] **Passo 1: Adicionar teste falho**
 
 ```python
 from engine.dimensionamento import esbeltez_pilar, flexocompressao_obliqua
@@ -1310,12 +1310,12 @@ def test_flexocompressao_envoltoria_falha():
     assert r["passa"] is False
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_dimensionamento.py::test_esbeltez_curto -v`
 Esperado: `ImportError`
 
-- [ ] **Passo 3: Adicionar `esbeltez_pilar` e `flexocompressao_obliqua`**
+- [x] **Passo 3: Adicionar `esbeltez_pilar` e `flexocompressao_obliqua`**
 
 ```python
 def esbeltez_pilar(b_menor, le):
@@ -1345,12 +1345,12 @@ def flexocompressao_obliqua(Mx, My, MRdxx, MRdyy, alpha=1.2):
     return {"indice": indice, "passa": indice <= 1.0}
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_dimensionamento.py -v`
 Esperado: 13 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/dimensionamento.py tests/test_dimensionamento.py
@@ -1365,7 +1365,7 @@ git commit -m "feat: engine/dimensionamento — esbeltez e flexo-compressao obli
 - Create: `engine/detalhamento.py`
 - Create: `tests/test_detalhamento.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_detalhamento.py`**
+- [x] **Passo 1: Escrever teste falho `tests/test_detalhamento.py`**
 
 ```python
 import sys, os
@@ -1404,12 +1404,12 @@ def test_escolher_estribo_respeita_smax():
     assert r["espacamento"] <= 30
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_detalhamento.py -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/detalhamento.py`**
+- [x] **Passo 3: Implementar `engine/detalhamento.py`**
 
 ```python
 import math
@@ -1476,12 +1476,12 @@ def escolher_estribo(Asw_s, comprimento_zona, n_ramos=2, s_max=30.0):
             "descricao": "Ø 5 c/5 cm (%dr) — %d un." % (n_ramos, quantidade)}
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_detalhamento.py -v`
 Esperado: 4 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/detalhamento.py tests/test_detalhamento.py
@@ -1496,7 +1496,7 @@ git commit -m "feat: engine/detalhamento — escolha de bitola e estribo por men
 - Create: `engine/svg_secao.py`
 - Create: `tests/test_svg.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_svg.py`**
+- [x] **Passo 1: Escrever teste falho `tests/test_svg.py`**
 
 ```python
 import sys, os
@@ -1528,12 +1528,12 @@ def test_secao_com_pele():
     assert svg.count("<circle") == 10
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_svg.py -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/svg_secao.py`**
+- [x] **Passo 3: Implementar `engine/svg_secao.py`**
 
 ```python
 def desenhar_secao(bw, h, cobrimento, barras_inf, barras_sup,
@@ -1610,12 +1610,12 @@ def desenhar_secao(bw, h, cobrimento, barras_inf, barras_sup,
     return "\n".join(parts)
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_svg.py -v`
 Esperado: 3 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/svg_secao.py tests/test_svg.py
@@ -1630,7 +1630,7 @@ git commit -m "feat: engine/svg_secao — desenho SVG da secao transversal armad
 - Create: `engine/svg_elevacao.py`
 - Modify: `tests/test_svg.py`
 
-- [ ] **Passo 1: Adicionar teste falho em `tests/test_svg.py`**
+- [x] **Passo 1: Adicionar teste falho em `tests/test_svg.py`**
 
 ```python
 from engine.svg_elevacao import desenhar_elevacao
@@ -1659,12 +1659,12 @@ def test_elevacao_desenha_zonas():
     assert svg.count('class="zona"') == 2
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_svg.py::test_elevacao_retorna_svg -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/svg_elevacao.py`**
+- [x] **Passo 3: Implementar `engine/svg_elevacao.py`**
 
 ```python
 def desenhar_elevacao(L, h, zonas, barras_pos, barras_neg):
@@ -1723,12 +1723,12 @@ def desenhar_elevacao(L, h, zonas, barras_pos, barras_neg):
     return "\n".join(parts)
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_svg.py -v`
 Esperado: 5 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/svg_elevacao.py tests/test_svg.py
@@ -1743,7 +1743,7 @@ git commit -m "feat: engine/svg_elevacao — desenho SVG da elevacao com zonas d
 - Create: `engine/relatorio.py`
 - Create: `tests/test_relatorio.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_relatorio.py`**
+- [x] **Passo 1: Escrever teste falho `tests/test_relatorio.py`**
 
 ```python
 import sys, os
@@ -1799,12 +1799,12 @@ def test_relatorio_aviso_flecha():
     assert len(rel["avisos"]) >= 1
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_relatorio.py -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/relatorio.py`**
+- [x] **Passo 3: Implementar `engine/relatorio.py`**
 
 ```python
 from engine.solver import (resolver, reacoes, esforcos_elemento, flecha_viga)
@@ -1954,12 +1954,12 @@ def gerar_relatorio(estrutura):
     }
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_relatorio.py -v`
 Esperado: 4 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/relatorio.py tests/test_relatorio.py
@@ -1975,7 +1975,11 @@ git commit -m "feat: engine/relatorio — passos Carini, detalhamento, SVG e avi
 - Create: `templates/relatorio.html`
 - Create: `tests/test_api_estrutura.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_api_estrutura.py`**
+> **Desvio implementado (ADRs aprovadas):** estado em **filesystem** (`engine/persistencia.py`)
+> em vez de dict em memória, e rotas em **Blueprint** (`engine/rotas.py`) em vez de no `app.py`.
+> O teste foi alinhado ao design (sem `_ANALISES`). Ver `2026-06-02-motor-decisoes-arquitetura.md`.
+
+- [x] **Passo 1: Escrever teste falho `tests/test_api_estrutura.py`**
 
 ```python
 import sys, os, json
@@ -2037,12 +2041,12 @@ def test_index_intocado(client):
     assert b"D'LIMA" in r.data
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_api_estrutura.py -v`
 Esperado: `ImportError: cannot import name '_ANALISES'`
 
-- [ ] **Passo 3: Adicionar rotas e armazenamento em `app.py`**
+- [x] **Passo 3: Adicionar rotas e armazenamento** (via blueprint + filesystem, ADR)
 
 Inserir após a rota `/referencia` (linha ~51), e adicionar os imports no topo do arquivo (logo após `import tempfile`):
 
@@ -2092,7 +2096,7 @@ def api_relatorio(aid):
     return render_template('relatorio.html', rel=rel)
 ```
 
-- [ ] **Passo 4: Criar `templates/relatorio.html`**
+- [x] **Passo 4: Criar `templates/relatorio.html`**
 
 ```html
 <!DOCTYPE html>
@@ -2190,12 +2194,12 @@ def api_relatorio(aid):
 </html>
 ```
 
-- [ ] **Passo 5: Rodar todos os testes**
+- [x] **Passo 5: Rodar todos os testes** (63 passando)
 
 Run: `.venv/Scripts/python -m pytest tests/ -v`
 Esperado: todos PASSED (materiais 5, modelo 5, rigidez 7, solver 9, dimensionamento 13, detalhamento 4, svg 5, relatorio 4, api 5, app 3 = 60 testes)
 
-- [ ] **Passo 6: Verificação manual no browser**
+- [x] **Passo 6: Verificação manual** (smoke test: reações 25 kN, HTML c/ 2 SVG + matriz + Carini)
 
 ```bash
 .venv/Scripts/python app.py
@@ -2206,7 +2210,7 @@ curl -s -X POST http://localhost:10000/api/estrutura -H "Content-Type: applicati
 ```
 Esperado: JSON com `id`, reações ~25 kN. Abrir `http://localhost:10000/api/relatorio/<id>` → relatório com matriz colorida e SVGs.
 
-- [ ] **Passo 7: Commit + push**
+- [x] **Passo 7: Commit** (push pendente — aguardando o usuário)
 
 ```bash
 git add app.py templates/relatorio.html tests/test_api_estrutura.py

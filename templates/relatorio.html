@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D'LIMA — Relatorio de Analise Estrutural</title>
+  <style>
+    body{font-family:Arial,sans-serif;background:#f4f4f9;color:#222;margin:0;padding:0}
+    header{background:#0056b3;color:#fff;padding:14px 20px;font-size:18px;font-weight:bold}
+    .wrap{max-width:1000px;margin:20px auto;padding:0 16px}
+    h2{color:#0056b3;border-bottom:2px solid #0056b3;padding-bottom:4px;margin-top:32px}
+    .passo{background:#fff;border-radius:8px;padding:12px 16px;margin:8px 0;
+      border-left:4px solid #0056b3}
+    .passo .t{font-weight:bold;margin-bottom:4px}
+    .aviso{background:#fef2f2;border-left:4px solid #dc2626;color:#991b1b;
+      padding:10px 14px;border-radius:6px;margin:6px 0}
+    table.kmat{border-collapse:collapse;font-size:11px;margin:10px 0;overflow:auto;display:block}
+    table.kmat td{border:1px solid #ddd;padding:4px 6px;text-align:right;min-width:54px;
+      cursor:default}
+    .el-card{background:#fff;border-radius:8px;padding:16px;margin:12px 0;
+      box-shadow:0 1px 3px rgba(0,0,0,.1)}
+    .svgs{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+    .legenda span{display:inline-block;padding:2px 8px;border-radius:3px;margin-right:8px;
+      font-size:12px;color:#fff}
+  </style>
+</head>
+<body>
+  <header>🏗 D'LIMA — Relatorio de Analise Estrutural</header>
+  <div class="wrap">
+
+    {% if rel.avisos %}
+    <h2>⚠ Avisos</h2>
+    {% for a in rel.avisos %}<div class="aviso">{{ a }}</div>{% endfor %}
+    {% endif %}
+
+    <h2>Sequencia de Calculo (Carini)</h2>
+    {% for p in rel.passos %}
+      <div class="passo"><div class="t">{{ p.titulo }}</div>{{ p.conteudo }}</div>
+    {% endfor %}
+
+    <h2>Matriz de Rigidez Global</h2>
+    <div class="legenda">
+      {% for eid, cor in rel.cores.items() %}
+        <span style="background:{{ cor }}">{{ eid }}</span>
+      {% endfor %}
+    </div>
+    <table class="kmat">
+      {% for linha in rel.matriz_global %}
+      <tr>
+        {% for cel in linha %}
+          {% if cel.elem|length == 1 %}
+            <td style="background:{{ rel.cores[cel.elem[0]] }}22"
+                title="K = {{ cel.v }} ({{ cel.elem|join(', ') }})">{{ cel.v }}</td>
+          {% elif cel.elem|length > 1 %}
+            <td style="background:#ddd"
+                title="K = {{ cel.v }} ({{ cel.elem|join(' + ') }})">{{ cel.v }}</td>
+          {% else %}
+            <td style="color:#bbb">{{ cel.v }}</td>
+          {% endif %}
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </table>
+
+    <h2>Detalhamento por Elemento</h2>
+    {% for eid, det in rel.elementos.items() %}
+      <div class="el-card">
+        <h3 style="margin-top:0">{{ eid }} ({{ det.tipo }})</h3>
+        {% if det.regioes %}
+          <p><b>Vao:</b> As+ = {{ det.regioes.meio.As_pos }} cm² →
+             {{ det.regioes.meio.barras }} | Estribos:
+             {{ det.regioes.meio.estribo }}</p>
+          {% if det.armadura_pele and det.armadura_pele.necessaria %}
+            <p><b>Armadura de pele:</b> 2 Ø 8 por face</p>
+          {% endif %}
+          {% if det.flecha %}
+            <p><b>Flecha:</b> imediata {{ '%.1f'|format(det.flecha.imediata) }} mm |
+               diferida {{ '%.1f'|format(det.flecha.diferida) }} mm |
+               limite {{ '%.1f'|format(det.flecha.limite) }} mm</p>
+          {% endif %}
+          <div class="svgs">
+            <div>{{ det.svg_secao|safe }}</div>
+            <div>{{ det.svg_elevacao|safe }}</div>
+          </div>
+        {% else %}
+          <p>Esforco normal maximo: {{ det.Nmax_kN }} kN</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+  </div>
+</body>
+</html>
