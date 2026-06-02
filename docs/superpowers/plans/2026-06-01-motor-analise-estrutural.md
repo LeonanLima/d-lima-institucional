@@ -390,7 +390,7 @@ git commit -m "feat: engine/modelo — dataclasses e parse do JSON da estrutura"
 - Create: `engine/rigidez.py`
 - Create: `tests/test_rigidez.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_rigidez.py`**
+- [x] **Passo 1: Escrever teste falho `tests/test_rigidez.py`**
 
 ```python
 import sys, os
@@ -435,12 +435,12 @@ def test_matriz_T_vertical():
     assert abs(T[1, 0] - (-1.0)) < 1e-9
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_rigidez.py -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/rigidez.py` (parte 1)**
+- [x] **Passo 3: Implementar `engine/rigidez.py` (parte 1)**
 
 ```python
 import math
@@ -491,12 +491,12 @@ def k_global_elemento(E, A, I, L, angulo) -> np.ndarray:
     return T.T @ kl @ T
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_rigidez.py -v`
 Esperado: 5 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/rigidez.py tests/test_rigidez.py
