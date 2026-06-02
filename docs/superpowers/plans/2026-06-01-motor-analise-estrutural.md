@@ -1054,7 +1054,7 @@ git commit -m "feat: engine/solver — flecha imediata e diferida (Branson simpl
 - Create: `engine/dimensionamento.py`
 - Create: `tests/test_dimensionamento.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_dimensionamento.py`**
+- [x] **Passo 1: Escrever teste falho `tests/test_dimensionamento.py`**
 
 ```python
 import sys, os
@@ -1095,12 +1095,12 @@ def test_cisalhamento_bielas_estouram():
     assert r["bielas_ok"] is False
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_dimensionamento.py -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/dimensionamento.py` (parte 1)**
+- [x] **Passo 3: Implementar `engine/dimensionamento.py` (parte 1)**
 
 ```python
 def cisalhamento_viga(material, bw, d, VSd):
@@ -1135,12 +1135,12 @@ def cisalhamento_viga(material, bw, d, VSd):
     }
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_dimensionamento.py -v`
 Esperado: 4 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/dimensionamento.py tests/test_dimensionamento.py
