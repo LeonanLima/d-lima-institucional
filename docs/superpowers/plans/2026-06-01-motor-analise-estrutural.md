@@ -511,7 +511,7 @@ git commit -m "feat: engine/rigidez — matriz elementar k_local e transformacao
 - Modify: `engine/rigidez.py`
 - Modify: `tests/test_rigidez.py`
 
-- [ ] **Passo 1: Adicionar teste falho em `tests/test_rigidez.py`**
+- [x] **Passo 1: Adicionar teste falho em `tests/test_rigidez.py`**
 
 ```python
 from engine.rigidez import montar_global
@@ -552,12 +552,12 @@ def test_montar_global_mapa_contribuicoes():
     assert contrib[(0, 0)] == {"V1"}
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_rigidez.py::test_montar_global_dimensao -v`
 Esperado: `ImportError: cannot import name 'montar_global'`
 
-- [ ] **Passo 3: Adicionar `montar_global` em `engine/rigidez.py`**
+- [x] **Passo 3: Adicionar `montar_global` em `engine/rigidez.py`**
 
 ```python
 def gdls_do_no(no_id: int, ordem_nos: list) -> list:
@@ -594,12 +594,12 @@ def montar_global(estrutura):
     return K, gdl_map, contrib
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_rigidez.py -v`
 Esperado: 7 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/rigidez.py tests/test_rigidez.py
