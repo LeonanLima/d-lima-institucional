@@ -51,6 +51,25 @@ export function addCargaNodal(m, no, { fx = 0, fy = 0, mz = 0 }) {
   return c;
 }
 
+export function validar(m) {
+  const erros = [];
+  if (m.vinculos.length === 0) erros.push("Adicione ao menos um vínculo (apoio).");
+  if (m.elementos.length === 0) erros.push("Adicione ao menos uma barra.");
+  const ids = new Set(m.nos.map((n) => n.id));
+  for (const e of m.elementos) {
+    if (!ids.has(e.no_i) || !ids.has(e.no_j) || e.no_i === e.no_j) {
+      erros.push(`Barra ${e.id}: nós inválidos.`);
+    }
+    if (!(e.secao.bw > 0) || !(e.secao.h > 0)) {
+      erros.push(`Barra ${e.id}: seção inválida (bw e h devem ser > 0).`);
+    }
+  }
+  if (!(m.material.fck > 0) || !(m.material.fyk > 0)) {
+    erros.push("Material: fck e fyk devem ser > 0.");
+  }
+  return erros;
+}
+
 export function toJson(m) {
   return {
     estrutura: {
