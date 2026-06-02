@@ -1,7 +1,8 @@
 import sys, os
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-from engine.rigidez import k_local, matriz_T
+from engine.rigidez import k_local, matriz_T, montar_global
+from engine.modelo import Estrutura
 
 
 def test_k_local_simetrica():
@@ -38,3 +39,37 @@ def test_matriz_T_vertical():
     assert abs(T[0, 0] - 0.0) < 1e-9
     assert abs(T[0, 1] - 1.0) < 1e-9
     assert abs(T[1, 0] - (-1.0)) < 1e-9
+
+
+def test_montar_global_dimensao():
+    # 2 nos, 3 GDL/no -> K 6x6
+    entrada = {"estrutura": {
+        "material": {"fck": 25, "fyk": 500, "CAA": 2, "agregado": "basalto"},
+        "nos": [{"id": 1, "x": 0, "y": 0}, {"id": 2, "x": 3, "y": 0}],
+        "elementos": [{"id": "V1", "tipo": "viga", "no_i": 1, "no_j": 2,
+                       "secao": {"bw": 14, "h": 40}}],
+        "vinculos": [], "cargas": []}}
+    est = Estrutura.from_json(entrada)
+    K, gdl_map, contrib = montar_global(est)
+    assert K.shape == (6, 6)
+    assert np.allclose(K, K.T)
+
+
+def test_montar_global_mapa_contribuicoes():
+    entrada = {"estrutura": {
+        "material": {"fck": 25, "fyk": 500, "CAA": 2, "agregado": "basalto"},
+        "nos": [{"id": 1, "x": 0, "y": 0}, {"id": 2, "x": 3, "y": 0},
+                {"id": 3, "x": 3, "y": 3}],
+        "elementos": [
+            {"id": "V1", "tipo": "viga", "no_i": 1, "no_j": 2,
+             "secao": {"bw": 14, "h": 40}},
+            {"id": "P1", "tipo": "pilar", "no_i": 2, "no_j": 3,
+             "secao": {"bw": 19, "h": 19}}],
+        "vinculos": [], "cargas": []}}
+    est = Estrutura.from_json(entrada)
+    K, gdl_map, contrib = montar_global(est)
+    # No 2 (GDL 3,4,5) recebe contribuicao de V1 e P1
+    assert "V1" in contrib[(3, 3)]
+    assert "P1" in contrib[(3, 3)]
+    # No 1 (GDL 0,1,2) so de V1
+    assert contrib[(0, 0)] == {"V1"}
