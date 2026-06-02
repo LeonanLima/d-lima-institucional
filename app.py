@@ -21,6 +21,10 @@ CORS(app, origins=[
     "http://127.0.0.1:3000",
 ])
 
+# Motor de analise estrutural — rotas isoladas em blueprint (ADR-2)
+from engine.rotas import estrutura_bp
+app.register_blueprint(estrutura_bp)
+
 
 @app.errorhandler(413)
 def too_large(e):
