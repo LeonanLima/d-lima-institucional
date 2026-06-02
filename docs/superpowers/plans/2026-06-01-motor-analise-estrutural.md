@@ -1155,7 +1155,7 @@ git commit -m "feat: engine/dimensionamento — verificacao ao cortante Modelo I
 - Modify: `engine/dimensionamento.py`
 - Modify: `tests/test_dimensionamento.py`
 
-- [ ] **Passo 1: Adicionar teste falho**
+- [x] **Passo 1: Adicionar teste falho**
 
 ```python
 from engine.dimensionamento import flexao_viga, armadura_pele
@@ -1201,12 +1201,12 @@ def test_armadura_pele_dispensada():
     assert r["necessaria"] is False
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_dimensionamento.py::test_flexao_armadura_simples -v`
 Esperado: `ImportError`
 
-- [ ] **Passo 3: Adicionar `flexao_viga` e `armadura_pele`**
+- [x] **Passo 3: Adicionar `flexao_viga` e `armadura_pele`**
 
 ```python
 def flexao_viga(material, bw, d, Md):
@@ -1257,12 +1257,12 @@ def armadura_pele(material, bw, h, cobrimento, phi_est):
     return {"necessaria": True, "As_face": As_face, "espacamento_max": 20.0}
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_dimensionamento.py -v`
 Esperado: 9 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/dimensionamento.py tests/test_dimensionamento.py
