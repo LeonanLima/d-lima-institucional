@@ -704,7 +704,31 @@ document.getElementById('search').addEventListener('input', e => {
 });
 
 renderAll();
-    /* TASK 6 — install */
+    let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-btn').style.display = 'block';
+});
+document.getElementById('install-btn').addEventListener('click', () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => {
+    deferredPrompt = null;
+    document.getElementById('install-btn').style.display = 'none';
+  });
+});
+window.addEventListener('appinstalled', () => {
+  document.getElementById('install-btn').style.display = 'none';
+});
+
+const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+if (isIos && !window.navigator.standalone) {
+  const hint = document.createElement('div');
+  hint.className = 'ios-hint';
+  hint.textContent = '📱 iOS: toque em Compartilhar (⬆) → "Adicionar à Tela de Início"';
+  document.getElementById('search-bar').after(hint);
+}
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/static/sw.js');
     }
