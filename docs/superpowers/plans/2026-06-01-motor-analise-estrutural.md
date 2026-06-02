@@ -1365,7 +1365,7 @@ git commit -m "feat: engine/dimensionamento — esbeltez e flexo-compressao obli
 - Create: `engine/detalhamento.py`
 - Create: `tests/test_detalhamento.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_detalhamento.py`**
+- [x] **Passo 1: Escrever teste falho `tests/test_detalhamento.py`**
 
 ```python
 import sys, os
@@ -1404,12 +1404,12 @@ def test_escolher_estribo_respeita_smax():
     assert r["espacamento"] <= 30
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_detalhamento.py -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/detalhamento.py`**
+- [x] **Passo 3: Implementar `engine/detalhamento.py`**
 
 ```python
 import math
@@ -1476,12 +1476,12 @@ def escolher_estribo(Asw_s, comprimento_zona, n_ramos=2, s_max=30.0):
             "descricao": "Ø 5 c/5 cm (%dr) — %d un." % (n_ramos, quantidade)}
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_detalhamento.py -v`
 Esperado: 4 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/detalhamento.py tests/test_detalhamento.py
