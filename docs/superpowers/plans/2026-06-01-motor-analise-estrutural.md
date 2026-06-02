@@ -1277,7 +1277,7 @@ git commit -m "feat: engine/dimensionamento — flexao simples/dupla e armadura 
 - Modify: `engine/dimensionamento.py`
 - Modify: `tests/test_dimensionamento.py`
 
-- [ ] **Passo 1: Adicionar teste falho**
+- [x] **Passo 1: Adicionar teste falho**
 
 ```python
 from engine.dimensionamento import esbeltez_pilar, flexocompressao_obliqua
@@ -1310,12 +1310,12 @@ def test_flexocompressao_envoltoria_falha():
     assert r["passa"] is False
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_dimensionamento.py::test_esbeltez_curto -v`
 Esperado: `ImportError`
 
-- [ ] **Passo 3: Adicionar `esbeltez_pilar` e `flexocompressao_obliqua`**
+- [x] **Passo 3: Adicionar `esbeltez_pilar` e `flexocompressao_obliqua`**
 
 ```python
 def esbeltez_pilar(b_menor, le):
@@ -1345,12 +1345,12 @@ def flexocompressao_obliqua(Mx, My, MRdxx, MRdyy, alpha=1.2):
     return {"indice": indice, "passa": indice <= 1.0}
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_dimensionamento.py -v`
 Esperado: 13 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/dimensionamento.py tests/test_dimensionamento.py
