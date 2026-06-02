@@ -1,7 +1,8 @@
 import sys, os
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from engine.materiais import Material
-from engine.dimensionamento import cisalhamento_viga, flexao_viga, armadura_pele
+from engine.dimensionamento import (cisalhamento_viga, flexao_viga, armadura_pele,
+                                    esbeltez_pilar, flexocompressao_obliqua)
 
 
 def test_cisalhamento_vrd2_ok():
@@ -74,3 +75,30 @@ def test_armadura_pele_dispensada():
     m = Material(fck=25, fyk=500, agregado='basalto')
     r = armadura_pele(m, bw=14, h=40, cobrimento=3.0, phi_est=0.5)
     assert r["necessaria"] is False
+
+
+def test_esbeltez_curto():
+    # secao 19x19, le=280cm -> i=19/3,46=5,49; lambda=51 -> esbelto
+    r = esbeltez_pilar(b_menor=19, le=280)
+    assert abs(r["lambda"] - 51.0) < 1.0
+    assert r["classe"] == "esbelto"
+
+
+def test_esbeltez_curto_real():
+    # secao 30x30, le=280 -> i=8,67; lambda=32,3 -> curto
+    r = esbeltez_pilar(b_menor=30, le=280)
+    assert r["lambda"] < 35
+    assert r["classe"] == "curto"
+
+
+def test_flexocompressao_envoltoria_passa():
+    # Mx/MRdxx=0,5; My/MRdyy=0,4 -> 0,5^1,2+0,4^1,2 = 0,435+0,333=0,768<=1
+    r = flexocompressao_obliqua(Mx=50, My=40, MRdxx=100, MRdyy=100)
+    assert r["passa"] is True
+    assert abs(r["indice"] - 0.768) < 0.01
+
+
+def test_flexocompressao_envoltoria_falha():
+    r = flexocompressao_obliqua(Mx=90, My=90, MRdxx=100, MRdyy=100)
+    # 0,9^1,2 * 2 = 0,883*2 = 1,766 > 1
+    assert r["passa"] is False

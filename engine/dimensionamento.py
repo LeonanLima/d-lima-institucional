@@ -76,3 +76,30 @@ def armadura_pele(material, bw, h, cobrimento, phi_est):
     h_util = h - 2 * cobrimento - 2 * phi_est
     As_face = 0.0010 * bw * h_util / 2.0  # por face
     return {"necessaria": True, "As_face": As_face, "espacamento_max": 20.0}
+
+
+def esbeltez_pilar(b_menor, le):
+    """Indice de esbeltez de pilar retangular (NBR 6118:2023).
+
+    b_menor, le em cm. Retorna dict com i, lambda, classe.
+    """
+    i = b_menor / 3.46   # raio de giracao secao retangular
+    lam = le / i
+    if lam <= 35:
+        classe = "curto"
+    elif lam <= 90:
+        classe = "esbelto"
+    elif lam <= 140:
+        classe = "muito_esbelto"
+    else:
+        classe = "nao_linear"
+    return {"i": i, "lambda": lam, "classe": classe}
+
+
+def flexocompressao_obliqua(Mx, My, MRdxx, MRdyy, alpha=1.2):
+    """Verificacao da envoltoria de flexo-compressao obliqua (NBR 6118 17.2.5).
+
+    indice = (Mx/MRdxx)^alpha + (My/MRdyy)^alpha <= 1.
+    """
+    indice = (Mx / MRdxx) ** alpha + (My / MRdyy) ** alpha
+    return {"indice": indice, "passa": indice <= 1.0}
