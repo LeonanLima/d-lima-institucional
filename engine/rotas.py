@@ -12,6 +12,11 @@ from engine import persistencia
 estrutura_bp = Blueprint("estrutura", __name__)
 
 
+@estrutura_bp.route("/estrutura")
+def hub():
+    return render_template("estrutura.html")
+
+
 @estrutura_bp.route("/estrutura/editor")
 def editor():
     return render_template("editor.html")

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D'LIMA — Estruturas</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Arial,sans-serif;background:#f4f4f9;color:#1e293b}
+    header{background:#0056b3;color:#fff;padding:14px 20px;font-size:18px;font-weight:bold}
+    .wrap{max-width:760px;margin:32px auto;padding:0 16px}
+    .sub{color:#475569;margin:6px 0 22px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+    .card{display:block;background:#fff;border:1px solid #e2e8f0;border-left:4px solid #0056b3;
+      border-radius:8px;padding:18px;text-decoration:none;color:inherit;
+      box-shadow:0 1px 3px rgba(0,0,0,.08);transition:transform .12s,box-shadow .12s}
+    .card:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.12)}
+    .card .ico{font-size:26px}
+    .card .tit{font-weight:bold;font-size:16px;margin:8px 0 4px;color:#0056b3}
+    .card .desc{font-size:13px;color:#475569}
+  </style>
+</head>
+<body>
+  <header>🏗 D'LIMA — Estruturas</header>
+  <div class="wrap">
+    <p class="sub">Ferramentas de cálculo e referência em concreto armado.</p>
+    <div class="grid">
+      <a class="card" href="/estrutura/editor">
+        <div class="ico">✏️</div>
+        <div class="tit">Editor de Estrutura</div>
+        <div class="desc">Desenhe pórticos planos e calcule reações, esforços e detalhamento.</div>
+      </a>
+      <a class="card" href="/referencia">
+        <div class="ico">📐</div>
+        <div class="tit">Referência Técnica</div>
+        <div class="desc">Consulta rápida de fórmulas e tabelas das normas (NBR).</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
