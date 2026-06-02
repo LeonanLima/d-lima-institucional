@@ -1496,7 +1496,7 @@ git commit -m "feat: engine/detalhamento — escolha de bitola e estribo por men
 - Create: `engine/svg_secao.py`
 - Create: `tests/test_svg.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_svg.py`**
+- [x] **Passo 1: Escrever teste falho `tests/test_svg.py`**
 
 ```python
 import sys, os
@@ -1528,12 +1528,12 @@ def test_secao_com_pele():
     assert svg.count("<circle") == 10
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_svg.py -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/svg_secao.py`**
+- [x] **Passo 3: Implementar `engine/svg_secao.py`**
 
 ```python
 def desenhar_secao(bw, h, cobrimento, barras_inf, barras_sup,
@@ -1610,12 +1610,12 @@ def desenhar_secao(bw, h, cobrimento, barras_inf, barras_sup,
     return "\n".join(parts)
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_svg.py -v`
 Esperado: 3 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/svg_secao.py tests/test_svg.py
