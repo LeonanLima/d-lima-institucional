@@ -962,7 +962,7 @@ git commit -m "feat: engine/solver — reacoes de apoio e diagramas N/V/M"
 - Modify: `engine/solver.py`
 - Modify: `tests/test_solver.py`
 
-- [ ] **Passo 1: Adicionar teste falho**
+- [x] **Passo 1: Adicionar teste falho**
 
 ```python
 from engine.solver import flecha_viga
@@ -994,12 +994,12 @@ def test_flecha_limite_l250():
     assert abs(fl["limite"] - 20.0) < 0.01
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py::test_flecha_biapoiada_imediata -v`
 Esperado: `ImportError`
 
-- [ ] **Passo 3: Adicionar `flecha_viga` em `engine/solver.py`**
+- [x] **Passo 3: Adicionar `flecha_viga` em `engine/solver.py`**
 
 ```python
 def flecha_viga(estrutura, resultado, elem_id, phi=2.5, balanco=False):
@@ -1034,12 +1034,12 @@ def flecha_viga(estrutura, resultado, elem_id, phi=2.5, balanco=False):
     return {"imediata": imediata, "diferida": diferida, "limite": limite}
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py -v`
 Esperado: 9 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/solver.py tests/test_solver.py
