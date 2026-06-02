@@ -1,6 +1,7 @@
 import * as M from "./editor-modelo.js";
 import * as Canvas from "./editor-canvas.js";
 import * as UI from "./editor-ui.js";
+import * as Resultados from "./editor-resultados.js";
 
 const CHAVE_AUTOSAVE = "dlima.editor.estrutura";
 
@@ -9,7 +10,10 @@ const painel = document.getElementById("painel");
 const banner = document.getElementById("banner");
 
 const estado = { modelo: carregarAutosave(), modo: "selecionar",
-                 selecionado: null, primeiroNo: null };
+                 selecionado: null, primeiroNo: null,
+                 resultado: null, relatorioId: null };
+
+function invalidarResultado() { estado.resultado = null; estado.relatorioId = null; }
 
 function carregarAutosave() {
   try {
@@ -25,7 +29,8 @@ function autosave() {
 
 function redesenhar() {
   Canvas.render(svg, estado.modelo, estado);
-  UI.renderPainel(painel, estado.modelo, estado.selecionado, cbs);
+  const resumo = estado.resultado ? Resultados.resumoResultado(estado.resultado) : null;
+  UI.renderPainel(painel, estado.modelo, estado.selecionado, cbs, resumo, estado.relatorioId);
   autosave();
 }
 
@@ -43,6 +48,7 @@ function barraEm(ev) {
 }
 
 svg.addEventListener("click", (ev) => {
+  if (estado.modo !== "selecionar") invalidarResultado();
   const rect = svg.getBoundingClientRect();
   const px = ev.clientX - rect.left, py = ev.clientY - rect.top;
   const noClicado = noEm(ev);
@@ -90,9 +96,10 @@ function apagar(no, barra) {
 
 const cbs = {
   aoMudarModo: (modo) => { estado.modo = modo; estado.primeiroNo = null; redesenhar(); },
-  aoEditarMaterial: (patch) => { Object.assign(estado.modelo.material, patch); autosave(); },
+  aoEditarMaterial: (patch) => { invalidarResultado(); Object.assign(estado.modelo.material, patch); redesenhar(); },
   aoEditarElemento: (patch) => {
     if (!estado.selecionado) return;
+    invalidarResultado();
     if (patch.secao) Object.assign(estado.selecionado.secao, patch.secao);
     if (patch.tipo) estado.selecionado.tipo = patch.tipo;
     redesenhar();
@@ -110,7 +117,7 @@ const cbs = {
     r.onload = () => {
       try {
         estado.modelo = M.fromJson(JSON.parse(r.result));
-        estado.selecionado = null; redesenhar();
+        estado.selecionado = null; invalidarResultado(); redesenhar();
       } catch (_) { UI.mostrarBanner(banner, "Arquivo inválido."); }
     };
     r.readAsText(file);
@@ -125,8 +132,13 @@ const cbs = {
       });
       const data = await resp.json();
       if (!resp.ok) { UI.mostrarBanner(banner, data.error || "Erro na análise."); return; }
-      window.open("/api/relatorio/" + data.id, "_blank");
+      estado.resultado = data.resultado;
+      estado.relatorioId = data.id;
+      redesenhar();
     } catch (e) { UI.mostrarBanner(banner, "Falha de rede: " + e.message); }
+  },
+  aoAbrirRelatorio: () => {
+    if (estado.relatorioId) window.open("/api/relatorio/" + estado.relatorioId, "_blank");
   },
 };
 
