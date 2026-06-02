@@ -88,3 +88,76 @@ def resolver(estrutura):
     return {"deslocamentos": desloc, "K": K, "F": F, "u_global": u,
             "gdl_map": gdl_map, "contrib": contrib, "ordem_nos": ordem_nos,
             "restritos": restritos}
+
+
+def reacoes(estrutura, resultado):
+    """Reacoes nodais nos apoios: {R} = [K]{u} - {F}.
+
+    Retorna dict no_id -> {'fx','fy','mz'} (kN, kNm) apenas para nos com vinculo.
+    """
+    K = resultado["K"]
+    u = resultado["u_global"]
+    F = resultado["F"]
+    gdl_map = resultado["gdl_map"]
+    R_vec = K @ u - F
+
+    nos_apoio = {v.no for v in estrutura.vinculos}
+    out = {}
+    for nid in nos_apoio:
+        g = gdl_map[nid]
+        out[nid] = {
+            "fx": R_vec[g[0]],
+            "fy": R_vec[g[1]],
+            "mz": R_vec[g[2]] / 100.0,   # kN.cm -> kNm
+        }
+    return out
+
+
+def esforcos_elemento(estrutura, resultado, elem_id, n_pontos=11):
+    """Diagramas N(x), V(x), M(x) ao longo de um elemento.
+
+    Retorna {'x': [cm], 'N': [kN], 'V': [kN], 'M': [kNm]}.
+    Considera carga distribuida transversal se houver.
+    """
+    from engine.rigidez import k_local, matriz_T
+    el = next(e for e in estrutura.elementos if e.id == elem_id)
+    L = el.comprimento()
+    E = estrutura.material.Ecs
+    kl = k_local(E, el.secao.area, el.secao.inercia, L)
+    T = matriz_T(el.angulo())
+
+    gdl_map = resultado["gdl_map"]
+    u = resultado["u_global"]
+    g = gdl_map[el.no_i.id] + gdl_map[el.no_j.id]
+    u_e_global = np.array([u[i] for i in g])
+    u_e_local = T @ u_e_global
+    f_local = kl @ u_e_local   # forcas internas nos nos (sem carga de vao)
+
+    # carga distribuida transversal sobre o elemento (kN/cm, para baixo)
+    q = 0.0
+    for c in estrutura.cargas:
+        if c.tipo == "distribuida" and c.elemento == elem_id:
+            q += c.valor
+
+    # No no i: N_i = -f_local[0]; V_i = -f_local[1] (porem incluimos a parcela
+    # de engastamento ja embutida em u). Para o diagrama usamos as forcas
+    # internas nodais corrigidas pela carga de vao (metodo da superposicao).
+    feq_local = np.array([0.0, -q * L / 2, -q * L * L / 12,
+                          0.0, -q * L / 2, q * L * L / 12])
+    f_int = f_local - feq_local   # forcas internas reais nos nos
+
+    N_i = -f_int[0]
+    V_i = f_int[1]
+    M_i = f_int[2]
+
+    xs, Ns, Vs, Ms = [], [], [], []
+    for k in range(n_pontos):
+        x = L * k / (n_pontos - 1)
+        N = N_i
+        V = V_i - q * x
+        M = M_i + V_i * x - q * x * x / 2.0
+        xs.append(x)
+        Ns.append(N)
+        Vs.append(V)
+        Ms.append(M / 100.0)   # kN.cm -> kNm
+    return {"x": xs, "N": Ns, "V": Vs, "M": Ms}
