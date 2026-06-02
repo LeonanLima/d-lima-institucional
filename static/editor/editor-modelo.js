@@ -50,3 +50,19 @@ export function addCargaNodal(m, no, { fx = 0, fy = 0, mz = 0 }) {
   m.cargas.push(c);
   return c;
 }
+
+export function toJson(m) {
+  return {
+    estrutura: {
+      material: { fck: m.material.fck, fyk: m.material.fyk,
+                  CAA: m.material.CAA, agregado: m.material.agregado },
+      nos: m.nos.map((n) => ({ id: n.id, x: n.x, y: n.y })),
+      elementos: m.elementos.map((e) => ({
+        id: e.id, tipo: e.tipo, no_i: e.no_i, no_j: e.no_j,
+        secao: { bw: e.secao.bw, h: e.secao.h },
+      })),
+      vinculos: m.vinculos.map((v) => ({ no: v.no, ux: v.ux, uy: v.uy, rz: v.rz })),
+      cargas: m.cargas.map((c) => ({ ...c })),
+    },
+  };
+}
