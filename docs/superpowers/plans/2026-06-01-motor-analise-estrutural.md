@@ -688,7 +688,7 @@ git commit -m "feat: engine/solver — forcas nodais equivalentes para carga dis
 - Modify: `engine/solver.py`
 - Modify: `tests/test_solver.py`
 
-- [ ] **Passo 1: Adicionar teste falho (cantilever analítico)**
+- [x] **Passo 1: Adicionar teste falho (cantilever analítico)**
 
 ```python
 from engine.solver import resolver
@@ -724,12 +724,12 @@ def test_cantilever_rotacao_ponta():
     assert abs(rz2 - (-0.00208)) < 0.0001
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py::test_cantilever_deslocamento_ponta -v`
 Esperado: `ImportError: cannot import name 'resolver'`
 
-- [ ] **Passo 3: Adicionar montagem de F e `resolver` em `engine/solver.py`**
+- [x] **Passo 3: Adicionar montagem de F e `resolver` em `engine/solver.py`**
 
 ```python
 def montar_forcas(estrutura, gdl_map, n_gdl):
@@ -803,12 +803,12 @@ def resolver(estrutura):
             "restritos": restritos}
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py -v`
 Esperado: 4 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/solver.py tests/test_solver.py
