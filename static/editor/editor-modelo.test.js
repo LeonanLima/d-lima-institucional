@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   criarModelo, snap, addNo, addBarra, setVinculo,
-  addCargaDistribuida, addCargaNodal, PRESETS_VINCULO, toJson, validar,
+  addCargaDistribuida, addCargaNodal, PRESETS_VINCULO, toJson, validar, fromJson,
 } from "./editor-modelo.js";
 
 test("snap arredonda para o passo de 0,25 m", () => {
@@ -94,4 +94,30 @@ test("validar acusa secao invalida", () => {
   addNo(m, 0, 0); addNo(m, 5, 0); addBarra(m, 1, 2, { bw: 0, h: 40 });
   setVinculo(m, 1, PRESETS_VINCULO.fixo);
   assert.ok(validar(m).some((e) => /seção/.test(e)));
+});
+
+test("fromJson reconstroi o modelo e toJson e idempotente", () => {
+  const m = criarModelo();
+  addNo(m, 0, 0); addNo(m, 5, 0); addBarra(m, 1, 2);
+  setVinculo(m, 1, PRESETS_VINCULO.fixo);
+  setVinculo(m, 2, PRESETS_VINCULO.movel);
+  addCargaDistribuida(m, "B1", 10);
+  const j1 = toJson(m);
+
+  const m2 = fromJson(j1);
+  const j2 = toJson(m2);
+  assert.deepEqual(j2, j1);
+});
+
+test("fromJson continua a sequencia de ids", () => {
+  const m2 = fromJson({ estrutura: {
+    material: { fck: 25, fyk: 500, CAA: 2, agregado: "basalto" },
+    nos: [{ id: 1, x: 0, y: 0 }, { id: 2, x: 5, y: 0 }],
+    elementos: [{ id: "B1", tipo: "viga", no_i: 1, no_j: 2, secao: { bw: 14, h: 40 } }],
+    vinculos: [], cargas: [],
+  }});
+  const novo = addNo(m2, 8, 0);
+  const novaBarra = addBarra(m2, 2, 3);
+  assert.equal(novo.id, 3);
+  assert.equal(novaBarra.id, "B2");
 });

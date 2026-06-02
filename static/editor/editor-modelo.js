@@ -51,6 +51,30 @@ export function addCargaNodal(m, no, { fx = 0, fy = 0, mz = 0 }) {
   return c;
 }
 
+export function fromJson(data) {
+  const e = data.estrutura;
+  const m = criarModelo();
+  m.material = {
+    fck: e.material.fck, fyk: e.material.fyk,
+    CAA: e.material.CAA, agregado: e.material.agregado,
+  };
+  for (const n of e.nos) {
+    m.nos.push({ id: n.id, x: n.x, y: n.y });
+    m._seqNo = Math.max(m._seqNo, n.id);
+  }
+  for (const el of e.elementos) {
+    m.elementos.push({ id: el.id, tipo: el.tipo, no_i: el.no_i, no_j: el.no_j,
+                       secao: { bw: el.secao.bw, h: el.secao.h } });
+    const num = parseInt(String(el.id).replace(/\D/g, ""), 10);
+    if (!Number.isNaN(num)) m._seqEl = Math.max(m._seqEl, num);
+  }
+  for (const v of e.vinculos || []) {
+    m.vinculos.push({ no: v.no, ux: !!v.ux, uy: !!v.uy, rz: !!v.rz });
+  }
+  for (const c of e.cargas || []) m.cargas.push({ ...c });
+  return m;
+}
+
 export function validar(m) {
   const erros = [];
   if (m.vinculos.length === 0) erros.push("Adicione ao menos um vínculo (apoio).");
