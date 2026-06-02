@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D'LIMA — Editor de Estrutura</title>
+  <style>
+    body{font-family:Arial,sans-serif;margin:0;color:#1e293b;background:#f4f4f9}
+    header{background:#0056b3;color:#fff;padding:12px 18px;font-weight:bold}
+    .app{display:flex;height:calc(100vh - 46px)}
+    .toolbar{display:flex;flex-direction:column;gap:6px;padding:10px;background:#fff;border-right:1px solid #e2e8f0}
+    .toolbar button{padding:8px 10px;border:1px solid #cbd5e1;background:#fff;border-radius:6px;cursor:pointer;font-size:13px}
+    .toolbar button.ativo{background:#0056b3;color:#fff;border-color:#0056b3}
+    .canvas-wrap{flex:1;position:relative;overflow:hidden}
+    #canvas{width:100%;height:100%;background:#fff}
+    .painel{width:260px;padding:12px;background:#fff;border-left:1px solid #e2e8f0;overflow:auto;font-size:13px}
+    .painel h3{margin:6px 0;color:#0056b3}
+    .painel label{display:block;margin:6px 0 2px}
+    .painel input,.painel select{width:100%;padding:5px;border:1px solid #cbd5e1;border-radius:4px;box-sizing:border-box}
+    .banner{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#fef2f2;color:#991b1b;border:1px solid #fecaca;padding:8px 14px;border-radius:6px;display:none;max-width:80%}
+    .row{display:flex;gap:6px}.row>*{flex:1}
+    button.primary{background:#16a34a;color:#fff;border:none;padding:9px;border-radius:6px;cursor:pointer;width:100%;margin-top:8px}
+  </style>
+</head>
+<body>
+  <header>🏗 D'LIMA — Editor de Estrutura</header>
+  <div class="app">
+    <div class="toolbar" id="toolbar">
+      <button data-modo="selecionar" class="ativo">▖ Selecionar</button>
+      <button data-modo="no">● Nó</button>
+      <button data-modo="barra">／ Barra</button>
+      <button data-modo="vinculo">▲ Vínculo</button>
+      <button data-modo="carga">↓ Carga</button>
+      <button data-modo="apagar">✕ Apagar</button>
+    </div>
+    <div class="canvas-wrap">
+      <svg id="canvas"></svg>
+      <div class="banner" id="banner"></div>
+    </div>
+    <div class="painel" id="painel"></div>
+  </div>
+  <script type="module" src="/static/editor/editor.js"></script>
+</body>
+</html>

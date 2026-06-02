@@ -1,0 +1,8 @@
+{
+  "name": "dlima-editor-estrutura",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test static/editor/*.test.js"
+  }
+}

@@ -12,6 +12,11 @@ from engine import persistencia
 estrutura_bp = Blueprint("estrutura", __name__)
 
 
+@estrutura_bp.route("/estrutura/editor")
+def editor():
+    return render_template("editor.html")
+
+
 @estrutura_bp.route("/api/estrutura", methods=["POST"])
 def api_estrutura():
     data = request.get_json(silent=True)
