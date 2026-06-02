@@ -8,6 +8,8 @@
 
 **Tech Stack:** Python 3 / Flask 3, Jinja2, SVG + JavaScript ES modules, `node --test` (lógica pura), pytest (rota). `package.json` já tem `"type":"module"` e `npm test`.
 
+> **STATUS (2026-06-02): TODAS AS 6 TASKS CONCLUÍDAS.** Suítes: 67 pytest + 18 node verdes. Caminho de dados (hub, rota do editor, POST /api/estrutura → fy=25 kN, relatório) verificado via HTTP. Falta apenas a conferência visual no navegador pelo usuário. Branch `feat/integracao-acabamento-estruturas`, ainda não pushada.
+
 **Contrato de `POST /api/estrutura` (já existente, imutável):**
 ```json
 { "id": "ab12cd34", "status": "ok",
@@ -38,7 +40,7 @@
 
 ---
 
-### Task 1: Hub de Estruturas — rota, template e crosslinks
+### Task 1: Hub de Estruturas — rota, template e crosslinks ✅ CONCLUÍDA
 
 **Files:**
 - Create: `tests/test_estrutura_hub.py`
@@ -180,7 +182,7 @@ git commit -m "feat: hub /estrutura + crosslinks no editor e na referencia"
 
 ---
 
-### Task 2: `editor-resultados.js` — módulo puro de formatação (TDD)
+### Task 2: `editor-resultados.js` — módulo puro de formatação (TDD) ✅ CONCLUÍDA
 
 **Files:**
 - Create: `static/editor/editor-resultados.test.js`
@@ -315,7 +317,7 @@ git commit -m "feat: editor-resultados — formatacao pura de reacoes/deslocamen
 
 ---
 
-### Task 3: `editor-canvas.js` — overlay de reações no canvas
+### Task 3: `editor-canvas.js` — overlay de reações no canvas ✅ CONCLUÍDA
 
 **Files:**
 - Modify: `static/editor/editor-canvas.js`
@@ -379,7 +381,7 @@ git commit -m "feat: editor-canvas — overlay das reacoes nos nos apoiados"
 
 ---
 
-### Task 4: `editor-ui.js` — bloco de resultados no painel
+### Task 4: `editor-ui.js` — bloco de resultados no painel ✅ CONCLUÍDA
 
 **Files:**
 - Modify: `static/editor/editor-ui.js`
@@ -456,7 +458,7 @@ git commit -m "feat: editor-ui — bloco de resultados e botao do relatorio no p
 
 ---
 
-### Task 5: `editor.js` — guardar resultado, exibir e invalidar
+### Task 5: `editor.js` — guardar resultado, exibir e invalidar ✅ CONCLUÍDA
 
 **Files:**
 - Modify: `static/editor/editor.js`
@@ -633,7 +635,7 @@ git commit -m "feat: editor.js — exibe resultado inline e invalida ao editar"
 
 ---
 
-### Task 6: Verificação end-to-end e fechamento
+### Task 6: Verificação end-to-end e fechamento ✅ CONCLUÍDA (suítes + caminho de dados via HTTP; render visual no navegador pendente de conferência do usuário)
 
 **Files:** nenhum novo.
 
