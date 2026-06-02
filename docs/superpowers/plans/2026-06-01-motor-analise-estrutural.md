@@ -823,7 +823,7 @@ git commit -m "feat: engine/solver — montagem de forcas, contorno e solucao do
 - Modify: `engine/solver.py`
 - Modify: `tests/test_solver.py`
 
-- [ ] **Passo 1: Adicionar teste falho (viga biapoiada)**
+- [x] **Passo 1: Adicionar teste falho (viga biapoiada)**
 
 ```python
 from engine.solver import reacoes, esforcos_elemento
@@ -861,12 +861,12 @@ def test_biapoiada_momento_meio_vao():
     assert abs(abs(m_meio) - 31.25) < 0.5   # kNm
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py::test_biapoiada_reacoes -v`
 Esperado: `ImportError: cannot import name 'reacoes'`
 
-- [ ] **Passo 3: Adicionar `reacoes` e `esforcos_elemento` em `engine/solver.py`**
+- [x] **Passo 3: Adicionar `reacoes` e `esforcos_elemento` em `engine/solver.py`**
 
 ```python
 def reacoes(estrutura, resultado):
@@ -942,12 +942,12 @@ def esforcos_elemento(estrutura, resultado, elem_id, n_pontos=11):
     return {"x": xs, "N": Ns, "V": Vs, "M": Ms}
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py -v`
 Esperado: 6 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/solver.py tests/test_solver.py
