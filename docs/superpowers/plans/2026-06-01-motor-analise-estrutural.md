@@ -614,7 +614,7 @@ git commit -m "feat: engine/rigidez — montagem K_global com mapa de contribuic
 - Create: `engine/solver.py`
 - Create: `tests/test_solver.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_solver.py`**
+- [x] **Passo 1: Escrever teste falho `tests/test_solver.py`**
 
 ```python
 import sys, os
@@ -639,12 +639,12 @@ def test_forcas_equivalentes_soma_vertical():
     assert abs((f[1] + f[4]) - (-50.0)) < 0.01
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/solver.py` (parte 1)**
+- [x] **Passo 3: Implementar `engine/solver.py` (parte 1)**
 
 ```python
 import numpy as np
@@ -668,12 +668,12 @@ def forcas_equivalentes_distribuida(q: float, L: float,
     return T.T @ f_local
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_solver.py -v`
 Esperado: 2 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/solver.py tests/test_solver.py
