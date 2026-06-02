@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test static/editor/"
+    "test": "node --test static/editor/*.test.js"
   }
 }
