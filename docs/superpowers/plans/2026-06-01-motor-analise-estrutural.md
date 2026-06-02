@@ -1630,7 +1630,7 @@ git commit -m "feat: engine/svg_secao — desenho SVG da secao transversal armad
 - Create: `engine/svg_elevacao.py`
 - Modify: `tests/test_svg.py`
 
-- [ ] **Passo 1: Adicionar teste falho em `tests/test_svg.py`**
+- [x] **Passo 1: Adicionar teste falho em `tests/test_svg.py`**
 
 ```python
 from engine.svg_elevacao import desenhar_elevacao
@@ -1659,12 +1659,12 @@ def test_elevacao_desenha_zonas():
     assert svg.count('class="zona"') == 2
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_svg.py::test_elevacao_retorna_svg -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/svg_elevacao.py`**
+- [x] **Passo 3: Implementar `engine/svg_elevacao.py`**
 
 ```python
 def desenhar_elevacao(L, h, zonas, barras_pos, barras_neg):
@@ -1723,12 +1723,12 @@ def desenhar_elevacao(L, h, zonas, barras_pos, barras_neg):
     return "\n".join(parts)
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_svg.py -v`
 Esperado: 5 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/svg_elevacao.py tests/test_svg.py
