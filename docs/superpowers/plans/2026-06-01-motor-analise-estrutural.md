@@ -162,7 +162,7 @@ git commit -m "feat: engine/materiais — propriedades do concreto e aco NBR 611
 - Create: `engine/modelo.py`
 - Create: `tests/test_modelo.py`
 
-- [ ] **Passo 1: Escrever teste falho `tests/test_modelo.py`**
+- [x] **Passo 1: Escrever teste falho `tests/test_modelo.py`**
 
 ```python
 import sys, os
@@ -223,12 +223,12 @@ def test_cobrimento_caa2_viga():
     assert e.elementos[0].cobrimento(caa=2) == 3.0
 ```
 
-- [ ] **Passo 2: Rodar teste — verificar FAIL**
+- [x] **Passo 2: Rodar teste — verificar FAIL**
 
 Run: `.venv/Scripts/python -m pytest tests/test_modelo.py -v`
 Esperado: `ModuleNotFoundError`
 
-- [ ] **Passo 3: Implementar `engine/modelo.py`**
+- [x] **Passo 3: Implementar `engine/modelo.py`**
 
 ```python
 from dataclasses import dataclass, field
@@ -370,12 +370,12 @@ class Estrutura:
                    elementos=elementos, vinculos=vinculos, cargas=cargas)
 ```
 
-- [ ] **Passo 4: Rodar teste — verificar PASS**
+- [x] **Passo 4: Rodar teste — verificar PASS**
 
 Run: `.venv/Scripts/python -m pytest tests/test_modelo.py -v`
 Esperado: 5 PASSED
 
-- [ ] **Passo 5: Commit**
+- [x] **Passo 5: Commit**
 
 ```bash
 git add engine/modelo.py tests/test_modelo.py
