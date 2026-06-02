@@ -574,7 +574,27 @@ Estribo fechado (torção)  →  fluxo de Bredt exige circuito fechado
 Armadura de suspensão  →  apoio indireto: carga chega ao banzo inferior`
   }
 ];
-    /* TASK 4 — search() */
+    function search(query) {
+  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (!terms.length) return [];
+  return SECTIONS
+    .map(s => {
+      let score = 0;
+      const titleL = s.title.toLowerCase();
+      const contentL = s.content.toLowerCase();
+      terms.forEach(term => {
+        if (titleL.includes(term)) score += 3;
+        s.tags.forEach(tag => {
+          if (tag.toLowerCase() === term) score += 2;
+          else if (tag.toLowerCase().includes(term)) score += 1;
+        });
+        score += Math.min((contentL.match(new RegExp(term, 'g')) || []).length, 3);
+      });
+      return { section: s, score };
+    })
+    .filter(r => r.score > 0)
+    .sort((a, b) => b.score - a.score);
+}
     /* TASK 5 — render */
     /* TASK 6 — install */
     if ('serviceWorker' in navigator) {
