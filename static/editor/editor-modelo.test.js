@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   criarModelo, snap, addNo, addBarra, setVinculo,
   addCargaDistribuida, addCargaNodal, PRESETS_VINCULO, toJson, validar, fromJson,
+  moverNo, setCargaNodal, setCargaDistribuida,
 } from "./editor-modelo.js";
 
 test("snap arredonda para o passo de 0,25 m", () => {
@@ -120,4 +121,63 @@ test("fromJson continua a sequencia de ids", () => {
   const novaBarra = addBarra(m2, 2, 3);
   assert.equal(novo.id, 3);
   assert.equal(novaBarra.id, "B2");
+});
+
+test("moverNo reposiciona o no existente com snap (nao cria novo)", () => {
+  const m = criarModelo();
+  const a = addNo(m, 0, 0);
+  const r = moverNo(m, a, 3.13, 2.02);
+  assert.equal(r, a);
+  assert.equal(a.x, 3.25);
+  assert.equal(a.y, 2.0);
+  assert.equal(m.nos.length, 1);
+});
+
+test("setVinculo com todos GDL falsos remove o vinculo", () => {
+  const m = criarModelo();
+  addNo(m, 0, 0);
+  setVinculo(m, 1, PRESETS_VINCULO.fixo);
+  assert.equal(m.vinculos.length, 1);
+  const r = setVinculo(m, 1, { ux: false, uy: false, rz: false });
+  assert.equal(r, null);
+  assert.equal(m.vinculos.length, 0);
+});
+
+test("setVinculo com GDL parcial faz upsert", () => {
+  const m = criarModelo();
+  addNo(m, 0, 0);
+  setVinculo(m, 1, { ux: true, uy: false, rz: false });
+  assert.equal(m.vinculos.length, 1);
+  assert.deepEqual(m.vinculos[0], { no: 1, ux: true, uy: false, rz: false });
+});
+
+test("setCargaNodal mantem uma carga por no e atualiza no lugar", () => {
+  const m = criarModelo();
+  addNo(m, 0, 0);
+  setCargaNodal(m, 1, { fy: -10 });
+  setCargaNodal(m, 1, { fx: 5, fy: -8, mz: 2 });
+  const nodais = m.cargas.filter((c) => c.tipo === "nodal" && c.no === 1);
+  assert.equal(nodais.length, 1);
+  assert.deepEqual(nodais[0], { tipo: "nodal", no: 1, fx: 5, fy: -8, mz: 2 });
+});
+
+test("setCargaNodal remove a carga quando tudo zero", () => {
+  const m = criarModelo();
+  addNo(m, 0, 0);
+  setCargaNodal(m, 1, { fy: -10 });
+  const r = setCargaNodal(m, 1, { fx: 0, fy: 0, mz: 0 });
+  assert.equal(r, null);
+  assert.equal(m.cargas.filter((c) => c.tipo === "nodal").length, 0);
+});
+
+test("setCargaDistribuida upsert por barra e remove quando vazio/zero", () => {
+  const m = criarModelo();
+  addNo(m, 0, 0); addNo(m, 5, 0); addBarra(m, 1, 2);
+  setCargaDistribuida(m, "B1", 10);
+  setCargaDistribuida(m, "B1", 14);
+  const ds = m.cargas.filter((c) => c.tipo === "distribuida" && c.elemento === "B1");
+  assert.equal(ds.length, 1);
+  assert.equal(ds[0].valor, 14);
+  assert.equal(setCargaDistribuida(m, "B1", null), null);
+  assert.equal(m.cargas.filter((c) => c.tipo === "distribuida").length, 0);
 });

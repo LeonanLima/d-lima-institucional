@@ -32,11 +32,24 @@ export const PRESETS_VINCULO = {
 };
 
 export function setVinculo(m, no, { ux = false, uy = false, rz = false }) {
-  let v = m.vinculos.find((x) => x.no === no);
-  if (v) { v.ux = ux; v.uy = uy; v.rz = rz; return v; }
-  v = { no, ux, uy, rz };
+  const i = m.vinculos.findIndex((x) => x.no === no);
+  if (!ux && !uy && !rz) {
+    if (i >= 0) m.vinculos.splice(i, 1);
+    return null;
+  }
+  if (i >= 0) {
+    m.vinculos[i].ux = ux; m.vinculos[i].uy = uy; m.vinculos[i].rz = rz;
+    return m.vinculos[i];
+  }
+  const v = { no, ux, uy, rz };
   m.vinculos.push(v);
   return v;
+}
+
+export function moverNo(m, no, x, y) {
+  no.x = snap(x);
+  no.y = snap(y);
+  return no;
 }
 
 export function addCargaDistribuida(m, elementoId, valor, direcao = "y") {
@@ -47,6 +60,37 @@ export function addCargaDistribuida(m, elementoId, valor, direcao = "y") {
 
 export function addCargaNodal(m, no, { fx = 0, fy = 0, mz = 0 }) {
   const c = { tipo: "nodal", no, fx, fy, mz };
+  m.cargas.push(c);
+  return c;
+}
+
+export function setCargaNodal(m, no, { fx = 0, fy = 0, mz = 0 }) {
+  const i = m.cargas.findIndex((c) => c.tipo === "nodal" && c.no === no);
+  if (fx === 0 && fy === 0 && mz === 0) {
+    if (i >= 0) m.cargas.splice(i, 1);
+    return null;
+  }
+  if (i >= 0) {
+    m.cargas[i].fx = fx; m.cargas[i].fy = fy; m.cargas[i].mz = mz;
+    return m.cargas[i];
+  }
+  const c = { tipo: "nodal", no, fx, fy, mz };
+  m.cargas.push(c);
+  return c;
+}
+
+export function setCargaDistribuida(m, elementoId, valor, direcao = "y") {
+  const i = m.cargas.findIndex((c) => c.tipo === "distribuida" && c.elemento === elementoId);
+  const v = typeof valor === "number" ? valor : NaN;
+  if (!Number.isFinite(v) || v === 0) {
+    if (i >= 0) m.cargas.splice(i, 1);
+    return null;
+  }
+  if (i >= 0) {
+    m.cargas[i].valor = v; m.cargas[i].direcao = direcao;
+    return m.cargas[i];
+  }
+  const c = { tipo: "distribuida", elemento: elementoId, valor: v, direcao };
   m.cargas.push(c);
   return c;
 }
