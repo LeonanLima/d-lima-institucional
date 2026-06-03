@@ -43,8 +43,9 @@ export function render(svg, m, estado) {
   for (const v of m.vinculos) desenharVinculo(svg, m, v);
   for (const n of m.nos) {
     const p = metroParaPx(n.x, n.y);
-    svg.appendChild(el("circle", { cx: p.px, cy: p.py, r: 6,
-      fill: "#1e293b", "data-no": n.id }));
+    const sel = estado.selecionado === n;
+    svg.appendChild(el("circle", { cx: p.px, cy: p.py, r: sel ? 8 : 6,
+      fill: sel ? "#dc2626" : "#1e293b", "data-no": n.id }));
   }
   if (estado.resultado) desenharResultados(svg, m, estado.resultado);
 }
