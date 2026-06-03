@@ -95,7 +95,13 @@ svg.addEventListener("mousemove", (ev) => {
 });
 
 svg.addEventListener("mouseup", () => {
-  if (arrasto && arrasto.moveu) estado.suprimirClick = true;
+  if (arrasto && arrasto.moveu) {
+    // Suprime apenas o `click` que dispara no mesmo tick (se disparar); um arrasto
+    // real geralmente nao gera click, entao limpamos o flag no proximo tick para
+    // nao engolir o proximo clique de verdade.
+    estado.suprimirClick = true;
+    setTimeout(() => { estado.suprimirClick = false; }, 0);
+  }
   arrasto = null;
 });
 
