@@ -11,7 +11,9 @@ const banner = document.getElementById("banner");
 
 const estado = { modelo: carregarAutosave(), modo: "selecionar",
                  selecionado: null, primeiroNo: null,
-                 resultado: null, relatorioId: null };
+                 resultado: null, relatorioId: null, suprimirClick: false };
+
+let arrasto = null;  // { no, startX, startY, moveu }
 
 function invalidarResultado() { estado.resultado = null; estado.relatorioId = null; }
 
@@ -48,6 +50,7 @@ function barraEm(ev) {
 }
 
 svg.addEventListener("click", (ev) => {
+  if (estado.suprimirClick) { estado.suprimirClick = false; return; }
   if (estado.modo !== "selecionar") invalidarResultado();
   const rect = svg.getBoundingClientRect();
   const px = ev.clientX - rect.left, py = ev.clientY - rect.top;
@@ -63,23 +66,37 @@ svg.addEventListener("click", (ev) => {
       M.addBarra(estado.modelo, estado.primeiroNo.id, noClicado.id);
       estado.primeiroNo = null;
     }
-  } else if (estado.modo === "vinculo" && noClicado) {
-    const nome = prompt("Vínculo (engaste / fixo / movel):", "fixo");
-    if (M.PRESETS_VINCULO[nome]) M.setVinculo(estado.modelo, noClicado.id, M.PRESETS_VINCULO[nome]);
-  } else if (estado.modo === "carga") {
-    if (barraClicada) {
-      const v = parseFloat(prompt("Carga distribuída (kN/m, + para baixo):", "10"));
-      if (!Number.isNaN(v)) M.addCargaDistribuida(estado.modelo, barraClicada.id, v);
-    } else if (noClicado) {
-      const fy = parseFloat(prompt("Força vertical Fy (kN, - para baixo):", "-10"));
-      if (!Number.isNaN(fy)) M.addCargaNodal(estado.modelo, noClicado.id, { fy });
-    }
   } else if (estado.modo === "apagar") {
     apagar(noClicado, barraClicada);
   } else if (estado.modo === "selecionar") {
-    estado.selecionado = barraClicada || null;
+    estado.selecionado = noClicado || barraClicada || null;
   }
   redesenhar();
+});
+
+svg.addEventListener("mousedown", (ev) => {
+  if (estado.modo !== "selecionar") return;
+  const no = noEm(ev);
+  if (no) arrasto = { no, startX: ev.clientX, startY: ev.clientY, moveu: false };
+});
+
+svg.addEventListener("mousemove", (ev) => {
+  if (!arrasto) return;
+  if (!arrasto.moveu) {
+    if (Math.hypot(ev.clientX - arrasto.startX, ev.clientY - arrasto.startY) < 3) return;
+    arrasto.moveu = true;
+    estado.selecionado = arrasto.no;
+    invalidarResultado();
+  }
+  const rect = svg.getBoundingClientRect();
+  const { x, y } = Canvas.pxParaMetro(ev.clientX - rect.left, ev.clientY - rect.top);
+  M.moverNo(estado.modelo, arrasto.no, x, y);
+  redesenhar();
+});
+
+svg.addEventListener("mouseup", () => {
+  if (arrasto && arrasto.moveu) estado.suprimirClick = true;
+  arrasto = null;
 });
 
 function apagar(no, barra) {
@@ -102,6 +119,32 @@ const cbs = {
     invalidarResultado();
     if (patch.secao) Object.assign(estado.selecionado.secao, patch.secao);
     if (patch.tipo) estado.selecionado.tipo = patch.tipo;
+    redesenhar();
+  },
+  aoEditarNo: (patch) => {
+    if (!estado.selecionado || estado.selecionado.x === undefined) return;
+    invalidarResultado();
+    M.moverNo(estado.modelo, estado.selecionado,
+      patch.x !== undefined ? patch.x : estado.selecionado.x,
+      patch.y !== undefined ? patch.y : estado.selecionado.y);
+    redesenhar();
+  },
+  aoSetVinculo: ({ ux, uy, rz }) => {
+    if (!estado.selecionado || estado.selecionado.x === undefined) return;
+    invalidarResultado();
+    M.setVinculo(estado.modelo, estado.selecionado.id, { ux, uy, rz });
+    redesenhar();
+  },
+  aoSetCargaNodal: ({ fx, fy, mz }) => {
+    if (!estado.selecionado || estado.selecionado.x === undefined) return;
+    invalidarResultado();
+    M.setCargaNodal(estado.modelo, estado.selecionado.id, { fx, fy, mz });
+    redesenhar();
+  },
+  aoSetCargaDistribuida: (valor) => {
+    if (!estado.selecionado || !estado.selecionado.secao) return;
+    invalidarResultado();
+    M.setCargaDistribuida(estado.modelo, estado.selecionado.id, valor);
     redesenhar();
   },
   aoExportar: () => {
