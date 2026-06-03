@@ -29,7 +29,7 @@
 
 ---
 
-### Task 1: Modelo — moverNo, setVinculo (remoção), setCargaNodal, setCargaDistribuida
+### Task 1: Modelo — moverNo, setVinculo (remoção), setCargaNodal, setCargaDistribuida ✅ CONCLUÍDA
 
 **Files:**
 - Modify: `static/editor/editor-modelo.test.js`
@@ -196,7 +196,7 @@ git commit -m "feat: editor-modelo — moverNo, setCargaNodal/Distribuida e setV
 
 ---
 
-### Task 2: Toolbar — remover modos Vínculo e Carga
+### Task 2: Toolbar — remover modos Vínculo e Carga ✅ CONCLUÍDA
 
 **Files:**
 - Modify: `templates/editor.html`
@@ -241,7 +241,7 @@ git commit -m "feat: editor — toolbar sem modos Vinculo/Carga (edicao via pain
 
 ---
 
-### Task 3: Canvas — destaque do nó selecionado
+### Task 3: Canvas — destaque do nó selecionado ✅ CONCLUÍDA
 
 **Files:**
 - Modify: `static/editor/editor-canvas.js`
@@ -283,7 +283,7 @@ git commit -m "feat: editor-canvas — destaque do no selecionado"
 
 ---
 
-### Task 4: Painel — propriedades do nó e carga distribuída na barra
+### Task 4: Painel — propriedades do nó e carga distribuída na barra ✅ CONCLUÍDA
 
 **Files:**
 - Modify: `static/editor/editor-ui.js`
@@ -368,7 +368,9 @@ git commit -m "feat: editor-ui — painel do no (coords/vinculo/cargas) e distri
 
 ---
 
-### Task 5: Controlador — seleção de nó, arrasto e callbacks
+### Task 5: Controlador — seleção de nó, arrasto e callbacks ✅ CONCLUÍDA
+
+> **PAUSA (2026-06-02):** Tasks 1–5 concluídas e commitadas. Falta só a **Task 6** (verificação: suítes + Playwright visual + push/PR). Retomar a partir do Step 1 da Task 6.
 
 **Files:**
 - Modify: `static/editor/editor.js`
