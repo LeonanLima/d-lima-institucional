@@ -26,3 +26,11 @@ def test_seo_and_fonts(client):
     assert "GeneralContractor" in html          # Schema.org JSON-LD
     assert "Montserrat" in html                  # Google Fonts
     assert "GA4_ID" in html                      # slot analytics comentado
+
+
+def test_hero_form(client):
+    html = client.get("/").get_data(as_text=True)
+    assert 'id="simulacao"' in html
+    assert "aluguel" in html.lower()
+    assert 'id="leadForm"' in html
+    assert "Faixa" in html or "renda" in html.lower()
