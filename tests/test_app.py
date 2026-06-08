@@ -34,3 +34,10 @@ def test_hero_form(client):
     assert "aluguel" in html.lower()
     assert 'id="leadForm"' in html
     assert "Faixa" in html or "renda" in html.lower()
+
+
+def test_diferenciais_passos(client):
+    html = client.get("/").get_data(as_text=True)
+    assert "Burocracia Zero" in html
+    assert "Engenheiro Civil" in html
+    assert 'id="como-funciona"' in html
