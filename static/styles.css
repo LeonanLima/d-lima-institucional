@@ -191,8 +191,14 @@ img { max-width: 100%; display: block; }
     background: rgba(255,255,255,.05); border: 1px solid rgba(184,155,94,.22);
     border-radius: var(--radius); padding: 26px 22px;
 }
-.faixa__tag { color: var(--gold); font-weight: 700; font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; }
-.faixa__val { font-family: var(--font-head); font-size: 1.6rem; font-weight: 700; margin: 8px 0 10px; }
+.faixa__tag {
+    display: inline-block; margin-bottom: 12px;
+    background: var(--gold); color: var(--dark);
+    font-family: var(--font-head); font-weight: 800; font-size: .8rem;
+    letter-spacing: .08em; text-transform: uppercase;
+    padding: 5px 14px; border-radius: 999px;
+}
+.faixa__val { font-family: var(--font-head); font-size: 1.7rem; font-weight: 800; margin: 0 0 10px; color: var(--cream); }
 .faixa p { color: rgba(249,248,246,.7); font-size: .9rem; }
 .center { text-align: center; }
 .mt-40 { margin-top: 40px; }
