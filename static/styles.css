@@ -71,8 +71,8 @@ img { max-width: 100%; display: block; }
     backdrop-filter: blur(8px);
     border-bottom: 1px solid rgba(184,155,94,.18);
 }
-.header__inner { display: flex; align-items: center; justify-content: space-between; height: 76px; }
-.header__logo { height: 46px; width: auto; }
+.header__inner { display: flex; align-items: center; justify-content: space-between; height: 88px; }
+.header__logo { height: 70px; width: auto; }
 
 /* ---------- Seções genéricas ---------- */
 .section { padding: 72px 0; }
@@ -92,7 +92,8 @@ img { max-width: 100%; display: block; }
 /* ---------- Hero ---------- */
 .hero {
     color: var(--cream);
-    background-image: linear-gradient(rgba(15,18,15,.82), rgba(15,18,15,.92)), url('/static/fachada.png');
+    background-color: var(--dark);
+    background-image: linear-gradient(rgba(15,18,15,.78), rgba(15,18,15,.9)), url('/static/logo-completa.jpg');
     background-size: cover; background-position: center;
 }
 .hero__inner { padding: 70px 0; display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
@@ -273,7 +274,7 @@ img { max-width: 100%; display: block; }
 @media (max-width: 560px) {
     .section { padding: 56px 0; }
     .grid--4, .grid--3, .grid--2 { grid-template-columns: 1fr; }
-    .header__inner { height: 66px; }
-    .header__logo { height: 40px; }
+    .header__inner { height: 72px; }
+    .header__logo { height: 52px; }
     .nav-cta { display: none; }
 }
