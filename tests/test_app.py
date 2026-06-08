@@ -39,7 +39,7 @@ def test_hero_form(client):
 def test_diferenciais_passos(client):
     html = client.get("/").get_data(as_text=True)
     assert "Burocracia Zero" in html
-    assert "Engenheiro Civil" in html
+    assert "Engenheiro responsável" in html
     assert 'id="como-funciona"' in html
 
 
