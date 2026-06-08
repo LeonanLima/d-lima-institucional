@@ -12,3 +12,7 @@ Thumbs.db
 
 # Env
 .env
+
+# Playwright / previews
+.playwright-mcp/
+preview-*.jpeg
