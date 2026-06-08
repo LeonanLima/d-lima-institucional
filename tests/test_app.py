@@ -55,9 +55,11 @@ def test_subsidios_projetos(client):
 
 def test_provasocial_faq(client):
     html = client.get("/").get_data(as_text=True)
-    assert "Engenheiro Civil registrado" in html
+    assert "Especialista em engenharia de custos" in html
     assert 'id="faq"' in html
-    assert "[PRAZO_MEDIO]" in html  # placeholder editavel presente
+    # placeholders de programacao nao podem aparecer para o visitante
+    for ph in ("[FAIXA_PRECO]", "[PRAZO_MEDIO]", "[GARANTIA]", "[AREA_ATENDIMENTO]"):
+        assert ph not in html
 
 
 def test_cta_footer(client):
