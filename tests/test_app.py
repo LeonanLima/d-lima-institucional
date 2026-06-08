@@ -47,6 +47,10 @@ def test_subsidios_projetos(client):
     html = client.get("/").get_data(as_text=True)
     assert "Faixa" in html and "FGTS" in html
     assert 'id="projetos"' in html
+    assert "modelo-contemporaneo.jpg" in html
+    assert "modelo-familia.jpg" in html
+    assert "modelo-compacto.jpg" in html
+    assert "Modelo em breve" not in html  # placeholders substituidos por fotos reais
 
 
 def test_provasocial_faq(client):
