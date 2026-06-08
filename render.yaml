@@ -1,0 +1,13 @@
+# Render Blueprint — deploy automático da landing D'LIMA Engenharia
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: dlima-engenharia
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    healthCheckPath: /
+    autoDeploy: true

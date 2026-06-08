@@ -1,0 +1,3 @@
+# Dependências de desenvolvimento (testes). Em produção use requirements.txt.
+-r requirements.txt
+pytest
