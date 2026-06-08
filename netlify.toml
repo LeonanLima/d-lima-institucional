@@ -2,8 +2,14 @@
 # A landing é estática (form abre WhatsApp, sem backend), então montamos uma
 # pasta _site a partir dos templates + static e a Netlify publica isso.
 [build]
-  command = "rm -rf _site && mkdir -p _site && cp templates/index.html _site/index.html && cp templates/privacidade.html _site/politica-privacidade.html && cp -r static _site/static"
+  command = "rm -rf _site && mkdir -p _site && cp templates/index.html _site/index.html && cp templates/privacidade.html _site/politica-privacidade.html && cp -r static _site/static && cp static/sw.js _site/sw.js"
   publish = "_site"
+
+# O sw.js precisa ser sempre revalidado para o navegador pegar o kill-switch.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
 
 # URLs limpas: /politica-privacidade serve politica-privacidade.html automaticamente.
 [[redirects]]

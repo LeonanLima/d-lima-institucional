@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template
+from flask import Flask, render_template, send_from_directory
 
 app = Flask(__name__, static_folder="static", template_folder="templates")
 
@@ -7,6 +7,14 @@ app = Flask(__name__, static_folder="static", template_folder="templates")
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/sw.js")
+def service_worker():
+    # Servido na raiz (escopo "/") para desinstalar o SW antigo do site institucional.
+    resp = send_from_directory("static", "sw.js", mimetype="application/javascript")
+    resp.headers["Cache-Control"] = "no-cache"
+    return resp
 
 
 @app.route("/politica-privacidade")

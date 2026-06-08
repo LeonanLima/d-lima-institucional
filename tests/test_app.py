@@ -79,3 +79,10 @@ def test_privacidade(client):
     r = client.get("/politica-privacidade")
     assert r.status_code == 200
     assert "Privacidade" in r.get_data(as_text=True)
+
+
+def test_service_worker_killswitch(client):
+    r = client.get("/sw.js")
+    assert r.status_code == 200
+    body = r.get_data(as_text=True)
+    assert "unregister" in body  # kill-switch que remove o SW antigo
