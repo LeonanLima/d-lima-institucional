@@ -41,3 +41,9 @@ def test_diferenciais_passos(client):
     assert "Burocracia Zero" in html
     assert "Engenheiro Civil" in html
     assert 'id="como-funciona"' in html
+
+
+def test_subsidios_projetos(client):
+    html = client.get("/").get_data(as_text=True)
+    assert "Faixa" in html and "FGTS" in html
+    assert 'id="projetos"' in html
