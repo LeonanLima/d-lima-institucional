@@ -18,3 +18,11 @@ def test_index_ok(client):
 def test_whatsapp_number_present(client):
     html = client.get("/").get_data(as_text=True)
     assert "5528999646592" in html
+
+
+def test_seo_and_fonts(client):
+    html = client.get("/").get_data(as_text=True)
+    assert 'property="og:title"' in html
+    assert "GeneralContractor" in html          # Schema.org JSON-LD
+    assert "Montserrat" in html                  # Google Fonts
+    assert "GA4_ID" in html                      # slot analytics comentado

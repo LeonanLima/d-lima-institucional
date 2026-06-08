@@ -3,10 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D'LIMA Engenharia</title>
+
+    <!-- SEO -->
+    <title>D'LIMA Engenharia | Construa sua casa com o Minha Casa Minha Vida</title>
+    <meta name="description" content="Construtora chave na mão em São Mateus/ES. Realize o sonho da casa própria com o Minha Casa Minha Vida: subsídio do governo, uso do FGTS e projeto moderno com engenheiro civil responsável.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://dlimaengenharia.org/">
+    <meta name="theme-color" content="#0F120F">
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="D'LIMA Engenharia">
+    <meta property="og:title" content="Construa sua casa com o Minha Casa Minha Vida | D'LIMA Engenharia">
+    <meta property="og:description" content="Subsídio do governo, uso do FGTS e projeto moderno com engenheiro civil responsável. Saia do aluguel com a D'LIMA Engenharia em São Mateus/ES.">
+    <meta property="og:image" content="https://dlimaengenharia.org/static/fachada.png">
+    <meta property="og:url" content="https://dlimaengenharia.org/">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Construa sua casa com o Minha Casa Minha Vida | D'LIMA Engenharia">
+    <meta name="twitter:description" content="Subsídio do governo, uso do FGTS e projeto moderno com engenheiro civil responsável.">
+    <meta name="twitter:image" content="https://dlimaengenharia.org/static/fachada.png">
+
+    <!-- ============================================================
+         ANALYTICS — cole seus IDs aqui quando tiver:
+         GA4_ID:        substitua G-XXXXXXXXXX abaixo
+         META_PIXEL_ID: substitua 000000000000000 abaixo
+         (deixados comentados para não disparar sem ID válido)
+    ============================================================= -->
+    <!--
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA4_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'GA4_ID');
+    </script>
+    -->
+
+    <!-- Tailwind + ícones + fontes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+      if (typeof tailwind !== 'undefined') {
+        tailwind.config = {
+          theme: {
+            extend: {
+              colors: {
+                brand: {
+                  dark: '#0F120F',
+                  gold: '#B89B5E',
+                  goldHover: '#A6884B',
+                  cream: '#F9F8F6',
+                  sand: '#EFEBE0',
+                  text: '#2D3A2C',
+                  muted: '#7C8B7A'
+                }
+              },
+              fontFamily: {
+                heading: ['Montserrat', 'sans-serif'],
+                body: ['Inter', 'sans-serif']
+              }
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        h1, h2, h3, h4 { font-family: 'Montserrat', sans-serif; }
+        .hero-bg {
+            background-image: linear-gradient(rgba(15,18,15,0.82), rgba(15,18,15,0.92)), url('/static/fachada.png');
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+
+    <!-- Schema.org - SEO local -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "GeneralContractor",
+      "name": "D'LIMA Engenharia",
+      "image": "https://dlimaengenharia.org/static/minha-logo.png",
+      "url": "https://dlimaengenharia.org/",
+      "telephone": "+5528999646592",
+      "email": "contato@dlimaengenharia.org",
+      "areaServed": { "@type": "City", "name": "São Mateus", "addressRegion": "ES" },
+      "address": { "@type": "PostalAddress", "addressLocality": "São Mateus", "addressRegion": "ES", "addressCountry": "BR" },
+      "sameAs": [
+        "https://www.instagram.com/leonan.dlima",
+        "https://www.facebook.com/profile.php?id=61577458711721"
+      ]
+    }
+    </script>
 </head>
-<body>
-    <h1>D'LIMA Engenharia</h1>
-    <a href="https://wa.me/5528999646592">WhatsApp</a>
+<body class="bg-brand-cream text-brand-text font-body antialiased">
+
+    <!-- ===================== CONTEÚDO ===================== -->
+    <!-- Header, Hero, Diferenciais, Como funciona, Subsídios,
+         Projetos, Prova social, FAQ, CTA, Footer entram nas próximas fatias -->
+    <h1 class="sr-only">D'LIMA Engenharia</h1>
+    <a class="hidden" href="https://wa.me/5528999646592">WhatsApp</a>
+
+    <script>
+      if (window.lucide) { window.lucide.createIcons(); }
+    </script>
 </body>
 </html>
