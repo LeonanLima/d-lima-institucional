@@ -96,7 +96,7 @@
                 <h1>Chegou a hora de sair do <span class="gold">aluguel</span></h1>
                 <p class="hero__lead">
                     Realize o sonho da casa própria com a D'LIMA Engenharia. Projeto sob medida,
-                    aprovação do crédito facilitada e a qualidade de quem tem engenheiro civil responsável.
+                    aprovação do crédito facilitada e a qualidade de quem entende de engenharia e de custos.
                 </p>
                 <ul class="hero__list">
                     <li>
@@ -223,6 +223,23 @@
                     <h3>Entrega das chaves</h3>
                     <p>Você recebe a casa pronta, no prazo combinado, e começa a viver o sonho.</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================== A ENTREGA (CHAVE NA MÃO) ===================== -->
+    <section class="section section--cream">
+        <div class="container entrega">
+            <div class="entrega__media">
+                <!-- Quando tiver a foto da entrega da chave, troque este bloco por:
+                     <img src="/static/entrega-chaves.jpg" alt="Engenheiro entregando a chave da casa para a família"> -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+                <p class="ph-text">Foto da entrega da chave (engenheiro + família) entra aqui</p>
+            </div>
+            <div class="entrega__text">
+                <h2>O momento que <span class="gold">muda tudo</span></h2>
+                <p>Da planta à chave na mão: acompanhamos cada etapa para entregar não só uma casa, mas a realização de um sonho da sua família — com segurança, qualidade e sem dor de cabeça.</p>
+                <a href="#simulacao" class="btn btn--gold btn--lg">Quero realizar meu sonho</a>
             </div>
         </div>
     </section>
@@ -417,6 +434,21 @@
 
     <!-- ===================== SCRIPTS ===================== -->
     <script>
+      // Revelação de seções no scroll (movimento)
+      (function () {
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const sel = '.section__head, .card, .step, .faixa, .gallery__item, .trust__item, .faq__item, .entrega__media, .entrega__text, .cta-final';
+        const els = document.querySelectorAll(sel);
+        if (reduce || !('IntersectionObserver' in window)) { return; }
+        els.forEach(el => el.classList.add('reveal'));
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach(e => {
+            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+          });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+        els.forEach(el => io.observe(el));
+      })();
+
       const NUM_WHATSAPP = "5528999646592";
       const leadForm = document.getElementById('leadForm');
       if (leadForm) {
