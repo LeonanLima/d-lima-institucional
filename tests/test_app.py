@@ -47,3 +47,29 @@ def test_subsidios_projetos(client):
     html = client.get("/").get_data(as_text=True)
     assert "Faixa" in html and "FGTS" in html
     assert 'id="projetos"' in html
+
+
+def test_provasocial_faq(client):
+    html = client.get("/").get_data(as_text=True)
+    assert "Engenheiro Civil registrado" in html
+    assert 'id="faq"' in html
+    assert "[PRAZO_MEDIO]" in html  # placeholder editavel presente
+
+
+def test_cta_footer(client):
+    html = client.get("/").get_data(as_text=True)
+    assert "leonan.dlima" in html                 # instagram
+    assert "politica-privacidade" in html         # link footer
+    assert 'id="whatsapp-float"' in html
+
+
+def test_css_no_cdn(client):
+    html = client.get("/").get_data(as_text=True)
+    assert "/static/styles.css" in html
+    assert "cdn.tailwindcss.com" not in html      # sem CDN de CSS
+
+
+def test_privacidade(client):
+    r = client.get("/politica-privacidade")
+    assert r.status_code == 200
+    assert "Privacidade" in r.get_data(as_text=True)
