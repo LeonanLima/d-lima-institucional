@@ -16,3 +16,6 @@ Thumbs.db
 # Playwright / previews
 .playwright-mcp/
 preview-*.jpeg
+
+# Netlify build
+_site/

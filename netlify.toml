@@ -1,0 +1,13 @@
+# Publicação estática na Netlify.
+# A landing é estática (form abre WhatsApp, sem backend), então montamos uma
+# pasta _site a partir dos templates + static e a Netlify publica isso.
+[build]
+  command = "rm -rf _site && mkdir -p _site && cp templates/index.html _site/index.html && cp templates/privacidade.html _site/politica-privacidade.html && cp -r static _site/static"
+  publish = "_site"
+
+# URLs limpas: /politica-privacidade serve politica-privacidade.html automaticamente.
+[[redirects]]
+  from = "/index.html"
+  to = "/"
+  status = 301
+  force = true
