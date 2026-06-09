@@ -17,14 +17,14 @@
     <meta property="og:site_name" content="D'LIMA Engenharia">
     <meta property="og:title" content="Construa sua casa com o Minha Casa Minha Vida | D'LIMA Engenharia">
     <meta property="og:description" content="Subsídio do governo, uso do FGTS e projeto moderno com engenheiro civil responsável. Saia do aluguel com a D'LIMA Engenharia em São Mateus/ES.">
-    <meta property="og:image" content="https://dlimaengenharia.org/static/fachada.png">
+    <meta property="og:image" content="https://dlimaengenharia.org/static/og-image.jpg">
     <meta property="og:url" content="https://dlimaengenharia.org/">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Construa sua casa com o Minha Casa Minha Vida | D'LIMA Engenharia">
     <meta name="twitter:description" content="Subsídio do governo, uso do FGTS e projeto moderno com engenheiro civil responsável.">
-    <meta name="twitter:image" content="https://dlimaengenharia.org/static/fachada.png">
+    <meta name="twitter:image" content="https://dlimaengenharia.org/static/og-image.jpg">
 
     <!-- ============================================================
          ANALYTICS — cole seus IDs aqui quando tiver:
@@ -56,7 +56,7 @@
       "@context": "https://schema.org",
       "@type": "GeneralContractor",
       "name": "D'LIMA Engenharia",
-      "image": "https://dlimaengenharia.org/static/minha-logo.png",
+      "image": "https://dlimaengenharia.org/static/logo-dlima.jpg",
       "url": "https://dlimaengenharia.org/",
       "telephone": "+5528999646592",
       "email": "contato@dlimaengenharia.org",
@@ -231,7 +231,7 @@
     <section class="section section--cream">
         <div class="container entrega">
             <div class="entrega__media">
-                <img src="/static/entrega-chaves.png" alt="Engenheiro da D'LIMA entregando a chave da casa para a família" loading="lazy">
+                <img src="/static/entrega-chaves.jpg" alt="Engenheiro da D'LIMA entregando a chave da casa para a família" loading="lazy">
             </div>
             <div class="entrega__text">
                 <h2>O momento que <span class="gold">muda tudo</span></h2>
@@ -387,7 +387,7 @@
         <div class="container">
             <div class="footer__grid">
                 <div>
-                    <img src="/static/minha-logo.png" alt="D'LIMA Engenharia" class="footer__logo">
+                    <span class="footer__brand">D'LIMA <span class="gold">Engenharia</span></span>
                     <p>Construindo sonhos, entregando lares. Especialistas no Minha Casa Minha Vida em São Mateus/ES.</p>
                 </div>
                 <div>
@@ -438,12 +438,15 @@
         const els = document.querySelectorAll(sel);
         if (reduce || !('IntersectionObserver' in window)) { return; }
         els.forEach(el => el.classList.add('reveal'));
+        const reveal = (el) => el.classList.add('in');
         const io = new IntersectionObserver((entries) => {
           entries.forEach(e => {
-            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+            if (e.isIntersecting) { reveal(e.target); io.unobserve(e.target); }
           });
-        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+        }, { threshold: 0.05, rootMargin: '0px 0px 0px 0px' });
         els.forEach(el => io.observe(el));
+        // Rede de segurança: revela tudo após 2,5s, caso o observer não dispare.
+        setTimeout(() => els.forEach(reveal), 2500);
       })();
 
       const NUM_WHATSAPP = "5528999646592";

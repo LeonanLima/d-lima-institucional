@@ -247,6 +247,11 @@ img { max-width: 100%; display: block; }
 .footer { background: var(--dark); color: var(--muted); padding: 56px 0 32px; border-top: 1px solid rgba(184,155,94,.12); }
 .footer__grid { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 32px; align-items: start; }
 .footer__logo { height: 52px; margin-bottom: 14px; }
+.footer__brand {
+    display: block; margin-bottom: 14px;
+    font-family: var(--font-head); font-weight: 800; font-size: 1.5rem;
+    color: var(--cream); text-transform: uppercase; letter-spacing: .04em;
+}
 .footer h4 { color: var(--cream); font-size: .95rem; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 16px; }
 .footer a:hover { color: var(--gold); }
 .footer__links { display: grid; gap: 10px; }
