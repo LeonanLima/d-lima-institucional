@@ -359,3 +359,96 @@ img { max-width: 100%; display: block; }
     .reveal { animation: none !important; opacity: 1 !important; transform: none !important; }
     .wa-float { animation: none; }
 }
+
+/* =====================================================================
+   Polimento profissional — cor, profundidade e movimento
+===================================================================== */
+
+/* Seções claras com brilho dourado sutil (em vez de branco chapado) */
+.section--cream {
+    background:
+        radial-gradient(1200px 520px at 88% -12%, rgba(184,155,94,.12), transparent 60%),
+        radial-gradient(900px 520px at -12% 112%, rgba(184,155,94,.08), transparent 55%),
+        var(--cream);
+}
+.section--sand {
+    background:
+        radial-gradient(900px 420px at 100% -10%, rgba(184,155,94,.16), transparent 55%),
+        radial-gradient(700px 380px at 0% 110%, rgba(45,58,44,.05), transparent 60%),
+        var(--sand);
+}
+
+/* Acento dourado sob o título da seção */
+.section__head .section__title::after {
+    content: ""; display: block; width: 66px; height: 3px; margin: 16px auto 0;
+    background: linear-gradient(90deg, var(--gold), var(--gold-hover));
+    border-radius: 3px;
+}
+
+/* Ícones dos cards com gradiente dourado (mais cor) */
+.card__icon { background: linear-gradient(135deg, rgba(184,155,94,.20), rgba(184,155,94,.34)); }
+.card:hover .card__icon { background: linear-gradient(135deg, var(--gold), var(--gold-hover)); }
+
+/* Barra dourada que cresce no topo do card ao passar o mouse */
+.card { position: relative; overflow: hidden; }
+.card::before {
+    content: ""; position: absolute; top: 0; left: 0; height: 3px; width: 0;
+    background: linear-gradient(90deg, var(--gold), var(--gold-hover));
+    transition: width .35s ease;
+}
+.card:hover::before { width: 100%; }
+
+/* Número dos passos: círculo dourado preenchido */
+.step__num {
+    background: linear-gradient(135deg, var(--gold), var(--gold-hover));
+    color: var(--dark); border-color: transparent;
+    box-shadow: 0 8px 18px rgba(184,155,94,.35);
+}
+
+/* Brilho que percorre o botão dourado no hover */
+.btn { position: relative; overflow: hidden; }
+.btn--gold::after {
+    content: ""; position: absolute; top: 0; left: -120%; width: 55%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,.5), transparent);
+    transform: skewX(-20deg); transition: left .6s ease; pointer-events: none;
+}
+.btn--gold:hover::after { left: 140%; }
+
+/* Hero: brilho dourado vivo atrás do conteúdo */
+.hero { position: relative; overflow: hidden; }
+.hero::before {
+    content: ""; position: absolute; width: 620px; height: 620px; border-radius: 50%;
+    top: -220px; right: -160px; pointer-events: none; z-index: 0;
+    background: radial-gradient(circle, rgba(184,155,94,.22), transparent 65%);
+    animation: heroGlow 8s ease-in-out infinite alternate;
+}
+.hero .container { position: relative; z-index: 1; }
+@keyframes heroGlow {
+    from { transform: translate(0,0) scale(1); opacity: .65; }
+    to   { transform: translate(-34px,34px) scale(1.18); opacity: 1; }
+}
+
+/* Faixas (seção escura): elevação e brilho no hover */
+.faixa { transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+.faixa:hover { transform: translateY(-5px); border-color: var(--gold); box-shadow: 0 16px 36px rgba(0,0,0,.4); }
+
+/* Galeria: leve zoom na foto ao passar o mouse */
+.gallery__item { overflow: hidden; }
+.gallery__img { transition: transform .5s ease; }
+.gallery__item:hover .gallery__img { transform: scale(1.06); }
+
+/* Selos de confiança: leve destaque no hover */
+.trust__item { transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease; }
+.trust__item:hover { transform: translateY(-3px); border-color: var(--gold); box-shadow: var(--shadow); }
+
+/* Foto da entrega flutua suavemente */
+.entrega__media { transition: transform .4s ease, box-shadow .4s ease; }
+.entrega__media:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+
+/* Logo do rodapé um pouco maior */
+.footer__logo { height: 64px; }
+
+@media (prefers-reduced-motion: reduce) {
+    .hero::before { animation: none; }
+    .btn--gold::after { display: none; }
+}
