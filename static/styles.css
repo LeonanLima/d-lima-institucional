@@ -110,7 +110,7 @@ img { max-width: 100%; display: block; }
     min-height: calc(100vh - 78px);
     min-height: calc(100svh - 78px);
 }
-.hero__inner { width: 100%; padding: 64px 0; display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
+.hero__inner { width: 100%; padding: 64px 20px; display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center; }
 .hero h1 { font-size: clamp(2.2rem, 5.2vw, 3.6rem); font-weight: 800; margin-bottom: 18px; }
 .hero__lead { font-size: 1.15rem; color: rgba(249,248,246,.82); max-width: 540px; margin-bottom: 22px; font-weight: 300; }
 .badge {
