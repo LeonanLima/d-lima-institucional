@@ -26,6 +26,7 @@ def test_seo_and_fonts(client):
     assert "GeneralContractor" in html          # Schema.org JSON-LD
     assert "Montserrat" in html                  # Google Fonts
     assert "G-DPCLJ7WS4R" in html                # Google Analytics 4 ativo
+    assert "1513592793641793" in html            # Meta Pixel ativo
 
 
 def test_hero_form(client):

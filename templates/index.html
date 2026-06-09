@@ -38,18 +38,19 @@
       gtag('config', 'G-DPCLJ7WS4R');
     </script>
 
-    <!-- Meta Pixel (Facebook/Instagram) — adicionar QUANDO criar um Pixel real
-         no Gerenciador de Eventos da Meta (precisa de conta de anúncios ativa).
-         O ID do Pixel tem 15-16 dígitos. Descomente e troque META_PIXEL_ID:
+    <!-- Meta Pixel (Facebook/Instagram) — ATIVO: 1513592793641793 -->
     <script>
       !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
       n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
       n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
       t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
       document,'script','https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', 'META_PIXEL_ID'); fbq('track', 'PageView');
+      fbq('init', '1513592793641793');
+      fbq('track', 'PageView');
     </script>
-    -->
+    <noscript><img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=1513592793641793&ev=PageView&noscript=1"/></noscript>
+    <!-- End Meta Pixel -->
 
     <!-- Fontes (Montserrat + Inter) com fallback de sistema no CSS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -479,9 +480,9 @@
           const msg = `Olá! Meu nome é *${nome}*. Vim pelo site da D'LIMA Engenharia e quero fazer uma simulação do Minha Casa Minha Vida. Minha renda familiar é: *${renda}*.`;
           const url = `https://wa.me/${NUM_WHATSAPP}?text=${encodeURIComponent(msg)}`;
 
-          // Registra a conversão (lead) no Google Analytics
+          // Registra a conversão (lead) no Google Analytics e no Meta Pixel
           if (typeof gtag === 'function') { gtag('event', 'generate_lead', { method: 'whatsapp_form' }); }
-          if (typeof fbq === 'function') { fbq('track', 'Lead'); }  // ativo só quando o Pixel for adicionado
+          if (typeof fbq === 'function') { fbq('track', 'Lead'); }
 
           window.location.href = url;
           setTimeout(() => {
