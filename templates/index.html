@@ -27,20 +27,30 @@
     <meta name="twitter:image" content="https://dlimaengenharia.org/static/og-image.jpg">
 
     <!-- ============================================================
-         ANALYTICS — cole seus IDs aqui quando tiver:
-         GA4_ID:        substitua G-XXXXXXXXXX abaixo
-         META_PIXEL_ID: substitua 000000000000000 abaixo
-         (deixados comentados para não disparar sem ID válido)
+         ANALYTICS — Google Analytics 4 + Meta Pixel (ativos)
     ============================================================= -->
-    <!--
-    <script async src="https://www.googletagmanager.com/gtag/js?id=GA4_ID"></script>
+    <!-- Google tag (gtag.js) - GA4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DPCLJ7WS4R"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', 'GA4_ID');
+      gtag('config', 'G-DPCLJ7WS4R');
     </script>
-    -->
+
+    <!-- Meta Pixel (Facebook/Instagram) -->
+    <script>
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+      n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+      document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '15029590773');
+      fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=15029590773&ev=PageView&noscript=1"/></noscript>
+    <!-- End Meta Pixel -->
 
     <!-- Fontes (Montserrat + Inter) com fallback de sistema no CSS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -468,6 +478,10 @@
 
           const msg = `Olá! Meu nome é *${nome}*. Vim pelo site da D'LIMA Engenharia e quero fazer uma simulação do Minha Casa Minha Vida. Minha renda familiar é: *${renda}*.`;
           const url = `https://wa.me/${NUM_WHATSAPP}?text=${encodeURIComponent(msg)}`;
+
+          // Registra a conversão (lead) no Analytics e no Pixel
+          if (typeof gtag === 'function') { gtag('event', 'generate_lead', { method: 'whatsapp_form' }); }
+          if (typeof fbq === 'function') { fbq('track', 'Lead'); }
 
           window.location.href = url;
           setTimeout(() => {

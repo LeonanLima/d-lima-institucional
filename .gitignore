@@ -19,3 +19,6 @@ preview-*.jpeg
 
 # Netlify build
 _site/
+
+# Local Netlify folder
+.netlify
