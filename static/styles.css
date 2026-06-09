@@ -344,11 +344,11 @@ img { max-width: 100%; display: block; }
 .hero .form-card { animation: fadeUp .7s ease .25s both; }
 
 /* Revelação no scroll (classe .reveal adicionada via JS) */
-.reveal { opacity: 0; transform: translateY(26px); transition: opacity .6s ease, transform .6s ease; }
+.reveal { opacity: 0; transform: translateY(38px); transition: opacity .7s ease, transform .7s cubic-bezier(0.22, 1, 0.36, 1); }
 .reveal.in { opacity: 1; transform: none; }
-.grid > .reveal:nth-child(2) { transition-delay: .08s; }
-.grid > .reveal:nth-child(3) { transition-delay: .16s; }
-.grid > .reveal:nth-child(4) { transition-delay: .24s; }
+.grid > .reveal:nth-child(2) { transition-delay: .1s; }
+.grid > .reveal:nth-child(3) { transition-delay: .2s; }
+.grid > .reveal:nth-child(4) { transition-delay: .3s; }
 
 /* Pulso suave no botão flutuante */
 .wa-float { animation: waPulse 2.6s ease-in-out infinite; }

@@ -447,10 +447,11 @@
           entries.forEach(e => {
             if (e.isIntersecting) { reveal(e.target); io.unobserve(e.target); }
           });
-        }, { threshold: 0.05, rootMargin: '0px 0px 0px 0px' });
+        }, { threshold: 0.15, rootMargin: '0px 0px -8% 0px' });
         els.forEach(el => io.observe(el));
-        // Rede de segurança: revela tudo após 2,5s, caso o observer não dispare.
-        setTimeout(() => els.forEach(reveal), 2500);
+        // Rede de segurança longa: só revela tudo após 9s (caso o observer falhe),
+        // para não matar a animação de quem está rolando normalmente.
+        setTimeout(() => els.forEach(reveal), 9000);
       })();
 
       const NUM_WHATSAPP = "5528999646592";
