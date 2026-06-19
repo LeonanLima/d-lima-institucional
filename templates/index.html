@@ -156,6 +156,15 @@
                             <option value="Acima de R$ 8.000,00">Acima de R$ 8.000,00</option>
                         </select>
                     </div>
+                    <div class="field">
+                        <label for="terrenoCliente">Você já tem o terreno?</label>
+                        <select id="terrenoCliente" required>
+                            <option value="" disabled selected>Selecione uma opção</option>
+                            <option value="Já tenho o terreno">Já tenho o terreno</option>
+                            <option value="Ainda estou procurando">Ainda estou procurando</option>
+                            <option value="Não sei como funciona">Não sei como funciona</option>
+                        </select>
+                    </div>
                     <button type="submit" class="btn btn--gold btn--block btn--lg">
                         QUERO PARAR DE PAGAR ALUGUEL
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
@@ -251,7 +260,7 @@
             <div class="entrega__text">
                 <h2>O momento que <span class="gold">muda tudo</span></h2>
                 <p>Da planta à chave na mão: acompanhamos cada etapa para entregar não só uma casa, mas a realização de um sonho da sua família — com segurança, qualidade e sem dor de cabeça.</p>
-                <a href="#simulacao" class="btn btn--gold btn--lg">Quero realizar meu sonho</a>
+                <a href="#simulacao" class="btn btn--gold btn--lg">Quero minha simulação grátis</a>
             </div>
         </div>
     </section>
@@ -287,42 +296,9 @@
             </div>
             <div class="center mt-40">
                 <a href="#simulacao" class="btn btn--gold btn--lg">
-                    Descubra o seu subsídio
+                    Quero minha simulação grátis
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- ===================== PROJETOS / MODELOS ===================== -->
-    <section id="projetos" class="section section--cream">
-        <div class="container">
-            <div class="section__head">
-                <h2 class="section__title">Nossos <span class="gold">modelos</span></h2>
-                <p class="section__sub">Casas modernas, funcionais e com ótimo acabamento — projetadas para a sua família.</p>
-            </div>
-            <div class="grid grid--3">
-                <div class="gallery__item">
-                    <img src="/static/modelo-contemporaneo.jpg" alt="Modelo Contemporâneo — casa moderna com garagem e piscina" loading="lazy" class="gallery__img">
-                    <div class="gallery__body">
-                        <h3>Modelo Contemporâneo</h3>
-                        <p>Fachada moderna, garagem para dois carros e área de lazer.</p>
-                    </div>
-                </div>
-                <div class="gallery__item">
-                    <img src="/static/modelo-familia.jpg" alt="Modelo Família — casa moderna com garagem para dois carros" loading="lazy" class="gallery__img">
-                    <div class="gallery__body">
-                        <h3>Modelo Família</h3>
-                        <p>Três quartos, pensado para o dia a dia.</p>
-                    </div>
-                </div>
-                <div class="gallery__item">
-                    <img src="/static/modelo-compacto.jpg" alt="Modelo Compacto — casa moderna com fachada em pedra" loading="lazy" class="gallery__img">
-                    <div class="gallery__body">
-                        <h3>Modelo Compacto</h3>
-                        <p>Aproveitamento inteligente em menor área.</p>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
@@ -333,6 +309,25 @@
             <div class="section__head">
                 <h2 class="section__title">Se você ainda não saiu do aluguel, <span class="gold">a culpa não é sua</span></h2>
                 <p class="section__sub">É que faltava quem fizesse do jeito certo: sem enrolação, sem promessa vazia, com responsabilidade técnica de verdade.</p>
+            </div>
+            <div class="entrega" style="margin-bottom:32px;">
+                <div class="entrega__media">
+                    <img src="/static/leonan-engenheiro.jpg" alt="Leonan Lima, engenheiro civil responsável pela D'LIMA Engenharia, CREA 060640/D" loading="lazy">
+                </div>
+                <div class="entrega__text">
+                    <h2>Leonan Lima</h2>
+                    <p class="form-card__hint" style="margin-bottom:10px;">Engenheiro Civil — CREA 060640/D</p>
+                    <p>Toda obra da D'LIMA é acompanhada por mim, com responsabilidade técnica registrada — não é "achismo" de pedreiro, é engenharia de verdade do início ao fim.</p>
+                </div>
+            </div>
+            <div class="entrega" style="margin-bottom:32px;">
+                <div class="entrega__text">
+                    <h2>Você acompanha sua obra em tempo real</h2>
+                    <p>Desenvolvemos um sistema próprio onde você vê o cronograma físico-financeiro da sua casa atualizado, etapa por etapa — sem precisar ficar ligando pra saber em que pé está.</p>
+                </div>
+                <div class="entrega__media">
+                    <img src="/static/sistema-cronograma.png" alt="Sistema D'LIMA mostrando o cronograma de obra acompanhado pelo cliente" loading="lazy">
+                </div>
             </div>
             <div class="trust">
                 <span class="trust__item">
@@ -348,8 +343,6 @@
                     Atendemos São Mateus e região
                 </span>
             </div>
-            <p class="trust-note">Depoimentos de clientes em breve — estamos construindo as primeiras histórias.
-                <!-- inserir depoimentos reais aqui --></p>
         </div>
     </section>
 
@@ -391,7 +384,7 @@
             <h2>Cada mês de aluguel é dinheiro que <span class="gold">não volta</span></h2>
             <p>Enquanto você adia, está pagando a casa do seu locador. As condições do Minha Casa Minha Vida nunca estiveram tão boas. A hora de virar esse jogo é agora.</p>
             <a href="https://wa.me/5528999646592?text=Ol%C3%A1!%20Quero%20falar%20com%20um%20especialista%20da%20D'LIMA%20Engenharia%20sobre%20minha%20casa%20pr%C3%B3pria." target="_blank" rel="noopener" class="btn btn--gold btn--lg">
-                Quero falar com um especialista
+                Falar agora no WhatsApp
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
             </a>
         </div>
@@ -466,6 +459,36 @@
       })();
 
       const NUM_WHATSAPP = "5528999646592";
+
+      // ViewContent: usuário rolou até o FAQ (sinal de interesse mais profundo)
+      (function () {
+        const faq = document.getElementById('faq');
+        if (!faq || !('IntersectionObserver' in window)) { return; }
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach(e => {
+            if (e.isIntersecting) {
+              if (typeof gtag === 'function') { gtag('event', 'view_content', { content_name: 'faq' }); }
+              if (typeof fbq === 'function') { fbq('track', 'ViewContent'); }
+              io.unobserve(e.target);
+            }
+          });
+        }, { threshold: 0.3 });
+        io.observe(faq);
+      })();
+
+      // InitiateCheckout: usuário começou a interagir com o formulário de simulação
+      (function () {
+        const leadForm = document.getElementById('leadForm');
+        if (!leadForm) { return; }
+        let fired = false;
+        leadForm.addEventListener('focusin', function () {
+          if (fired) { return; }
+          fired = true;
+          if (typeof gtag === 'function') { gtag('event', 'begin_checkout', { method: 'whatsapp_form' }); }
+          if (typeof fbq === 'function') { fbq('track', 'InitiateCheckout'); }
+        });
+      })();
+
       const leadForm = document.getElementById('leadForm');
       if (leadForm) {
         leadForm.addEventListener('submit', function (e) {
@@ -473,11 +496,12 @@
           const btn = this.querySelector('button[type="submit"]');
           const nome = document.getElementById('nomeCliente').value;
           const renda = document.getElementById('rendaCliente').value;
+          const terreno = document.getElementById('terrenoCliente').value;
 
           btn.textContent = 'Abrindo WhatsApp...';
           btn.disabled = true;
 
-          const msg = `Olá! Meu nome é *${nome}*. Vim pelo site da D'LIMA Engenharia e quero fazer uma simulação do Minha Casa Minha Vida. Minha renda familiar é: *${renda}*.`;
+          const msg = `Olá! Meu nome é *${nome}*. Vim pelo site da D'LIMA Engenharia e quero fazer uma simulação do Minha Casa Minha Vida. Minha renda familiar é: *${renda}*. Sobre o terreno: *${terreno}*.`;
           const url = `https://wa.me/${NUM_WHATSAPP}?text=${encodeURIComponent(msg)}`;
 
           // Registra a conversão (lead) no Google Analytics e no Meta Pixel
