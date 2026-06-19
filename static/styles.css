@@ -452,3 +452,10 @@ img { max-width: 100%; display: block; }
     .hero::before { animation: none; }
     .btn--gold::after { display: none; }
 }
+
+/* Responsividade corrigida — regras aqui sobrescrevem as bases acima */
+@media (max-width: 560px) {
+    .entrega { grid-template-columns: 1fr; }
+    .entrega__media { min-height: 340px; }
+    .entrega__media img { object-position: center 20%; }
+}
