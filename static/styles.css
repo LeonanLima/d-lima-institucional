@@ -99,6 +99,7 @@ img { max-width: 100%; display: block; }
 .grid--2 { grid-template-columns: repeat(2, 1fr); }
 .grid--3 { grid-template-columns: repeat(3, 1fr); }
 .grid--4 { grid-template-columns: repeat(4, 1fr); }
+.grid--5 { grid-template-columns: repeat(5, 1fr); }
 
 /* ---------- Hero ---------- */
 .hero {
@@ -198,8 +199,9 @@ img { max-width: 100%; display: block; }
     letter-spacing: .08em; text-transform: uppercase;
     padding: 5px 14px; border-radius: 999px;
 }
-.faixa__val { font-family: var(--font-head); font-size: 1.7rem; font-weight: 800; margin: 0 0 10px; color: var(--cream); }
-.faixa p { color: rgba(249,248,246,.7); font-size: .9rem; }
+.faixa__tag--premium { background: linear-gradient(135deg, var(--gold), #c8a14a); border: 1px solid rgba(184,155,94,.5); }
+.faixa__val { font-family: var(--font-head); font-size: 1.5rem; font-weight: 800; margin: 0 0 10px; color: var(--cream); }
+.faixa p { color: rgba(249,248,246,.7); font-size: .85rem; }
 .center { text-align: center; }
 .mt-40 { margin-top: 40px; }
 
@@ -290,6 +292,7 @@ img { max-width: 100%; display: block; }
    Responsivo
 ===================================================================== */
 @media (max-width: 900px) {
+    .grid--5 { grid-template-columns: repeat(3, 1fr); }
     .grid--4 { grid-template-columns: repeat(2, 1fr); }
     .grid--3 { grid-template-columns: repeat(2, 1fr); }
     .hero__inner { grid-template-columns: 1fr; gap: 36px; }
@@ -298,7 +301,7 @@ img { max-width: 100%; display: block; }
 }
 @media (max-width: 560px) {
     .section { padding: 56px 0; }
-    .grid--4, .grid--3, .grid--2 { grid-template-columns: 1fr; }
+    .grid--5, .grid--4, .grid--3, .grid--2 { grid-template-columns: 1fr; }
     .header__inner { height: 66px; }
     .header__logo { height: 52px; }
     .brand__name { font-size: 1.15rem; }
