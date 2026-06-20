@@ -100,7 +100,7 @@ img { max-width: 100%; display: block; }
   min-height: 100vh; display: flex; align-items: center;
   padding: 120px 0 80px;
   position: relative; overflow: hidden;
-  background: #FFFFFF;
+  background: var(--coal);
 }
 
 .hero__inner { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; position: relative; z-index: 1; }
@@ -137,7 +137,7 @@ img { max-width: 100%; display: block; }
   line-height: 1.05; margin-bottom: 20px;
 }
 .hero__lead {
-  font-size: 1.1rem; color: rgba(28,28,28,.72);
+  font-size: 1.1rem; color: rgba(255,255,255,.8);
   line-height: 1.7; margin-bottom: 28px; max-width: 480px;
 }
 .hero__list {
@@ -146,22 +146,22 @@ img { max-width: 100%; display: block; }
 }
 .hero__list li {
   display: flex; align-items: center; gap: 10px;
-  font-size: .95rem; color: rgba(28,28,28,.8);
+  font-size: .95rem; color: rgba(255,255,255,.85);
 }
 .hero__list svg { width: 18px; height: 18px; color: var(--gold); flex-shrink: 0; }
 .hero__cta { display: flex; gap: 14px; flex-wrap: wrap; }
 
 /* lado direito do hero — formulário */
 .form-card {
-  background: var(--white);
-  border: 1px solid rgba(28,28,28,.1);
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
   border-radius: var(--radius-lg);
   padding: 36px 32px;
-  box-shadow: 0 8px 40px rgba(0,0,0,.08);
+  backdrop-filter: blur(8px);
   animation: fadeUp .8s var(--ease) .7s both;
 }
-.form-card h2 { font-size: 1.3rem; margin-bottom: 6px; color: var(--coal); }
-.form-card__hint { font-size: .85rem; color: rgba(28,28,28,.55); margin-bottom: 20px; }
+.form-card h2 { font-size: 1.3rem; margin-bottom: 6px; }
+.form-card__hint { font-size: .85rem; color: var(--muted); margin-bottom: 20px; }
 .form-card__flag {
   display: inline-flex; align-items: center; gap: 6px;
   background: rgba(37,211,102,.12); border: 1px solid rgba(37,211,102,.25);
@@ -171,16 +171,16 @@ img { max-width: 100%; display: block; }
 }
 .form-card__flag svg { width: 13px; height: 13px; }
 .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
-.field label { font-size: .82rem; font-weight: 600; color: rgba(28,28,28,.65); }
+.field label { font-size: .82rem; font-weight: 600; color: rgba(255,255,255,.75); }
 .field input, .field select {
-  background: var(--cream); border: 1px solid rgba(28,28,28,.15);
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12);
   border-radius: var(--radius); padding: 12px 16px;
-  color: var(--coal); font-family: var(--fb); font-size: .95rem;
+  color: var(--white); font-family: var(--fb); font-size: .95rem;
   outline: none; transition: border-color .2s;
   -webkit-appearance: none;
 }
-.field input::placeholder { color: rgba(28,28,28,.3); }
-.field select option { background: var(--white); color: var(--coal); }
+.field input::placeholder { color: rgba(255,255,255,.3); }
+.field select option { background: #2a2a2a; color: var(--white); }
 .field input:focus, .field select:focus { border-color: var(--gold); }
 .urgencia { font-size: .75rem; text-align: center; color: #e0945a; font-weight: 600; margin: 8px 0 10px; }
 
@@ -699,7 +699,7 @@ img { max-width: 100%; display: block; }
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
           Quem está cuidando da sua obra
         </div>
-        <h2 class="leonan__title">Quando assino uma obra,<br>coloco meu <span class="gold">nome nisso.</span></h2>
+        <h2 class="leonan__title">Assino o projeto. Acompanho a obra.<br><span class="gold">Entrego a chave.</span></h2>
         <p class="leonan__text">
           Responsabilidade técnica não é papel. É estar presente do projeto à entrega,
           garantindo que cada etapa seja feita com segurança, dentro do orçamento
