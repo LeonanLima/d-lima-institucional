@@ -27,6 +27,11 @@ def contato():
     return render_template("contato.html")
 
 
+@app.route("/v2")
+def v2():
+    return render_template("v2.html")
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)

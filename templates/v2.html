@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D'LIMA Engenharia — Protótipo V2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* =====================================================================
+   D'LIMA V2 — Landing animada alto padrão
+   Paleta: Carvão #1C1C1C · Dourado #C9A84C · Branco #FFF
+   Animações: Intersection Observer + CSS transitions puras
+===================================================================== */
+
+:root {
+  --coal:       #1C1C1C;
+  --coal-deep:  #111111;
+  --coal-soft:  #252525;
+  --gold:       #C9A84C;
+  --gold-dim:   rgba(201,168,76,.15);
+  --gold-line:  rgba(201,168,76,.25);
+  --cream:      #F5F3EE;
+  --sand:       #EDEAE3;
+  --white:      #FFFFFF;
+  --muted:      rgba(255,255,255,.55);
+  --radius:     16px;
+  --radius-lg:  28px;
+  --maxw:       1180px;
+  --fh: "Montserrat", system-ui, sans-serif;
+  --fb: "Inter", system-ui, sans-serif;
+  --ease: cubic-bezier(.22,1,.36,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
+body { font-family: var(--fb); background: var(--coal); color: var(--white); line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+h1,h2,h3,h4 { font-family: var(--fh); line-height: 1.1; }
+a { text-decoration: none; color: inherit; }
+img { max-width: 100%; display: block; }
+.container { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+.gold { color: var(--gold); }
+.sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+
+/* ── ANIMAÇÕES BASE ──────────────────────────────────────────── */
+/* Elementos revelados pelo scroll ganham .in-view via IntersectionObserver */
+
+.reveal               { opacity: 0; transform: translateY(28px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.reveal.in-view       { opacity: 1; transform: translateY(0); }
+.reveal-left          { opacity: 0; transform: translateX(-32px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.reveal-left.in-view  { opacity: 1; transform: translateX(0); }
+.reveal-right         { opacity: 0; transform: translateX(32px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.reveal-right.in-view { opacity: 1; transform: translateX(0); }
+
+/* delay escalonado para grupos de cards */
+.d1 { transition-delay: .08s; }
+.d2 { transition-delay: .18s; }
+.d3 { transition-delay: .28s; }
+.d4 { transition-delay: .38s; }
+.d5 { transition-delay: .48s; }
+
+/* ── BOTÕES ──────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--fh); font-weight: 700; font-size: 1rem;
+  padding: 16px 32px; border-radius: 999px; border: none; cursor: pointer;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease), background .2s;
+  line-height: 1;
+}
+.btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+.btn--gold {
+  background: var(--gold); color: var(--coal-deep);
+  box-shadow: 0 8px 28px rgba(201,168,76,.35);
+}
+.btn--gold:hover { background: #B89148; transform: translateY(-2px); box-shadow: 0 14px 36px rgba(201,168,76,.45); }
+.btn--outline {
+  background: transparent; color: var(--gold);
+  border: 1.5px solid var(--gold-line);
+}
+.btn--outline:hover { background: var(--gold-dim); border-color: var(--gold); }
+.btn--lg { padding: 20px 40px; font-size: 1.05rem; }
+.btn--block { width: 100%; justify-content: center; }
+
+/* ── HEADER ─────────────────────────────────────────────────── */
+.header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(17,17,17,.88); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--gold-line);
+  transition: background .3s;
+}
+.header__inner { display: flex; align-items: center; justify-content: space-between; height: 72px; }
+.brand__name { font-family: var(--fh); font-weight: 800; font-size: 1.1rem; letter-spacing: .04em; }
+.brand__eng { color: var(--gold); }
+.brand__tag { display: block; font-size: .65rem; color: rgba(255,255,255,.55); letter-spacing: .08em; text-transform: uppercase; margin-top: 2px; }
+.nav-cta { padding: 10px 22px; font-size: .9rem; }
+
+/* ── HERO ────────────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh; display: flex; align-items: center;
+  padding: 120px 0 80px;
+  position: relative; overflow: hidden;
+  background: #FFFFFF;
+}
+
+.hero__inner { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; position: relative; z-index: 1; }
+
+/* animações do hero disparam automaticamente (sem scroll) */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(24px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity:0; }
+  to   { opacity:1; }
+}
+
+.hero__badge { animation: fadeUp .6s var(--ease) .1s both; }
+.hero__h1    { animation: fadeUp .7s var(--ease) .35s both; }
+.hero__lead  { animation: fadeUp .7s var(--ease) .6s both; }
+.hero__list  { animation: fadeUp .7s var(--ease) .8s both; }
+.hero__cta   { animation: fadeUp .7s var(--ease) 1s both; }
+.hero__img   { animation: fadeIn .9s var(--ease) .5s both; }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--gold-dim); border: 1px solid var(--gold-line);
+  color: var(--gold); border-radius: 999px;
+  padding: 6px 16px; font-size: .8rem; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; margin-bottom: 20px;
+}
+.badge svg { width: 14px; height: 14px; }
+
+.hero__h1 {
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+  font-weight: 900; letter-spacing: -.02em;
+  line-height: 1.05; margin-bottom: 20px;
+}
+.hero__lead {
+  font-size: 1.1rem; color: rgba(28,28,28,.72);
+  line-height: 1.7; margin-bottom: 28px; max-width: 480px;
+}
+.hero__list {
+  list-style: none; display: flex; flex-direction: column; gap: 12px;
+  margin-bottom: 36px;
+}
+.hero__list li {
+  display: flex; align-items: center; gap: 10px;
+  font-size: .95rem; color: rgba(28,28,28,.8);
+}
+.hero__list svg { width: 18px; height: 18px; color: var(--gold); flex-shrink: 0; }
+.hero__cta { display: flex; gap: 14px; flex-wrap: wrap; }
+
+/* lado direito do hero — formulário */
+.form-card {
+  background: var(--white);
+  border: 1px solid rgba(28,28,28,.1);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.08);
+  animation: fadeUp .8s var(--ease) .7s both;
+}
+.form-card h2 { font-size: 1.3rem; margin-bottom: 6px; color: var(--coal); }
+.form-card__hint { font-size: .85rem; color: rgba(28,28,28,.55); margin-bottom: 20px; }
+.form-card__flag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(37,211,102,.12); border: 1px solid rgba(37,211,102,.25);
+  color: #25D366; border-radius: 999px;
+  padding: 4px 12px; font-size: .75rem; font-weight: 600;
+  margin-bottom: 16px;
+}
+.form-card__flag svg { width: 13px; height: 13px; }
+.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+.field label { font-size: .82rem; font-weight: 600; color: rgba(28,28,28,.65); }
+.field input, .field select {
+  background: var(--cream); border: 1px solid rgba(28,28,28,.15);
+  border-radius: var(--radius); padding: 12px 16px;
+  color: var(--coal); font-family: var(--fb); font-size: .95rem;
+  outline: none; transition: border-color .2s;
+  -webkit-appearance: none;
+}
+.field input::placeholder { color: rgba(28,28,28,.3); }
+.field select option { background: var(--white); color: var(--coal); }
+.field input:focus, .field select:focus { border-color: var(--gold); }
+.urgencia { font-size: .75rem; text-align: center; color: #e0945a; font-weight: 600; margin: 8px 0 10px; }
+
+/* ── STRIP DE NÚMEROS ────────────────────────────────────────── */
+.strip {
+  background: var(--gold);
+  padding: 24px 0;
+}
+.strip__inner { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 16px; }
+.strip__item { text-align: center; }
+.strip__num {
+  font-family: var(--fh); font-weight: 900; font-size: 2rem;
+  color: var(--coal-deep); line-height: 1;
+}
+.strip__label { font-size: .75rem; font-weight: 600; color: rgba(28,28,28,.7); letter-spacing: .04em; text-transform: uppercase; margin-top: 4px; }
+
+/* ── SEÇÕES GENÉRICAS ────────────────────────────────────────── */
+.section { padding: 96px 0; }
+.section--dark  { background: var(--coal); }
+.section--deep  { background: var(--coal-deep); }
+.section--cream { background: var(--cream); color: var(--coal); }
+.section--sand  { background: var(--sand); color: var(--coal); }
+
+.section__head { text-align: center; max-width: 680px; margin: 0 auto 56px; }
+.section__title { font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 800; margin-bottom: 14px; }
+.section__sub   { font-size: 1.05rem; opacity: .75; line-height: 1.7; }
+
+.section--cream .section__sub,
+.section--sand  .section__sub { color: var(--coal); }
+.section--dark .section__sub,
+.section--deep .section__sub { color: var(--muted); }
+
+/* ── GRID ────────────────────────────────────────────────────── */
+.grid { display: grid; gap: 24px; }
+.grid--4 { grid-template-columns: repeat(4, 1fr); }
+.grid--3 { grid-template-columns: repeat(3, 1fr); }
+.grid--2 { grid-template-columns: repeat(2, 1fr); }
+
+/* ── CARDS (diferenciais) ────────────────────────────────────── */
+.card {
+  background: var(--white); border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+}
+.card:hover { transform: translateY(-6px); box-shadow: 0 20px 48px rgba(0,0,0,.12); }
+.card__icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: var(--gold-dim); border: 1px solid var(--gold-line);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px;
+}
+.card__icon svg { width: 24px; height: 24px; color: var(--gold); }
+.card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; color: var(--coal); }
+.card p { font-size: .9rem; color: #555; line-height: 1.6; }
+
+/* ── PASSOS (como funciona) ──────────────────────────────────── */
+.step { text-align: center; position: relative; }
+.step__num {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--gold); color: var(--coal-deep);
+  font-family: var(--fh); font-weight: 900; font-size: 1.4rem;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 18px;
+  box-shadow: 0 8px 24px rgba(201,168,76,.35);
+}
+.step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: var(--coal); }
+.step p  { font-size: .88rem; color: #666; line-height: 1.6; }
+/* linha conectora entre passos */
+.step:not(:last-child)::after {
+  content: '';
+  position: absolute; top: 28px; left: calc(50% + 36px);
+  width: calc(100% - 72px); height: 2px;
+  background: linear-gradient(90deg, var(--gold) 0%, rgba(201,168,76,.2) 100%);
+}
+
+/* ── FAIXAS MCMV ─────────────────────────────────────────────── */
+.faixa-card {
+  border-radius: var(--radius-lg); padding: 28px 24px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(255,255,255,.04);
+  transition: transform .3s var(--ease), border-color .3s, box-shadow .3s;
+  cursor: default;
+}
+.faixa-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--gold-line);
+  box-shadow: 0 16px 40px rgba(201,168,76,.1);
+}
+.faixa-card__tag {
+  font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 12px; opacity: .8;
+}
+.faixa-card__name { font-size: 1.05rem; font-weight: 800; margin-bottom: 6px; }
+.faixa-card__renda { font-size: .82rem; color: var(--muted); margin-bottom: 14px; }
+.faixa-card__subsidio {
+  font-family: var(--fh); font-size: 1.4rem; font-weight: 900; color: var(--gold);
+  margin-bottom: 4px;
+}
+.faixa-card__sub-label { font-size: .75rem; color: var(--muted); }
+.faixa-card--highlight { background: var(--gold-dim); border-color: rgba(201,168,76,.4); }
+
+/* ── LEONAN ──────────────────────────────────────────────────── */
+.leonan { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
+.leonan__img-wrap {
+  position: relative; border-radius: var(--radius-lg); overflow: hidden;
+  aspect-ratio: 4/5;
+  background: linear-gradient(135deg, var(--coal-soft), var(--coal-deep));
+  border: 1px solid var(--gold-line);
+}
+.leonan__img-wrap::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 40%;
+  background: linear-gradient(transparent, var(--coal-deep));
+}
+.leonan__photo { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.leonan__photo-placeholder {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 5rem; opacity: .15;
+}
+.leonan__badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--gold-dim); border: 1px solid var(--gold-line);
+  color: var(--gold); border-radius: 999px;
+  padding: 5px 14px; font-size: .75rem; font-weight: 600; letter-spacing: .04em;
+  text-transform: uppercase; margin-bottom: 18px;
+}
+.leonan__title { font-size: clamp(1.8rem, 3vw, 2.4rem); font-weight: 800; margin-bottom: 18px; }
+.leonan__text { color: var(--muted); font-size: 1rem; line-height: 1.8; margin-bottom: 14px; }
+.leonan__creds { display: flex; flex-direction: column; gap: 8px; margin: 24px 0 32px; }
+.cred-item { display: flex; align-items: center; gap: 10px; font-size: .9rem; }
+.cred-item svg { width: 16px; height: 16px; color: var(--gold); flex-shrink: 0; }
+
+/* ── FAQ ─────────────────────────────────────────────────────── */
+.faq-list { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 4px; }
+.faq-item {
+  border: 1px solid rgba(255,255,255,.08); border-radius: var(--radius);
+  overflow: hidden; transition: border-color .2s;
+}
+.faq-item.open { border-color: var(--gold-line); }
+.faq-q {
+  width: 100%; background: rgba(255,255,255,.03); border: none; cursor: pointer;
+  padding: 20px 24px; display: flex; justify-content: space-between; align-items: center;
+  font-family: var(--fh); font-weight: 600; font-size: .95rem; color: var(--white);
+  text-align: left; gap: 16px; transition: background .2s;
+}
+.faq-q:hover { background: rgba(255,255,255,.06); }
+.faq-q svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--gold); transition: transform .3s var(--ease); }
+.faq-item.open .faq-q svg { transform: rotate(45deg); }
+.faq-a {
+  max-height: 0; overflow: hidden;
+  transition: max-height .4s var(--ease), padding .3s;
+  padding: 0 24px;
+}
+.faq-item.open .faq-a { max-height: 300px; padding: 0 24px 20px; }
+.faq-a p { font-size: .92rem; color: var(--muted); line-height: 1.7; }
+
+/* ── CTA FINAL ───────────────────────────────────────────────── */
+.cta-final {
+  text-align: center; padding: 96px 0;
+  background: radial-gradient(ellipse 70% 80% at 50% 50%, rgba(201,168,76,.1) 0%, transparent 70%),
+              var(--coal-deep);
+  border-top: 1px solid var(--gold-line);
+}
+.cta-final h2 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; margin-bottom: 16px; }
+.cta-final p  { font-size: 1.1rem; color: var(--muted); max-width: 500px; margin: 0 auto 36px; }
+
+/* pulsação dourada no botão principal de conversão */
+@keyframes gold-pulse {
+  0%,100% { box-shadow: 0 8px 28px rgba(201,168,76,.35), 0 0 0 0 rgba(201,168,76,.4); }
+  50%      { box-shadow: 0 8px 28px rgba(201,168,76,.35), 0 0 0 14px rgba(201,168,76,0); }
+}
+.btn--pulse { animation: gold-pulse 3s ease-in-out infinite; }
+
+/* ── RODAPÉ ──────────────────────────────────────────────────── */
+.footer {
+  border-top: 1px solid rgba(255,255,255,.07);
+  padding: 40px 0;
+  background: var(--coal-deep);
+}
+.footer__inner {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+}
+.footer__brand { font-family: var(--fh); font-weight: 800; font-size: .95rem; }
+.footer__links { display: flex; gap: 24px; font-size: .85rem; color: var(--muted); }
+.footer__links a:hover { color: var(--gold); }
+.footer__legal { font-size: .78rem; color: rgba(255,255,255,.3); margin-top: 20px; text-align: center; }
+
+/* ── WA FLOAT ────────────────────────────────────────────────── */
+.wa-float {
+  position: fixed; bottom: 28px; right: 28px; z-index: 200;
+  width: 60px; height: 60px; border-radius: 50%;
+  background: #25D366;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8px 28px rgba(37,211,102,.4);
+  transition: transform .3s var(--ease);
+}
+.wa-float:hover { transform: scale(1.1); }
+.wa-float svg { width: 30px; height: 30px; fill: white; }
+
+@keyframes wa-pulse {
+  0%,100% { box-shadow: 0 8px 28px rgba(37,211,102,.4), 0 0 0 0 rgba(37,211,102,.35); }
+  60%      { box-shadow: 0 8px 28px rgba(37,211,102,.4), 0 0 0 16px rgba(37,211,102,0); }
+}
+.wa-float { animation: wa-pulse 4s ease-in-out infinite; }
+
+/* ── RESPONSIVO ──────────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .hero__inner { grid-template-columns: 1fr; gap: 40px; }
+  .grid--4 { grid-template-columns: repeat(2, 1fr); }
+  .grid--3 { grid-template-columns: repeat(2, 1fr); }
+  .leonan  { grid-template-columns: 1fr; }
+  .leonan__img-wrap { max-width: 360px; margin: 0 auto; }
+  .step:not(:last-child)::after { display: none; }
+}
+@media (max-width: 600px) {
+  .grid--4, .grid--3, .grid--2 { grid-template-columns: 1fr; }
+  .hero__cta { flex-direction: column; }
+  .hero__cta .btn { width: 100%; justify-content: center; }
+  .strip__inner { gap: 24px; }
+  .header__inner .nav-cta { display: none; }
+  .footer__inner { flex-direction: column; text-align: center; }
+  .footer__links { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════ -->
+<header class="header">
+  <div class="container header__inner">
+    <a href="#" class="brand">
+      <span class="brand__name">D'LIMA <span class="brand__eng">Engenharia</span></span>
+      <span class="brand__tag">Engenheiro civil responsável · São Mateus/ES</span>
+    </a>
+    <a href="#simulacao" class="btn btn--gold nav-cta">
+      Simulação gratuita
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+    </a>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+<section class="hero">
+  <div class="container hero__inner">
+
+    <!-- Texto -->
+    <div>
+      <div class="hero__badge">
+        <span class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+          Programa Minha Casa Minha Vida
+        </span>
+      </div>
+      <h1 class="hero__h1">
+        Pare de pagar<br>a casa <span class="gold">dos outros.</span>
+      </h1>
+      <p class="hero__lead">
+        Todo mês você entrega dinheiro pra alguém que você nem conhece.<br>
+        Esse mesmo valor pode construir <strong>a sua casa</strong> — com engenheiro responsável, projeto personalizado e chave na mão.
+      </p>
+      <ul class="hero__list">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+          Subsídio do governo de até <strong>R$ 55.000</strong>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+          Use o seu FGTS — dinheiro que já é seu
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+          Você escolhe o bairro e o terreno
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+          CREA ativo · responsabilidade técnica do início ao fim
+        </li>
+      </ul>
+      <div class="hero__cta">
+        <a href="#simulacao" class="btn btn--gold btn--lg btn--pulse">
+          Descobrir meu subsídio
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        </a>
+        <a href="#como-funciona" class="btn btn--outline">
+          Como funciona
+        </a>
+      </div>
+    </div>
+
+    <!-- Formulário -->
+    <div class="hero__img">
+      <div id="simulacao" class="form-card">
+        <div class="form-card__flag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Resposta rápida no WhatsApp
+        </div>
+        <h2>Descubra quanto o governo paga da sua casa</h2>
+        <p class="form-card__hint">Simulação gratuita e sem compromisso. Leva 1 minuto.</p>
+        <form id="leadForm">
+          <div class="field">
+            <label for="nome">Nome completo</label>
+            <input id="nome" type="text" required placeholder="Digite seu nome">
+          </div>
+          <div class="field">
+            <label for="tel">WhatsApp</label>
+            <input id="tel" type="tel" required placeholder="(28) 90000-0000">
+          </div>
+          <div class="field">
+            <label for="renda">Renda familiar bruta</label>
+            <select id="renda" required>
+              <option value="" disabled selected>Selecione sua renda</option>
+              <option>Até R$ 3.200 (Faixa 1)</option>
+              <option>R$ 3.200 a R$ 5.000 (Faixa 2)</option>
+              <option>R$ 5.000 a R$ 9.600 (Faixa 3)</option>
+              <option>R$ 9.600 a R$ 13.000 (Faixa 4)</option>
+              <option>Acima de R$ 13.000 (Alto Padrão)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="terreno">Você já tem o terreno?</label>
+            <select id="terreno" required>
+              <option value="" disabled selected>Selecione uma opção</option>
+              <option>Já tenho o terreno</option>
+              <option>Ainda estou procurando</option>
+              <option>Não sei como funciona</option>
+            </select>
+          </div>
+          <p class="urgencia">⚡ Condições do programa mudam a cada revisão — simule agora</p>
+          <button type="submit" class="btn btn--gold btn--block btn--lg">
+            DESCOBRIR MEU SUBSÍDIO
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+          </button>
+          <p style="font-size:.78rem;text-align:center;color:rgba(255,255,255,.3);margin-top:10px;">🔒 Seus dados estão seguros. Sem spam.</p>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     STRIP DE NÚMEROS
+══════════════════════════════════════════ -->
+<div class="strip">
+  <div class="container strip__inner">
+    <div class="strip__item">
+      <div class="strip__num">R$<span data-count="55000" data-prefix="R$" data-suffix="">55.000</span></div>
+      <div class="strip__label">Subsídio máximo</div>
+    </div>
+    <div class="strip__item">
+      <div class="strip__num"><span data-count="0" data-suffix="%">0</span>%</div>
+      <div class="strip__label">Entrada Faixa 1</div>
+    </div>
+    <div class="strip__item">
+      <div class="strip__num"><span data-count="30" data-suffix="+">30</span>+</div>
+      <div class="strip__label">Famílias atendidas</div>
+    </div>
+    <div class="strip__item">
+      <div class="strip__num"><span data-count="1">1</span></div>
+      <div class="strip__label">Engenheiro responsável</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     DIFERENCIAIS
+══════════════════════════════════════════ -->
+<section class="section section--cream">
+  <div class="container">
+    <div class="section__head reveal">
+      <h2 class="section__title">Já ouviu histórias de obra que viraram <span class="gold">pesadelo?</span></h2>
+      <p class="section__sub">Com a gente é o contrário. Cuidamos de tudo, do crédito até a chave na mão. Você só escolhe a cor da parede.</p>
+    </div>
+    <div class="grid grid--4">
+      <div class="card reveal d1">
+        <div class="card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m3 15 2 2 4-4"/></svg>
+        </div>
+        <h3>Burocracia Zero</h3>
+        <p>Esquece fila e pilha de documento. Cuidamos de toda a papelada e aprovação na Caixa.</p>
+      </div>
+      <div class="card reveal d2">
+        <div class="card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4Z"/><path d="m13.5 4.5 2 2"/><path d="m10.5 7.5 2 2"/></svg>
+        </div>
+        <h3>Projeto Personalizado</h3>
+        <p>Nada de casa igual à do vizinho. Desenhamos a planta do jeito da sua família.</p>
+      </div>
+      <div class="card reveal d3">
+        <div class="card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1Z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6"/><path d="M14 6a6 6 0 0 1 6 6v3"/></svg>
+        </div>
+        <h3>Engenheiro Responsável</h3>
+        <p>CREA ativo. Responsabilidade técnica de verdade do início ao fim da obra.</p>
+      </div>
+      <div class="card reveal d4">
+        <div class="card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+        </div>
+        <h3>Chave na Mão</h3>
+        <p>Você não gerencia nada. Recebe a casa pronta pra morar — é só abrir a porta.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     COMO FUNCIONA
+══════════════════════════════════════════ -->
+<section id="como-funciona" class="section section--sand">
+  <div class="container">
+    <div class="section__head reveal">
+      <h2 class="section__title">Mais simples do que <span class="gold">você imagina</span></h2>
+      <p class="section__sub">São 4 passos da simulação até a chave na mão.</p>
+    </div>
+    <div class="grid grid--4">
+      <div class="step reveal d1">
+        <div class="step__num">1</div>
+        <h3>Simulação gratuita</h3>
+        <p>Preenche o formulário. Em 24h você sabe o valor exato do subsídio — sem sair de casa.</p>
+      </div>
+      <div class="step reveal d2">
+        <div class="step__num">2</div>
+        <h3>Aprovação na Caixa</h3>
+        <p>Cuidamos de toda a documentação e do processo de aprovação do crédito para você.</p>
+      </div>
+      <div class="step reveal d3">
+        <div class="step__num">3</div>
+        <h3>Projeto e obra</h3>
+        <p>Seu projeto personalizado entra em execução com acompanhamento técnico em tempo real.</p>
+      </div>
+      <div class="step reveal d4">
+        <div class="step__num">4</div>
+        <h3>Chave na mão</h3>
+        <p>Vistoria final, entrega com documentação completa. Você recebe as chaves e entra.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FAIXAS MCMV
+══════════════════════════════════════════ -->
+<section class="section section--dark">
+  <div class="container">
+    <div class="section__head reveal">
+      <h2 class="section__title">Qual é a sua <span class="gold">faixa?</span></h2>
+      <p class="section__sub">O MCMV atende desde quem ganha R$ 2.000 até quem quer construir alto padrão. Cada faixa tem condições específicas.</p>
+    </div>
+    <div class="grid grid--3" style="grid-template-columns: repeat(3,1fr); gap:20px;">
+      <div class="faixa-card reveal d1">
+        <div class="faixa-card__tag">Faixa 1</div>
+        <div class="faixa-card__name">Até R$ 3.200/mês</div>
+        <div class="faixa-card__renda">Maior subsídio do programa</div>
+        <div class="faixa-card__subsidio">até R$ 55.000</div>
+        <div class="faixa-card__sub-label">Parcelas a partir de R$ 80</div>
+      </div>
+      <div class="faixa-card faixa-card--highlight reveal d2">
+        <div class="faixa-card__tag">Faixa 2</div>
+        <div class="faixa-card__name">R$ 3.200 a R$ 5.000</div>
+        <div class="faixa-card__renda">Subsídio alto + FGTS</div>
+        <div class="faixa-card__subsidio">até R$ 45.000</div>
+        <div class="faixa-card__sub-label">Mais solicitada na região</div>
+      </div>
+      <div class="faixa-card reveal d3">
+        <div class="faixa-card__tag">Faixa 3</div>
+        <div class="faixa-card__name">R$ 5.000 a R$ 9.600</div>
+        <div class="faixa-card__renda">Financiamento facilitado</div>
+        <div class="faixa-card__subsidio">até R$ 30.000</div>
+        <div class="faixa-card__sub-label">Uso do FGTS na entrada</div>
+      </div>
+      <div class="faixa-card reveal d2">
+        <div class="faixa-card__tag">Faixa 4</div>
+        <div class="faixa-card__name">R$ 9.600 a R$ 13.000</div>
+        <div class="faixa-card__renda">Taxas reduzidas</div>
+        <div class="faixa-card__subsidio">taxas especiais</div>
+        <div class="faixa-card__sub-label">Crédito facilitado CEF</div>
+      </div>
+      <div class="faixa-card reveal d3" style="grid-column: span 2;">
+        <div class="faixa-card__tag">Alto Padrão · Linha Exclusive</div>
+        <div class="faixa-card__name">Acima de R$ 13.000</div>
+        <div class="faixa-card__renda">Projeto sob medida, curadoria total, acompanhamento presencial</div>
+        <div class="faixa-card__subsidio" style="font-size:1rem;margin-top:8px;">Consultoria personalizada</div>
+        <div class="faixa-card__sub-label">Entre em contato para orçamento exclusivo</div>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:32px;" class="reveal">
+      <a href="#simulacao" class="btn btn--gold btn--lg">
+        Ver minha faixa agora
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </a>
+    </p>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     LEONAN
+══════════════════════════════════════════ -->
+<section class="section section--deep">
+  <div class="container">
+    <div class="leonan">
+      <div class="reveal-left">
+        <div class="leonan__img-wrap">
+          <!-- Substitua pelo src real: /static/leonan-engenheiro.png -->
+          <img src="/static/leonan-engenheiro.png" alt="Leonan Lima, Engenheiro Civil" class="leonan__photo"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="leonan__photo-placeholder">👷</div>
+        </div>
+      </div>
+      <div class="reveal-right">
+        <div class="leonan__badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          Quem está cuidando da sua obra
+        </div>
+        <h2 class="leonan__title">Quando assino uma obra,<br>coloco meu <span class="gold">nome nisso.</span></h2>
+        <p class="leonan__text">
+          Responsabilidade técnica não é papel. É estar presente do projeto à entrega,
+          garantindo que cada etapa seja feita com segurança, dentro do orçamento
+          e sem surpresa no final.
+        </p>
+        <p class="leonan__text">
+          Se o programa não for a melhor opção pra você, falo com transparência.
+          Minha reputação vale mais do que qualquer contrato.
+        </p>
+        <div class="leonan__creds">
+          <div class="cred-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+            Engenheiro Civil — IFES
+          </div>
+          <div class="cred-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+            CREA ativo · Responsabilidade técnica legal
+          </div>
+          <div class="cred-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+            Especialista em engenharia de custos MCMV
+          </div>
+          <div class="cred-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+            São Mateus/ES — Atendimento na região
+          </div>
+        </div>
+        <a href="https://wa.me/5528999646592" target="_blank" rel="noopener" class="btn btn--gold btn--lg">
+          Falar com Leonan
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.523 5.847L.057 23.882l6.209-1.43A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 0 1-4.964-1.347l-.356-.211-3.688.849.873-3.595-.232-.369A9.797 9.797 0 0 1 2.182 12C2.182 6.565 6.565 2.182 12 2.182c5.436 0 9.818 4.383 9.818 9.818 0 5.436-4.382 9.818-9.818 9.818z"/></svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FAQ
+══════════════════════════════════════════ -->
+<section class="section section--dark">
+  <div class="container">
+    <div class="section__head reveal">
+      <h2 class="section__title">Perguntas <span class="gold">frequentes</span></h2>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          Preciso ter o terreno para começar?
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        </button>
+        <div class="faq-a"><p>Não necessariamente. Você pode começar a simulação sem o terreno. Ajudamos a encontrar o terreno certo para o seu projeto e orçamento.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          O subsídio precisa ser devolvido?
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        </button>
+        <div class="faq-a"><p>Não. O subsídio é um desconto do governo direto no valor do imóvel — não é empréstimo e não volta. É uma diferença que nunca sai do seu bolso.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          Quanto tempo leva do início à entrega?
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        </button>
+        <div class="faq-a"><p>Em média 12 a 18 meses da aprovação do crédito até a entrega, dependendo do tamanho da casa e das condições do terreno. Você acompanha tudo em tempo real.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          Posso usar o FGTS mesmo sem demissão?
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        </button>
+        <div class="faq-a"><p>Sim. O FGTS pode ser usado na compra do imóvel mesmo você estando empregado. Serve para reduzir o valor financiado ou abater parcelas.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" aria-expanded="false">
+          A D'LIMA atende qual região?
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        </button>
+        <div class="faq-a"><p>Atendemos São Mateus e região norte do Espírito Santo. Entre em contato para verificar disponibilidade na sua cidade.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     CTA FINAL
+══════════════════════════════════════════ -->
+<section class="cta-final">
+  <div class="container">
+    <h2 class="reveal">Tem gente que me chama<br>e em 3 meses tem <span class="gold">data de entrega.</span></h2>
+    <p class="reveal d1">Tem gente que fica esperando o momento certo. Uma mensagem no WhatsApp não compromete a nada. Mas pode mudar tudo.</p>
+    <a href="https://wa.me/5528999646592?text=Ol%C3%A1!%20Vim%20pelo%20site%20e%20quero%20fazer%20uma%20simula%C3%A7%C3%A3o%20do%20MCMV."
+       target="_blank" rel="noopener"
+       class="btn btn--gold btn--lg btn--pulse reveal d2">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.523 5.847L.057 23.882l6.209-1.43A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 0 1-4.964-1.347l-.356-.211-3.688.849.873-3.595-.232-.369A9.797 9.797 0 0 1 2.182 12C2.182 6.565 6.565 2.182 12 2.182c5.436 0 9.818 4.383 9.818 9.818 0 5.436-4.382 9.818-9.818 9.818z"/></svg>
+      Chamar no WhatsApp agora
+    </a>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     RODAPÉ
+══════════════════════════════════════════ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__inner">
+      <span class="footer__brand">D'LIMA <span class="gold">Engenharia</span></span>
+      <div class="footer__links">
+        <a href="/politica-privacidade">Privacidade</a>
+        <a href="/contato">Contato</a>
+        <a href="https://www.instagram.com/leonan.dlima" target="_blank" rel="noopener">Instagram</a>
+      </div>
+    </div>
+    <p class="footer__legal">© 2026 D'LIMA Engenharia · CREA ativo · São Mateus/ES · (28) 99964-6592</p>
+  </div>
+</footer>
+
+<!-- WA flutuante -->
+<a id="whatsapp-float" class="wa-float" href="https://wa.me/5528999646592" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.523 5.847L.057 23.882l6.209-1.43A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 0 1-4.964-1.347l-.356-.211-3.688.849.873-3.595-.232-.369A9.797 9.797 0 0 1 2.182 12C2.182 6.565 6.565 2.182 12 2.182c5.436 0 9.818 4.383 9.818 9.818 0 5.436-4.382 9.818-9.818 9.818z"/></svg>
+</a>
+
+<script>
+/* ── Intersection Observer — revela elementos no scroll ── */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('in-view');
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right')
+  .forEach(el => io.observe(el));
+
+/* ── Contadores animados (strip) ── */
+function animCounter(el, target, duration) {
+  const start = performance.now();
+  const fmt = n => n >= 1000 ? n.toLocaleString('pt-BR') : n;
+  const step = now => {
+    const p = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3); // ease-out cubic
+    el.textContent = fmt(Math.floor(ease * target));
+    if (p < 1) requestAnimationFrame(step);
+    else el.textContent = fmt(target);
+  };
+  requestAnimationFrame(step);
+}
+
+const stripIO = new IntersectionObserver((entries) => {
+  if (entries[0].isIntersecting) {
+    document.querySelectorAll('[data-count]').forEach(el => {
+      animCounter(el, +el.dataset.count, 1600);
+    });
+    stripIO.disconnect();
+  }
+}, { threshold: 0.5 });
+const strip = document.querySelector('.strip');
+if (strip) stripIO.observe(strip);
+
+/* ── FAQ accordion ── */
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.faq-item');
+    const open = item.classList.contains('open');
+    document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+    if (!open) item.classList.add('open');
+  });
+});
+
+/* ── Formulário → WhatsApp ── */
+document.getElementById('leadForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const nome    = document.getElementById('nome').value.trim();
+  const tel     = document.getElementById('tel').value.trim();
+  const renda   = document.getElementById('renda').value;
+  const terreno = document.getElementById('terreno').value;
+  const msg = `Olá! Meu nome é *${nome}*. Vim pelo site da D'LIMA Engenharia.\nRenda familiar: *${renda}*\nTerreno: *${terreno}*\nWhatsApp: ${tel}`;
+  window.open('https://wa.me/5528999646592?text=' + encodeURIComponent(msg), '_blank');
+});
+</script>
+</body>
+</html>
