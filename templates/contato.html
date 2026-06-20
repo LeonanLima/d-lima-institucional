@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contato | D'LIMA Engenharia</title>
+    <meta name="description" content="Entre em contato com a D'LIMA Engenharia. Fale com um engenheiro sobre seu projeto MCMV ou orçamento.">
+    <meta name="robots" content="index, follow">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <main class="legal" id="contato">
+        <h1>Fale com a <span class="gold">D'LIMA</span></h1>
+        <p>Preencha o formulário e entraremos em contato via WhatsApp em até 1 dia útil.</p>
+
+        <form class="contato-form" id="contatoForm" onsubmit="enviarWhatsApp(event)">
+            <div class="contato-campo">
+                <label for="nome">Seu nome</label>
+                <input type="text" id="nome" name="nome" placeholder="Ex: João Silva" required>
+            </div>
+            <div class="contato-campo">
+                <label for="telefone">WhatsApp</label>
+                <input type="tel" id="telefone" name="telefone" placeholder="(28) 99999-0000" required>
+            </div>
+            <div class="contato-campo">
+                <label for="assunto">Assunto</label>
+                <select id="assunto" name="assunto" required>
+                    <option value="" disabled selected>Selecione...</option>
+                    <option value="Casa MCMV">Minha Casa Minha Vida</option>
+                    <option value="Orçamento de obra">Orçamento de obra</option>
+                    <option value="Regularização de imóvel">Regularização de imóvel</option>
+                    <option value="Outro assunto">Outro assunto</option>
+                </select>
+            </div>
+            <div class="contato-campo">
+                <label for="mensagem">Mensagem <span class="contato-opcional">(opcional)</span></label>
+                <textarea id="mensagem" name="mensagem" rows="4" placeholder="Conte um pouco sobre seu projeto..."></textarea>
+            </div>
+            <button type="submit" class="btn btn--gold btn--lg btn--block">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.523 5.847L.057 23.882l6.209-1.43A11.942 11.942 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 01-4.964-1.347l-.356-.211-3.688.849.873-3.595-.232-.369A9.797 9.797 0 012.182 12C2.182 6.565 6.565 2.182 12 2.182c5.436 0 9.818 4.383 9.818 9.818 0 5.436-4.382 9.818-9.818 9.818z"/>
+                </svg>
+                Enviar pelo WhatsApp
+            </button>
+        </form>
+
+        <a class="back btn btn--gold" href="/">← Voltar para o início</a>
+    </main>
+
+    <script>
+    function enviarWhatsApp(e) {
+        e.preventDefault();
+        var nome     = document.getElementById('nome').value.trim();
+        var telefone = document.getElementById('telefone').value.trim();
+        var assunto  = document.getElementById('assunto').value;
+        var mensagem = document.getElementById('mensagem').value.trim();
+        var texto = 'Olá! Vim pelo site da D\'LIMA.\n'
+            + 'Nome: ' + nome + '\n'
+            + 'Tel: ' + telefone + '\n'
+            + 'Assunto: ' + assunto
+            + (mensagem ? '\nMensagem: ' + mensagem : '');
+        window.open('https://wa.me/5528999646592?text=' + encodeURIComponent(texto), '_blank');
+    }
+    </script>
+</body>
+</html>

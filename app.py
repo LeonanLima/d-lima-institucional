@@ -22,6 +22,11 @@ def privacidade():
     return render_template("privacidade.html")
 
 
+@app.route("/contato")
+def contato():
+    return render_template("contato.html")
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)

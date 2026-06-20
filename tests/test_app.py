@@ -87,3 +87,13 @@ def test_service_worker_killswitch(client):
     assert r.status_code == 200
     body = r.get_data(as_text=True)
     assert "unregister" in body  # kill-switch que remove o SW antigo
+
+
+def test_contato(client):
+    r = client.get("/contato")
+    assert r.status_code == 200
+    html = r.get_data(as_text=True)
+    assert "Contato" in html
+    assert 'id="contato"' in html
+    assert 'id="contatoForm"' in html
+    assert "5528999646592" in html
