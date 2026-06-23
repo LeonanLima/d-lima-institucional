@@ -344,3 +344,112 @@ def memorial_viga(bw, h, L_m, Md_kNm, Vd_kN, fck=25.0, fyk=500.0, caa="II", q_se
     ))
 
     return passos, {"d": d, "VRd2": VRd2, "Vc": Vc, "Md_duc": Md_duc, "dupla": dupla}
+
+def memorial_pilar(H, hx, hy, beta, Nd, Md_kNcm, fck=25.0, fyk=500.0, caa="II"):
+    from dimensionamento.pilar import (
+        _fck_props, calcular_esbeltez, excentricidade_minima, lambda1_limite,
+        excentricidade_2a_ordem, dimensionar_secao, escolher_barras, estribo_pilar,
+    )
+    passos = []
+    p = _fck_props(fck)
+    fcd = p["fcd"] / 10.0
+    fyd = fyk / 1.15 / 10.0
+    Ac = hx * hy
+    nu = Nd / (Ac * fcd)
+    esb = calcular_esbeltez(H, hx, hy, beta)
+    exc = excentricidade_minima(hx, hy)
+    e0 = Md_kNcm / Nd if Nd > 0.1 else 0.0
+    sx = r"\text{" + esb["status_x"] + r"}"
+    sy = r"\text{" + esb["status_y"] + r"}"
+
+    # Passo 1 - esbeltez
+    passos.append(Passo(
+        titulo="Passo 1 - Indice de esbeltez",
+        formula=r"\ell_e=\beta\,H \qquad \lambda=\dfrac{\ell_e}{i}=\dfrac{\ell_e}{h/\sqrt{12}}",
+        substituicao=[
+            r"\ell_e = " + _v(beta, 2) + r" \cdot " + _v(H) + r" = " + _v(esb["le_cm"]) + r"\ \mathrm{cm}",
+            r"\lambda_x = \dfrac{" + _v(esb["le_cm"]) + r"}{" + _v(hx) + r"/\sqrt{12}} = " + _v(esb["lam_x"], 1) + r"\ (" + sx + r")",
+            r"\lambda_y = \dfrac{" + _v(esb["le_cm"]) + r"}{" + _v(hy) + r"/\sqrt{12}} = " + _v(esb["lam_y"], 1) + r"\ (" + sy + r")",
+        ],
+        resultado="lambda_x = " + _v(esb["lam_x"], 1) + " (" + esb["status_x"] + ") | lambda_y = " + _v(esb["lam_y"], 1) + " (" + esb["status_y"] + ")",
+        norma="NBR 6118:2023 sec.15.8.2 | Carini Slide 4",
+        obs="lambda <= 35 curto (sem 2a ordem); 35 < lambda <= 90 pilar-padrao; > 90 metodos mais rigorosos.",
+    ))
+
+    # Passo 2 - exc 1a ordem
+    lam1 = lambda1_limite(max(e0, exc["e1y_min"]), hy, 1.0)
+    precisa2a = esb["lam_y"] > lam1
+    passos.append(Passo(
+        titulo="Passo 2 - Excentricidades de 1a ordem",
+        formula=r"e_0=\dfrac{M_d}{N_d}\qquad e_{1,min}=1{,}5+0{,}03\,h\qquad \lambda_1=25+12{,}5\,\dfrac{\alpha_b\,e_1}{h}",
+        substituicao=[
+            r"e_0 = \dfrac{" + _v(Md_kNcm) + r"}{" + _v(Nd) + r"} = " + _v(e0) + r"\ \mathrm{cm}",
+            r"e_{1x,min} = 1{,}5+0{,}03\cdot" + _v(hx) + r" = " + _v(exc["e1x_min"]) + r"\quad e_{1y,min} = 1{,}5+0{,}03\cdot" + _v(hy) + r" = " + _v(exc["e1y_min"]) + r"\ \mathrm{cm}",
+            r"\lambda_1 = " + _v(lam1, 1) + r"\quad \lambda_y = " + _v(esb["lam_y"], 1) + (r" > \lambda_1 \Rightarrow \text{calcular 2a ordem}" if precisa2a else r" \le \lambda_1 \Rightarrow \text{dispensa 2a ordem}"),
+        ],
+        resultado="e0 = " + _v(e0) + " cm | e1y,min = " + _v(exc["e1y_min"]) + " cm | lambda1 = " + _v(lam1, 1) + " -> " + ("precisa 2a ordem" if precisa2a else "dispensa 2a ordem"),
+        norma="NBR 6118:2023 sec.11.4.1, 15.8.2 | Carini Slide 4",
+    ))
+
+    # Passo 3 - 2a ordem
+    e2y = excentricidade_2a_ordem(esb["lam_y"], hy, nu)
+    e2x = excentricidade_2a_ordem(esb["lam_x"], hx, nu)
+    passos.append(Passo(
+        titulo="Passo 3 - Excentricidade de 2a ordem (pilar-padrao)",
+        formula=r"\nu=\dfrac{N_d}{A_c\,f_{cd}}\qquad e_2=0{,}0005\,\lambda^2\,\dfrac{h}{0{,}5+\nu}",
+        substituicao=[
+            r"\nu = \dfrac{" + _v(Nd) + r"}{" + _v(Ac, 0) + r" \cdot " + _v(fcd, 3) + r"} = " + _v(nu, 3),
+            r"e_{2y} = 0{,}0005 \cdot " + _v(esb["lam_y"], 1) + r"^2 \cdot \dfrac{" + _v(hy) + r"}{0{,}5+" + _v(nu, 3) + r"} = " + _v(e2y, 2) + r"\ \mathrm{cm}",
+            r"e_{2x} = 0{,}0005 \cdot " + _v(esb["lam_x"], 1) + r"^2 \cdot \dfrac{" + _v(hx) + r"}{0{,}5+" + _v(nu, 3) + r"} = " + _v(e2x, 2) + r"\ \mathrm{cm}",
+        ],
+        resultado="nu = " + _v(nu, 3) + " | e2x = " + _v(e2x, 2) + " cm | e2y = " + _v(e2y, 2) + " cm",
+        norma="NBR 6118:2023 sec.15.8.3.3.2 (curvatura aproximada) | Carini Slide 4",
+    ))
+
+    # Passo 4 - momento total
+    e_design = max(e0, exc["e1y_min"]) + e2y
+    Md_design = Nd * e_design
+    passos.append(Passo(
+        titulo="Passo 4 - Momento total de calculo (direcao y)",
+        formula=r"M_{d,tot}=N_d\,(e_1+e_2)\quad\text{com } e_1=\max(e_0,\ e_{1,min})",
+        substituicao=[
+            r"e_{tot} = \max(" + _v(e0) + r",\ " + _v(exc["e1y_min"]) + r") + " + _v(e2y, 2) + r" = " + _v(e_design, 2) + r"\ \mathrm{cm}",
+            r"M_{d,tot} = " + _v(Nd) + r" \cdot " + _v(e_design, 2) + r" = " + _v(Md_design, 1) + r"\ \mathrm{kNcm}",
+        ],
+        resultado="Md,tot = " + _v(Md_design, 1) + " kNcm (dimensiona com este momento)",
+        norma="NBR 6118:2023 sec.15.8 | Carini Slide 4",
+        obs="A pagina Pilar dimensiona com o Md informado; aqui o memorial soma e1+e2 (pilar-padrao correto).",
+    ))
+
+    # Passo 5 - flexo-compressao
+    dim = dimensionar_secao(Nd, Md_design, hx, hy, fck, fyk, caa)
+    cobr = {"I": 2.5, "II": 3.0, "III": 4.0, "IV": 5.0}.get(caa, 3.0)
+    d = hy - cobr - 0.625
+    passos.append(Passo(
+        titulo="Passo 5 - Flexo-compressao normal (armadura simetrica)",
+        formula=r"N_d=F_c-A_s\sigma_{s1}+A_s\sigma_{s2}\qquad A_{s,min}=\max\!\left(0{,}15\dfrac{N_d}{f_{yd}};\ 0{,}4\%\,A_c\right)",
+        substituicao=[
+            r"d = " + _v(hy) + r" - " + _v(cobr) + r" - 0{,}625 = " + _v(d) + r"\ \mathrm{cm}\quad x = " + _v(dim["x_cm"]) + r"\ \mathrm{cm}\ (\text{dominio } " + str(dim["dominio"]) + r")",
+            r"A_{s,total} = " + _v(dim["As_calc"]) + r"\quad A_{s,min} = " + _v(dim["As_min"]) + r"\quad A_{s,max} = " + _v(dim["As_max"]) + r"\ \mathrm{cm^2}",
+        ],
+        resultado="As adotado = " + _v(dim["As_adot"]) + " cm2 (dominio " + str(dim["dominio"]) + (", ductil OK" if dim["ok_ductil"] else ", verificar") + ")",
+        norma="NBR 6118:2023 sec.17.2.2, 17.2.5, 18.4.2.1 | Araujo (Dr., FURG) cap.10",
+    ))
+
+    # Passo 6 - detalhamento
+    escolha = escolher_barras(dim["As_adot"])
+    phi_long = escolha[0][1] if escolha else 16.0
+    est = estribo_pilar(phi_long, min(hx, hy))
+    bar_txt = " ou ".join([str(n) + "Phi" + _v(phi, 1) + "(" + _v(area) + ")" for n, phi, area in escolha[:3]]) if escolha else "-"
+    passos.append(Passo(
+        titulo="Passo 6 - Detalhamento: barras e estribos",
+        formula=r"\phi_t\ge\max(5\,\mathrm{mm};\ \phi_\ell/4)\qquad s_{max}=\min(b;\ 20\,\phi_\ell;\ 30\,\mathrm{cm})",
+        substituicao=[
+            r"\text{Longitudinal: " + bar_txt + r"}",
+            r"\phi_t = " + _v(est["phi_est_mm"], 0) + r"\,\mathrm{mm}\quad s_{max} = " + _v(est["s_max_cm"]) + r"\,\mathrm{cm}\quad s_{red} = " + _v(est["s_red_cm"]) + r"\,\mathrm{cm}",
+        ],
+        resultado="Barras: " + bar_txt + " | Estribo Phi" + _v(est["phi_est_mm"], 0) + " c/" + _v(est["s_max_cm"]) + "cm (s_red " + _v(est["s_red_cm"]) + " cm em emendas/base)",
+        norma="NBR 6118:2023 sec.18.4.2.1, 18.4.3 | Carini Slide 4",
+    ))
+
+    return passos, dim

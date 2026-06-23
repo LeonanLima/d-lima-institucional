@@ -5,7 +5,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
-from relatorio.passo_a_passo import memorial_laje, memorial_viga
+from relatorio.passo_a_passo import memorial_laje, memorial_viga, memorial_pilar
 
 from dimensionamento.predim import predimensionar_laje, predimensionar_viga, predimensionar_pilar
 from dimensionamento.pilar import (
@@ -504,7 +504,7 @@ elif pagina == "📋  Memorial de Cálculo":
     st.title("📋 Memorial de Cálculo — passo a passo")
     st.caption("Metodologia Prof. M.R. Carini (MSc, UFSC) — fórmula, substituição e norma em cada passo")
     elem_m = st.selectbox("Elemento", [
-        "Laje Maciça", "Viga", "Pilar (em breve)",
+        "Laje Maciça", "Viga", "Pilar",
         "Muro de Arrimo (em breve)", "Reservatório (em breve)", "Piscina (em breve)",
     ])
     if elem_m == "Laje Maciça":
@@ -585,5 +585,42 @@ elif pagina == "📋  Memorial de Cálculo":
                 st.error("Erro: " + str(e))
                 import traceback
                 st.code(traceback.format_exc())
+    elif elem_m == "Pilar":
+        with st.form("mem_pilar"):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                H_p = st.number_input("H — altura livre (cm)", 100, 800, 300, 10, key="hp")
+                hx_p = st.number_input("hx (cm)", 12, 120, 19, 1, key="hxp")
+                hy_p = st.number_input("hy (cm)", 12, 120, 40, 1, key="hyp")
+                beta_p = st.number_input("β flambagem", 0.5, 2.0, 1.0, 0.1, key="betap")
+            with c2:
+                Nd_p = st.number_input("Nd (kN)", 10.0, 10000.0, 450.0, 10.0, key="ndp")
+                Md_p = st.number_input("Md (kNcm)", 0.0, 50000.0, 1200.0, 100.0, key="mdp")
+            with c3:
+                fck_p = st.number_input("fck (MPa)", 20, 50, 25, key="fckp")
+                fyk_p = st.number_input("fyk (MPa)", 250, 600, 500, key="fykp")
+                caa_p = st.selectbox("CAA", ["I", "II", "III", "IV"], index=1, key="caap")
+            ok_p = st.form_submit_button("📋 Gerar memorial passo a passo", use_container_width=True)
+        if ok_p:
+            try:
+                passos, _r = memorial_pilar(H_p, hx_p, hy_p, beta_p, Nd_p, Md_p, fck_p, fyk_p, caa_p)
+                st.divider()
+                for p in passos:
+                    st.markdown("#### " + p.titulo)
+                    if p.norma:
+                        st.caption("📖 " + p.norma)
+                    if p.formula:
+                        st.latex(p.formula)
+                    for linha in p.substituicao:
+                        st.latex(linha)
+                    if p.resultado:
+                        st.success(p.resultado)
+                    if p.obs:
+                        st.info("💡 " + p.obs)
+                    st.divider()
+            except Exception as e:
+                st.error("Erro: " + str(e))
+                import traceback
+                st.code(traceback.format_exc())
     else:
-        st.info("Este elemento entra nas próximas fatias. Comece pela Laje ou Viga.")
+        st.info("Este elemento entra nas próximas fatias. Comece pela Laje, Viga ou Pilar.")
