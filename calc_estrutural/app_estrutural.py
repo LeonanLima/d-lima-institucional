@@ -5,7 +5,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
-from relatorio.passo_a_passo import memorial_laje, memorial_viga, memorial_pilar, memorial_muro
+from relatorio.passo_a_passo import memorial_laje, memorial_viga, memorial_pilar, memorial_muro, memorial_reservatorio
 
 from dimensionamento.predim import predimensionar_laje, predimensionar_viga, predimensionar_pilar
 from dimensionamento.pilar import (
@@ -505,7 +505,7 @@ elif pagina == "📋  Memorial de Cálculo":
     st.caption("Metodologia Prof. M.R. Carini (MSc, UFSC) — fórmula, substituição e norma em cada passo")
     elem_m = st.selectbox("Elemento", [
         "Laje Maciça", "Viga", "Pilar",
-        "Muro de Arrimo", "Reservatório (em breve)", "Piscina (em breve)",
+        "Muro de Arrimo", "Reservatório", "Piscina (em breve)",
     ])
     if elem_m == "Laje Maciça":
         CASOS_M = {1: "Caso 1 - 4 apoiadas", 2: "Caso 2 - 3 ap.+1 eng.(ly)",
@@ -657,5 +657,42 @@ elif pagina == "📋  Memorial de Cálculo":
                 st.error("Erro: " + str(e))
                 import traceback
                 st.code(traceback.format_exc())
+    elif elem_m == "Reservatório":
+        with st.form("mem_reserv"):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                tipo_r = st.selectbox("Tipo", ["Elevado", "Enterrado"], key="tipor")
+                estado_r = st.selectbox("Estado", ["Cheio", "Vazio"], key="estr")
+                H_r = st.number_input("H — altura da água (m)", 1.0, 8.0, 2.4, 0.1, key="hr")
+            with c2:
+                L_r = st.number_input("L — maior vão da parede (m)", 1.0, 12.0, 4.75, 0.05, key="lr")
+                hpar_r = st.number_input("h — espessura da parede (cm)", 12, 40, 20, 1, key="hparr")
+                phi_r = st.number_input("φ solo (graus, só enterrado)", 15.0, 45.0, 30.0, 1.0, key="phir")
+            with c3:
+                gs_r = st.number_input("γ solo (kN/m³, só enterrado)", 14.0, 22.0, 18.0, 0.5, key="gsr")
+                fck_r = st.number_input("fck (MPa, mín 40)", 40, 50, 40, key="fckr")
+                fyk_r = st.number_input("fyk (MPa)", 250, 600, 500, key="fykr")
+            ok_r = st.form_submit_button("📋 Gerar memorial passo a passo", use_container_width=True)
+        if ok_r:
+            try:
+                passos, _r = memorial_reservatorio(tipo_r, estado_r, H_r, L_r, hpar_r, phi_r, gs_r, fck_r, fyk_r, "IV")
+                st.divider()
+                for p in passos:
+                    st.markdown("#### " + p.titulo)
+                    if p.norma:
+                        st.caption("📖 " + p.norma)
+                    if p.formula:
+                        st.latex(p.formula)
+                    for linha in p.substituicao:
+                        st.latex(linha)
+                    if p.resultado:
+                        st.success(p.resultado)
+                    if p.obs:
+                        st.info("💡 " + p.obs)
+                    st.divider()
+            except Exception as e:
+                st.error("Erro: " + str(e))
+                import traceback
+                st.code(traceback.format_exc())
     else:
-        st.info("Este elemento entra nas próximas fatias (reservatório, piscina, viga-parede).")
+        st.info("Este elemento entra nas próximas fatias (piscina, viga-parede).")
