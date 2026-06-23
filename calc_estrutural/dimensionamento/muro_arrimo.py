@@ -148,9 +148,10 @@ def dimensionar_fuste(predim, empuxo, fck=25.0, fyk=500.0, caa="III"):
     gamma_solo = empuxo["gamma_solo"]
 
     # Momento na base do fuste (carga triangular em balanco):
-    # M = Ka*gamma*H_fuste^2/6
+    # Pa = Ka*gamma*h^2/2  (kN/m)  aplicada em h/3
+    # Md = Pa * h/3 = Ka*gamma*h^3/6  (kNm/m)  <- Bastos [1] eq.4.12
     gamma_f = 1.4
-    Md = gamma_f * Ka * gamma_solo * h_fuste**2 / 6   # kNm/m
+    Md = gamma_f * Ka * gamma_solo * h_fuste**3 / 6   # kNm/m
     Vd = gamma_f * Ka * gamma_solo * h_fuste**2 / 2   # kN/m
 
     # Dimensionar armadura vertical
