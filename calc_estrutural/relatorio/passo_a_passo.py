@@ -453,3 +453,88 @@ def memorial_pilar(H, hx, hy, beta, Nd, Md_kNcm, fck=25.0, fyk=500.0, caa="II"):
     ))
 
     return passos, dim
+
+def memorial_muro(H_m, phi, gs, qs=0.0, fck=25.0, fyk=500.0, caa="III"):
+    from dimensionamento.muro_arrimo import (
+        predimensionar_muro, calcular_empuxo, verificar_estabilidade, dimensionar_fuste,
+    )
+    passos = []
+    pm = predimensionar_muro(H_m, phi, gs)
+    emp = calcular_empuxo(H_m, gs, phi, 0.0, qs)
+    est = verificar_estabilidade(pm, emp, gs)
+    fus = dimensionar_fuste(pm, emp, fck, fyk, caa)
+    Ka = emp["Ka"]
+
+    # Passo 1 - geometria
+    passos.append(Passo(
+        titulo="Passo 1 - Pre-dimensionamento geometrico",
+        formula=r"e_{base}=0{,}08H+0{,}15\qquad B=0{,}5H\qquad e_{sap}=\max(0{,}10H;\ 0{,}20)",
+        substituicao=[
+            r"e_{base} = 0{,}08\cdot" + _v(H_m) + r"+0{,}15 = " + _v(pm["espessura_fuste_base"]) + r"\ \mathrm{m}\quad e_{topo} = " + _v(pm["espessura_fuste_topo"]) + r"\ \mathrm{m}",
+            r"B = " + _v(pm["B_sapata"]) + r"\ \mathrm{m}\quad e_{sap} = " + _v(pm["esp_sapata"]) + r"\ \mathrm{m}",
+            r"\text{ponta} = " + _v(pm["comprimento_ponta"]) + r"\ \mathrm{m}\quad \text{calcanheira} = " + _v(pm["comprimento_calcanheira"]) + r"\ \mathrm{m}",
+        ],
+        resultado="B = " + _v(pm["B_sapata"]) + " m | fuste base = " + _v(pm["espessura_fuste_base"]) + " m | sapata = " + _v(pm["esp_sapata"]) + " m",
+        norma="Bastos (Dr., UNESP) 2017 + pratica Carini",
+        obs="Carini ensina o muro logo apos o reservatorio elevado (ordem das aulas).",
+    ))
+
+    # Passo 2 - empuxo
+    passos.append(Passo(
+        titulo="Passo 2 - Empuxo ativo de Rankine",
+        formula=r"K_a=\tan^2\!\left(45^\circ-\dfrac{\varphi}{2}\right)\qquad P_a=\tfrac{1}{2}K_a\,\gamma\,H^2\qquad z_a=\dfrac{H}{3}",
+        substituicao=[
+            r"K_a = \tan^2\!\left(45-\dfrac{" + _v(phi, 0) + r"}{2}\right) = " + _v(Ka, 4),
+            r"P_a = \tfrac{1}{2}\cdot" + _v(Ka, 4) + r"\cdot" + _v(gs) + r"\cdot" + _v(H_m) + r"^2 = " + _v(emp["Pa_total"]) + r"\ \mathrm{kN/m}",
+            r"z_a = " + _v(emp["za"]) + r"\ \mathrm{m}\quad(\text{ponto de aplicacao})",
+        ],
+        resultado="Ka = " + _v(Ka, 4) + " | Pa = " + _v(emp["Pa_total"]) + " kN/m | za = " + _v(emp["za"]) + " m",
+        norma="Caputo (Dr., PUC-Rio) 2008 | Mecanica dos Solos",
+    ))
+
+    # Passo 3 - tombamento
+    passos.append(Passo(
+        titulo="Passo 3 - Estabilidade ao tombamento (FST)",
+        formula=r"FST=\dfrac{M_{resist}}{M_{tomb}}=\dfrac{\sum W_i\,x_i}{P_a\,z_a}\ge 1{,}5",
+        substituicao=[
+            r"M_{resist} = " + _v(est["Mt_resist"]) + r"\ \mathrm{kNm/m}\quad M_{tomb} = P_a z_a = " + _v(est["Mt_acao"]) + r"\ \mathrm{kNm/m}",
+            r"FST = \dfrac{" + _v(est["Mt_resist"]) + r"}{" + _v(est["Mt_acao"]) + r"} = " + _v(est["FST"], 3),
+        ],
+        resultado="FST = " + _v(est["FST"], 3) + (" >= 1,5 -> OK" if est["FST_ok"] else " < 1,5 -> aumentar base"),
+        norma="Bastos (Dr., UNESP) 2017 + Araujo (Dr., FURG) 2014",
+    ))
+
+    # Passo 4 - deslizamento
+    passos.append(Passo(
+        titulo="Passo 4 - Estabilidade ao deslizamento (FSD)",
+        formula=r"\mu=\tan\!\left(\tfrac{2}{3}\varphi\right)\qquad FSD=\dfrac{\mu\,\sum W_i}{P_a}\ge 1{,}5",
+        substituicao=[
+            r"W_{total} = " + _v(est["W_total"]) + r"\ \mathrm{kN/m}",
+            r"FSD = \dfrac{\tan(\tfrac{2}{3}\cdot" + _v(phi, 0) + r")\cdot" + _v(est["W_total"]) + r"}{" + _v(emp["Pa_total"]) + r"} = " + _v(est["FSD"], 3),
+        ],
+        resultado="FSD = " + _v(est["FSD"], 3) + (" >= 1,5 -> OK" if est["FSD_ok"] else " < 1,5 -> aumentar base (0,6 a 0,7 H) ou chave de cisalhamento"),
+        norma="Bastos (Dr., UNESP) 2017 | atrito solo-sapata",
+    ))
+
+    # Passo 5 - fuste
+    if "erro" in fus:
+        passos.append(Passo(
+            titulo="Passo 5 - Dimensionamento do fuste",
+            resultado="ERRO: " + fus["erro"],
+            norma="NBR 6118:2023 sec.17",
+        ))
+    else:
+        passos.append(Passo(
+            titulo="Passo 5 - Fuste: armadura vertical (balanco com carga triangular)",
+            formula=r"M_d=\gamma_f\,\dfrac{K_a\,\gamma\,h^3}{6}\qquad V_d=\gamma_f\,\dfrac{K_a\,\gamma\,h^2}{2}\qquad A_s=\dfrac{0{,}85 f_{cd}\,0{,}80\,x\,b}{f_{yd}}",
+            substituicao=[
+                r"M_d = 1{,}4\cdot\dfrac{" + _v(Ka, 4) + r"\cdot" + _v(gs) + r"\cdot" + _v(fus["h_fuste"]) + r"^3}{6} = " + _v(fus["Md_kNm"]) + r"\ \mathrm{kNm/m}",
+                r"V_d = 1{,}4\cdot\dfrac{" + _v(Ka, 4) + r"\cdot" + _v(gs) + r"\cdot" + _v(fus["h_fuste"]) + r"^2}{2} = " + _v(fus["Vd_kN"]) + r"\ \mathrm{kN/m}",
+                r"d = " + _v(fus["d_cm"]) + r"\ \mathrm{cm}\quad A_s = " + _v(fus["As_cm2m"]) + r"\ \mathrm{cm^2/m}",
+            ],
+            resultado="Md = " + _v(fus["Md_kNm"]) + " kNm/m | Vd = " + _v(fus["Vd_kN"]) + " kN/m | As vertical = " + _v(fus["As_cm2m"]) + " cm2/m",
+            norma="Bastos (Dr., UNESP) eq.4.12 | NBR 6118:2023 sec.17",
+            obs="O fuste e uma laje em balanco engastada na sapata; momento na base pela carga triangular do empuxo.",
+        ))
+
+    return passos, {"Ka": Ka, "FST": est["FST"], "FSD": est["FSD"], "fuste": fus}

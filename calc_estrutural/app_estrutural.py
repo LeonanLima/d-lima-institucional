@@ -5,7 +5,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
-from relatorio.passo_a_passo import memorial_laje, memorial_viga, memorial_pilar
+from relatorio.passo_a_passo import memorial_laje, memorial_viga, memorial_pilar, memorial_muro
 
 from dimensionamento.predim import predimensionar_laje, predimensionar_viga, predimensionar_pilar
 from dimensionamento.pilar import (
@@ -505,7 +505,7 @@ elif pagina == "📋  Memorial de Cálculo":
     st.caption("Metodologia Prof. M.R. Carini (MSc, UFSC) — fórmula, substituição e norma em cada passo")
     elem_m = st.selectbox("Elemento", [
         "Laje Maciça", "Viga", "Pilar",
-        "Muro de Arrimo (em breve)", "Reservatório (em breve)", "Piscina (em breve)",
+        "Muro de Arrimo", "Reservatório (em breve)", "Piscina (em breve)",
     ])
     if elem_m == "Laje Maciça":
         CASOS_M = {1: "Caso 1 - 4 apoiadas", 2: "Caso 2 - 3 ap.+1 eng.(ly)",
@@ -622,5 +622,40 @@ elif pagina == "📋  Memorial de Cálculo":
                 st.error("Erro: " + str(e))
                 import traceback
                 st.code(traceback.format_exc())
+    elif elem_m == "Muro de Arrimo":
+        with st.form("mem_muro"):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                H_mu = st.number_input("H — altura do muro (m)", 1.0, 8.0, 3.0, 0.5, key="hmu")
+                phi_mu = st.number_input("φ — atrito do solo (graus)", 15.0, 45.0, 30.0, 1.0, key="phimu")
+            with c2:
+                gs_mu = st.number_input("γ solo (kN/m³)", 14.0, 22.0, 18.0, 0.5, key="gsmu")
+                qs_mu = st.number_input("Sobrecarga qs (kN/m²)", 0.0, 30.0, 0.0, 1.0, key="qsmu")
+            with c3:
+                fck_mu = st.number_input("fck (MPa)", 20, 40, 25, key="fckmu")
+                fyk_mu = st.number_input("fyk (MPa)", 250, 600, 500, key="fykmu")
+                caa_mu = st.selectbox("CAA", ["II", "III", "IV"], index=1, key="caamu")
+            ok_mu = st.form_submit_button("📋 Gerar memorial passo a passo", use_container_width=True)
+        if ok_mu:
+            try:
+                passos, _r = memorial_muro(H_mu, phi_mu, gs_mu, qs_mu, fck_mu, fyk_mu, caa_mu)
+                st.divider()
+                for p in passos:
+                    st.markdown("#### " + p.titulo)
+                    if p.norma:
+                        st.caption("📖 " + p.norma)
+                    if p.formula:
+                        st.latex(p.formula)
+                    for linha in p.substituicao:
+                        st.latex(linha)
+                    if p.resultado:
+                        st.success(p.resultado)
+                    if p.obs:
+                        st.info("💡 " + p.obs)
+                    st.divider()
+            except Exception as e:
+                st.error("Erro: " + str(e))
+                import traceback
+                st.code(traceback.format_exc())
     else:
-        st.info("Este elemento entra nas próximas fatias. Comece pela Laje, Viga ou Pilar.")
+        st.info("Este elemento entra nas próximas fatias (reservatório, piscina, viga-parede).")
