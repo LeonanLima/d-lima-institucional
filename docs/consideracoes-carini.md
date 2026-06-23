@@ -119,3 +119,57 @@ e1 = e0 - (d-d')/2 = 39,11 - 2 = 37,11 cm
 Nd*e1 = 13,68*37,11 = 508 kN*cm/m < Md,lim = 2196 kN*cm/m → Armadura SIMPLES
 (empregar sistema de equações do Slide 28)
 ```
+## 6. Parede de reservatorio - tabela de Carini (painel com carga triangular)
+
+Fonte: Carini, "Reservatorios Elevados", slides 13-15.
+
+Modelo de calculo do reservatorio:
+- TAMPA: laje com carga uniformemente distribuida (4 bordas apoiadas).
+- FUNDO: laje com carga uniforme + momentos nas bordas (4 bordas engastadas).
+- PAREDES: painel com carga TRIANGULAR, bordas laterais e base ENGASTADAS, topo APOIADO.
+
+Momentos (caracteristicos):
+```
+Mx = (mx/1000)*p*l^2     Mxe = (mxe/1000)*p*l^2
+My = (my/1000)*p*l^2     Mye = (mye/1000)*p*l^2
+p = pressao no pico (base) = gamma*H ; l = menor dimensao
+Md = 1,4 * M  (ELU flexao)   |   tracao do anel: Nd = 1,2 * p_agua * L/2
+```
+- Tabela SUPERIOR -> l = lx (usar quando lx <= ly), indexada por lx/ly.
+- Tabela INFERIOR -> l = ly (usar quando ly <= lx), indexada por ly/lx.
+- ly = altura da parede (= altura da agua) ; lx = comprimento da parede.
+- Interpolar linearmente entre as razoes.
+
+Tabela SUPERIOR (l = lx), colunas: lx/ly | mxe | mye | mx | my
+```
+1,00  -28,3  -34,5  12,2  10,6
+0,95  -30,1  -35,5  13,3  10,6
+0,90  -31,9  -36,5  14,3  10,5
+0,85  -33,6  -37,6  15,3  10,4
+0,80  -35,2  -38,7  16,2  10,1
+0,75  -36,6  -39,9  17,2   9,5
+0,70  -37,8  -41,0  18,0   8,7
+0,65  -38,9  -42,1  18,8   8,0
+0,60  -39,8  -43,1  19,5   7,2
+0,55  -40,6  -44,1  20,1   6,4
+0,50  -41,3  -45,1  20,6   5,8
+```
+Tabela INFERIOR (l = ly), colunas: ly/lx | mxe | mye | mx | my
+```
+0,50  -36,2  -62,1   9,4  26,0
+0,55  -36,0  -60,3  10,3  24,6
+0,60  -35,6  -57,8  11,1  23,1
+0,65  -35,2  -54,8  11,9  21,4
+0,70  -34,6  -51,6  12,5  19,7
+0,75  -33,8  -48,2  12,8  18,0
+0,80  -32,9  -45,0  13,0  16,3
+0,85  -31,9  -42,2  13,0  14,8
+0,90  -30,7  -39,5  12,9  13,3
+0,95  -29,5  -37,0  12,6  11,9
+1,00  -28,3  -34,5  12,2  10,6
+```
+Validacao: ly/lx = 0,532 -> mxe=-36,07 mye=-60,95 mx=9,98 my=25,10 (bate com a planilha do Leonan).
+
+Implementado em relatorio/passo_a_passo.py (TAB_RESERV_SUP / TAB_RESERV_INF / memorial_reservatorio).
+Para reservatorio ENTERRADO: mesma tabela, trocando a pressao p -> agua (gamma*H) na face interna
+ou solo (Ka*gamma_s*H) na face externa, conforme a combinacao cheio/vazio.

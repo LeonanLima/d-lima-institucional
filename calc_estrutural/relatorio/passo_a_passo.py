@@ -539,6 +539,40 @@ def memorial_muro(H_m, phi, gs, qs=0.0, fck=25.0, fyk=500.0, caa="III"):
 
     return passos, {"Ka": Ka, "FST": est["FST"], "FSD": est["FSD"], "fuste": fus}
 
+
+def _interp_tab(tab, key):
+    """Interpolacao linear na tabela [(razao, mxe, mye, mx, my), ...]."""
+    key = max(tab[0][0], min(tab[-1][0], key))
+    for i in range(len(tab) - 1):
+        r0, r1 = tab[i], tab[i + 1]
+        if r0[0] <= key <= r1[0]:
+            f = (key - r0[0]) / (r1[0] - r0[0]) if r1[0] != r0[0] else 0.0
+            return [r0[j] + f * (r1[j] - r0[j]) for j in range(1, 5)]
+    return list(tab[-1][1:])
+
+
+# Tabela Carini - parede de reservatorio (painel com carga triangular)
+# Vinculacao: bordas laterais e base ENGASTADAS, topo APOIADO.
+# M = (m/1000) * p * l^2 . Fonte: Carini, Reservatorios Elevados, slide 15.
+# (razao, mxe, mye, mx, my)
+TAB_RESERV_SUP = [  # l = lx, indexado por lx/ly
+    (0.50, -41.3, -45.1, 20.6, 5.8), (0.55, -40.6, -44.1, 20.1, 6.4),
+    (0.60, -39.8, -43.1, 19.5, 7.2), (0.65, -38.9, -42.1, 18.8, 8.0),
+    (0.70, -37.8, -41.0, 18.0, 8.7), (0.75, -36.6, -39.9, 17.2, 9.5),
+    (0.80, -35.2, -38.7, 16.2, 10.1), (0.85, -33.6, -37.6, 15.3, 10.4),
+    (0.90, -31.9, -36.5, 14.3, 10.5), (0.95, -30.1, -35.5, 13.3, 10.6),
+    (1.00, -28.3, -34.5, 12.2, 10.6),
+]
+TAB_RESERV_INF = [  # l = ly, indexado por ly/lx
+    (0.50, -36.2, -62.1, 9.4, 26.0), (0.55, -36.0, -60.3, 10.3, 24.6),
+    (0.60, -35.6, -57.8, 11.1, 23.1), (0.65, -35.2, -54.8, 11.9, 21.4),
+    (0.70, -34.6, -51.6, 12.5, 19.7), (0.75, -33.8, -48.2, 12.8, 18.0),
+    (0.80, -32.9, -45.0, 13.0, 16.3), (0.85, -31.9, -42.2, 13.0, 14.8),
+    (0.90, -30.7, -39.5, 12.9, 13.3), (0.95, -29.5, -37.0, 12.6, 11.9),
+    (1.00, -28.3, -34.5, 12.2, 10.6),
+]
+
+
 def memorial_reservatorio(tipo, estado, H_m, L_m, h_par_cm, phi=30.0, gs=18.0,
                           fck=40.0, fyk=500.0, caa="IV"):
     GAMMA_AGUA = 10.0
@@ -548,130 +582,117 @@ def memorial_reservatorio(tipo, estado, H_m, L_m, h_par_cm, phi=30.0, gs=18.0,
     cobr = {"I": 2.0, "II": 2.5, "III": 4.0, "IV": 4.5}.get(caa, 4.5)
     d = h_par_cm - cobr - 0.625
     Ka = math.tan(math.radians(45 - phi / 2.0)) ** 2
-    p_agua = GAMMA_AGUA * H_m
-    p_solo = Ka * gs * H_m
-
-    # define a combinacao
     enterrado = tipo.lower().startswith("enter")
     cheio = estado.lower().startswith("ch")
-    tem_agua = cheio
+
+    p_agua = GAMMA_AGUA * H_m
+    p_solo = Ka * gs * H_m
     if not enterrado:
-        p_lat = p_agua if cheio else 0.0
-        face = "interna (agua empurra para fora)" if cheio else "sem empuxo lateral (so peso proprio)"
+        p = p_agua if cheio else 0.0
+        carga = "agua interna" if cheio else "vazio (so peso proprio)"
     else:
         if cheio:
-            p_lat = max(p_agua - p_solo, 0.0)
-            face = "interna (agua menos alivio do solo)"
+            p = p_agua
+            carga = "agua interna (solo desprezado a favor da seguranca)"
         else:
-            p_lat = p_solo
-            face = "externa (solo empurra para dentro)"
+            p = p_solo
+            carga = "solo externo"
 
-    # Passo 1 - dados e combinacao
+    # Passo 1 - modelo
     passos.append(Passo(
-        titulo="Passo 1 - Dados e combinacao de calculo",
-        formula=r"\text{NBR 6118:2023 sec.21: CAA IV obrigatoria, } f_{ck}\ge 40\ \mathrm{MPa},\ w_{lim}=0{,}10\ \mathrm{mm}",
+        titulo="Passo 1 - Modelo: painel com carga triangular (Carini)",
+        formula=r"\text{Parede: bordas laterais e base engastadas, topo apoiado; carga triangular}",
         substituicao=[
-            r"\text{Tipo: " + tipo + r" | Estado: " + estado + r" | H = " + _v(H_m) + r"\ m | L = " + _v(L_m) + r"\ m}",
-            r"\text{Parede h = " + _v(h_par_cm) + r"\ cm | d = " + _v(d) + r"\ cm | CAA " + caa + r" (cob. " + _v(cobr) + r"\ cm)}",
+            r"\text{Tipo: " + tipo + r" | Estado: " + estado + r" | carga = " + carga + r"}",
+            r"\text{H = " + _v(H_m) + r"\ m (altura, ly) | L = " + _v(L_m) + r"\ m (comprimento, lx) | h = " + _v(h_par_cm) + r"\ cm}",
         ],
-        resultado=tipo + " + " + estado + " -> face critica: " + face,
-        norma="NBR 6118:2023 sec.21 (estruturas em contato com liquidos)",
-        obs="Carini ensina o reservatorio ELEVADO primeiro (mais simples, sem empuxo de solo).",
+        resultado="CAA IV (cob. " + _v(cobr) + " cm) | d = " + _v(d) + " cm | fck >= 40 MPa",
+        norma="Carini, Reservatorios Elevados, slides 14-15 | NBR 6118:2023 sec.21",
+        obs="Carini ensina o elevado primeiro. Tampa = laje 4 apoiadas (carga unif.); fundo = laje 4 engastadas; paredes = painel triangular.",
     ))
 
-    # Passo 2 - pressao lateral
-    sub2 = [r"p_{agua} = \gamma_a\,H = 10 \cdot " + _v(H_m) + r" = " + _v(p_agua) + r"\ \mathrm{kN/m^2}"]
-    if enterrado:
-        sub2.append(r"K_a = \tan^2(45-\tfrac{" + _v(phi, 0) + r"}{2}) = " + _v(Ka, 4) + r"\quad p_{solo} = K_a\gamma_s H = " + _v(p_solo) + r"\ \mathrm{kN/m^2}")
-        if cheio:
-            sub2.append(r"p_{lat} = p_{agua} - p_{solo} = " + _v(p_agua) + r" - " + _v(p_solo) + r" = " + _v(p_lat) + r"\ \mathrm{kN/m^2}")
-        else:
-            sub2.append(r"p_{lat} = p_{solo} = " + _v(p_lat) + r"\ \mathrm{kN/m^2}")
+    # Passo 2 - pressao + tabela
+    ly, lx = H_m, L_m
+    if ly <= lx:
+        tab, key, l, nome = TAB_RESERV_INF, ly / lx, ly, "inferior (l = ly)"
     else:
-        sub2.append(r"p_{lat} = " + _v(p_lat) + r"\ \mathrm{kN/m^2}\quad(\text{elevado: sem empuxo de solo})")
+        tab, key, l, nome = TAB_RESERV_SUP, lx / ly, lx, "superior (l = lx)"
+    key_c = max(0.50, min(1.00, key))
+    mxe, mye, mx, my = _interp_tab(tab, key_c)
+    if enterrado and not cheio:
+        sub2 = [
+            r"K_a = \tan^2\!\left(45-\tfrac{" + _v(phi, 0) + r"}{2}\right) = " + _v(Ka, 4),
+            r"p = K_a\,\gamma_s\,H = " + _v(Ka, 4) + r"\cdot" + _v(gs) + r"\cdot" + _v(H_m) + r" = " + _v(p) + r"\ \mathrm{kN/m^2}",
+        ]
+    elif p > 0:
+        sub2 = [r"p = \gamma_a\,H = 10\cdot" + _v(H_m) + r" = " + _v(p) + r"\ \mathrm{kN/m^2}\ (\text{pico na base})"]
+    else:
+        sub2 = [r"p = 0\quad(\text{reservatorio vazio, sem empuxo lateral})"]
+    sub2.append(r"\text{razao = " + _v(key_c, 3) + r"\ \Rightarrow\ tabela " + nome + r"}")
+    sub2.append(r"m_x = " + _v(mx, 2) + r",\ m_{xe} = " + _v(mxe, 2) + r",\ m_y = " + _v(my, 2) + r",\ m_{ye} = " + _v(mye, 2))
     passos.append(Passo(
-        titulo="Passo 2 - Pressao lateral governante na parede",
-        formula=r"p_{agua}=\gamma_a\,H \qquad p_{solo}=K_a\,\gamma_s\,H",
+        titulo="Passo 2 - Pressao e coeficientes de tabela (interpolados)",
+        formula=r"M=\dfrac{m}{1000}\,p\,l^2\qquad l=\min(l_x,\,l_y)",
         substituicao=sub2,
-        resultado="p_lat = " + _v(p_lat) + " kN/m2 na base (" + face + ")",
-        norma="Caputo (Dr., PUC-Rio) solos + Carini Notas Reservatorios",
+        resultado="p = " + _v(p) + " kN/m2 | l = " + _v(l) + " m | tabela " + nome,
+        norma="Carini, Reservatorios Elevados, slide 15 (painel carga triangular)",
     ))
 
-    # Passo 3 - momento na parede
-    gamma_f_M = 1.4
-    Md = gamma_f_M * p_lat * H_m ** 2 / 6.0
-    Vd = gamma_f_M * p_lat * H_m / 2.0
-    PL2 = p_lat * L_m ** 2 / 1000.0
+    # Passo 3 - momentos
+    fator = p * l ** 2 / 1000.0
+    Mx, Mxe, My, Mye = mx * fator, mxe * fator, my * fator, mye * fator
     passos.append(Passo(
-        titulo="Passo 3 - Momento de flexao na parede",
-        formula=r"M_d=\gamma_f\,\dfrac{p\,H^2}{6}\qquad(\gamma_f=1{,}4:\ peso\ proprio + sobrecarga + imperm.)",
+        titulo="Passo 3 - Momentos fletores na parede (servico)",
+        formula=r"M_x=\dfrac{m_x}{1000}pl^2\quad M_{xe}=\dfrac{m_{xe}}{1000}pl^2\quad M_y=\dfrac{m_y}{1000}pl^2\quad M_{ye}=\dfrac{m_{ye}}{1000}pl^2",
         substituicao=[
-            r"M_d = 1{,}4 \cdot \dfrac{" + _v(p_lat) + r" \cdot " + _v(H_m) + r"^2}{6} = " + _v(Md) + r"\ \mathrm{kNm/m}",
-            r"V_d = 1{,}4 \cdot \dfrac{" + _v(p_lat) + r" \cdot " + _v(H_m) + r"}{2} = " + _v(Vd) + r"\ \mathrm{kN/m}",
-            r"\text{(metodo de placa Carini: } M = coef\cdot\dfrac{p\,L^2}{1000}, \dfrac{p L^2}{1000}=" + _v(PL2, 3) + r"\text{)}",
+            r"\dfrac{p\,l^2}{1000} = \dfrac{" + _v(p) + r"\cdot" + _v(l) + r"^2}{1000} = " + _v(fator, 4),
+            r"M_x = " + _v(Mx, 2) + r"\quad M_{xe} = " + _v(Mxe, 2) + r"\ \mathrm{kNm/m}",
+            r"M_y = " + _v(My, 2) + r"\quad M_{ye} = " + _v(Mye, 2) + r"\ \mathrm{kNm/m}",
         ],
-        resultado="Md = " + _v(Md) + " kNm/m | Vd = " + _v(Vd) + " kN/m (parede em balanco vertical)",
-        norma="NBR 6118:2023 sec.21 | Carini (placa com carga triangular)",
-        obs="Modelo de balanco vertical (a favor da seguranca). O metodo rigoroso de Carini usa coeficientes de placa com carga triangular (P*L^2/1000) - ver docs/consideracoes-carini.md.",
+        resultado="Mx=" + _v(Mx, 2) + " Mxe=" + _v(Mxe, 2) + " My=" + _v(My, 2) + " Mye=" + _v(Mye, 2) + " kNm/m (servico)",
+        norma="Carini, slide 15 | momentos caracteristicos",
     ))
 
-    # Passo 4 - armadura vertical (flexao / flexo-tracao)
+    # Passo 4 - armaduras Md = 1,4 M
     b = 100.0
     As_min = 0.0015 * b * h_par_cm
-    if Md > 0.001:
+
+    def armar(Mk):
+        Md = 1.4 * abs(Mk)
+        if Md < 0.001:
+            return 0.0, 0.0, round(As_min, 2)
         disc = 1 - Md * 100 / (0.425 * b * d ** 2 * fcd)
+        if disc < 0:
+            return round(Md, 2), -1.0, round(As_min, 2)
         x = 1.25 * d * (1 - math.sqrt(max(0, disc)))
-        As_vert = 0.85 * fcd * 0.80 * x * b / fyd
-    else:
-        x = 0.0
-        As_vert = 0.0
-    As_vert_adot = max(As_vert, As_min)
+        As = 0.85 * fcd * 0.80 * x * b / fyd
+        return round(Md, 2), round(x, 2), round(max(As, As_min), 2)
+
+    Mvert = max(abs(My), abs(Mye))
+    Mhoriz = max(abs(Mx), abs(Mxe))
+    Md_v, x_v, As_v = armar(Mvert)
+    Md_h, x_h, As_h = armar(Mhoriz)
     passos.append(Passo(
-        titulo="Passo 4 - Armadura vertical (flexao / flexo-tracao)",
-        formula=r"x=1{,}25\,d\left[1-\sqrt{1-\dfrac{M_d}{0{,}425\,b\,d^2 f_{cd}}}\right]\qquad A_s=\dfrac{0{,}85 f_{cd}\,0{,}80\,x\,b}{f_{yd}}",
+        titulo="Passo 4 - Armaduras de flexao (Md = 1,4 M)",
+        formula=r"M_d=1{,}4\,M\qquad A_s=\dfrac{0{,}85 f_{cd}\,0{,}80\,x\,b}{f_{yd}}\ \ge\ A_{s,min}=0{,}15\%\,b\,h",
         substituicao=[
-            r"x = " + _v(x) + r"\ \mathrm{cm}\quad A_{s,calc} = " + _v(As_vert) + r"\ \mathrm{cm^2/m}",
-            r"A_{s,min} = 0{,}15\%\cdot b\cdot h = " + _v(As_min) + r"\ \mathrm{cm^2/m}",
+            r"\text{Vertical (y): } M_d = 1{,}4\cdot" + _v(Mvert, 2) + r" = " + _v(Md_v, 2) + r"\ \Rightarrow\ A_s = " + _v(As_v, 2) + r"\ \mathrm{cm^2/m}",
+            r"\text{Horizontal (x): } M_d = 1{,}4\cdot" + _v(Mhoriz, 2) + r" = " + _v(Md_h, 2) + r"\ \Rightarrow\ A_s = " + _v(As_h, 2) + r"\ \mathrm{cm^2/m}",
+            r"A_{s,min} = 0{,}15\%\cdot100\cdot" + _v(h_par_cm) + r" = " + _v(As_min, 2) + r"\ \mathrm{cm^2/m}",
         ],
-        resultado="As vertical = " + _v(As_vert_adot) + " cm2/m",
-        norma="NBR 6118:2023 sec.17.2.2, 21.3",
-        obs="Flexo-tracao: a norma nao da As,min especifica. Carini: se x>0 (grande excentr.) usar As,min de flexao simples; se pequena excentr., usar a de tracao simples (a favor da seguranca).",
+        resultado="As vertical = " + _v(As_v, 2) + " cm2/m | As horizontal = " + _v(As_h, 2) + " cm2/m",
+        norma="NBR 6118:2023 sec.17.2.2, 21.3 | gamma_f = 1,4 (Carini)",
+        obs="Flexo-tracao: somar a tracao do anel (gamma_f = 1,2). A norma nao da As,min de flexo-tracao; Carini usa a de flexao simples se x>0.",
     ))
 
-    # Passo 5 - tracao horizontal (anel)
-    if tem_agua:
-        gamma_f_N = 1.2
-        R = L_m / 2.0
-        Nd = gamma_f_N * p_agua * R
-        As_horiz = Nd / fyd
-        As_horiz_adot = max(As_horiz, As_min)
-        sub5 = [
-            r"N_d = \gamma_f\,p_{agua}\,\dfrac{L}{2} = 1{,}2 \cdot " + _v(p_agua) + r" \cdot " + _v(R) + r" = " + _v(Nd) + r"\ \mathrm{kN/m}",
-            r"A_{s,horiz} = \dfrac{N_d}{f_{yd}} = \dfrac{" + _v(Nd) + r"}{" + _v(fyd, 3) + r"} = " + _v(As_horiz) + r"\ \mathrm{cm^2/m}",
-        ]
-        res5 = "As horizontal = " + _v(As_horiz_adot) + " cm2/m (tracao do anel)"
-    else:
-        sub5 = [r"\text{Estado vazio: sem tracao de agua. Adotar armadura horizontal minima.}"]
-        res5 = "As horizontal = " + _v(As_min) + " cm2/m (minima)"
+    # Passo 5 - ELS
     passos.append(Passo(
-        titulo="Passo 5 - Tracao horizontal (efeito anel)",
-        formula=r"N_d=\gamma_f\,p_{agua}\,\dfrac{L}{2}\qquad A_{s,horiz}=\dfrac{N_d}{f_{yd}}\qquad(\gamma_f=1{,}2:\ empuxo\ da\ agua)",
-        substituicao=sub5,
-        resultado=res5,
-        norma="NBR 6118:2023 sec.21 | Fusco (Dr., USP) sol. tangenciais",
-        obs="Carini: para o empuxo da agua pode-se usar gamma_f = 1,2 (e a forca que a agua exerce na parede).",
-    ))
-
-    # Passo 6 - ELS fissuracao
-    passos.append(Passo(
-        titulo="Passo 6 - ELS: controle de fissuracao",
-        formula=r"w_k \le w_{lim} = 0{,}10\ \mathrm{mm}\quad(\text{contato com agua, CAA IV})",
-        substituicao=[
-            r"\text{Verificar abertura de fissura } w_k \le 0{,}10\ \mathrm{mm}\text{ nas duas faces.}",
-        ],
-        resultado="Limite de fissura wlim = 0,10 mm (estanqueidade)",
+        titulo="Passo 5 - ELS: controle de fissuracao",
+        formula=r"w_k \le w_{lim} = 0{,}10\ \mathrm{mm}\quad(\text{estanqueidade, CAA IV})",
+        substituicao=[r"\text{Verificar } w_k \le 0{,}10\ \mathrm{mm}\ \text{(bem mais restritivo que laje comum 0,30 mm).}"],
+        resultado="Limite de fissura wlim = 0,10 mm",
         norma="NBR 6118:2023 sec.21.3.3, Tabela 13.4",
-        obs="Reservatorio exige fissuracao bem mais restritiva que laje comum (0,10 vs 0,30 mm).",
     ))
 
-    return passos, {"p_lat": p_lat, "Md": Md, "As_vert": As_vert_adot, "Ka": Ka}
+    return passos, {"p": p, "l": l, "razao": key_c, "Mx": Mx, "Mxe": Mxe,
+                    "My": My, "Mye": Mye, "As_vert": As_v, "As_horiz": As_h}
