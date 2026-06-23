@@ -5,7 +5,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
-from relatorio.passo_a_passo import memorial_laje, memorial_viga, memorial_pilar, memorial_muro, memorial_reservatorio
+from relatorio.passo_a_passo import memorial_laje, memorial_viga, memorial_pilar, memorial_muro, memorial_reservatorio, memorial_piscina
 
 from dimensionamento.predim import predimensionar_laje, predimensionar_viga, predimensionar_pilar
 from dimensionamento.pilar import (
@@ -505,7 +505,7 @@ elif pagina == "📋  Memorial de Cálculo":
     st.caption("Metodologia Prof. M.R. Carini (MSc, UFSC) — fórmula, substituição e norma em cada passo")
     elem_m = st.selectbox("Elemento", [
         "Laje Maciça", "Viga", "Pilar",
-        "Muro de Arrimo", "Reservatório", "Piscina (em breve)",
+        "Muro de Arrimo", "Reservatório", "Piscina",
     ])
     if elem_m == "Laje Maciça":
         CASOS_M = {1: "Caso 1 - 4 apoiadas", 2: "Caso 2 - 3 ap.+1 eng.(ly)",
@@ -694,5 +694,42 @@ elif pagina == "📋  Memorial de Cálculo":
                 st.error("Erro: " + str(e))
                 import traceback
                 st.code(traceback.format_exc())
+    elif elem_m == "Piscina":
+        with st.form("mem_pisc"):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                estado_pi = st.selectbox("Estado", ["Cheia", "Vazia"], key="estpi")
+                H_pi = st.number_input("H — altura da água (m)", 1.0, 6.0, 1.5, 0.1, key="hpi")
+                L_pi = st.number_input("L — maior vão da parede (m)", 1.0, 12.0, 4.0, 0.1, key="lpi")
+            with c2:
+                hpar_pi = st.number_input("h — espessura da parede (cm)", 12, 40, 20, 1, key="hparpi")
+                phi_pi = st.number_input("φ solo (graus)", 15.0, 45.0, 30.0, 1.0, key="phipi")
+                gs_pi = st.number_input("γ solo (kN/m³)", 14.0, 22.0, 18.0, 0.5, key="gspi")
+            with c3:
+                qs_pi = st.number_input("Sobrecarga no solo qs (kN/m²)", 0.0, 30.0, 0.0, 1.0, key="qspi")
+                fck_pi = st.number_input("fck (MPa)", 25, 50, 30, key="fckpi")
+                fyk_pi = st.number_input("fyk (MPa)", 250, 600, 500, key="fykpi")
+            ok_pi = st.form_submit_button("📋 Gerar memorial passo a passo", use_container_width=True)
+        if ok_pi:
+            try:
+                passos, _r = memorial_piscina(estado_pi, H_pi, L_pi, hpar_pi, phi_pi, gs_pi, qs_pi, fck_pi, fyk_pi, "III")
+                st.divider()
+                for p in passos:
+                    st.markdown("#### " + p.titulo)
+                    if p.norma:
+                        st.caption("📖 " + p.norma)
+                    if p.formula:
+                        st.latex(p.formula)
+                    for linha in p.substituicao:
+                        st.latex(linha)
+                    if p.resultado:
+                        st.success(p.resultado)
+                    if p.obs:
+                        st.info("💡 " + p.obs)
+                    st.divider()
+            except Exception as e:
+                st.error("Erro: " + str(e))
+                import traceback
+                st.code(traceback.format_exc())
     else:
-        st.info("Este elemento entra nas próximas fatias (piscina, viga-parede).")
+        st.info("Falta apenas a Viga-parede (proxima fatia).")

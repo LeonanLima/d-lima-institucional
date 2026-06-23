@@ -696,3 +696,138 @@ def memorial_reservatorio(tipo, estado, H_m, L_m, h_par_cm, phi=30.0, gs=18.0,
 
     return passos, {"p": p, "l": l, "razao": key_c, "Mx": Mx, "Mxe": Mxe,
                     "My": My, "Mye": Mye, "As_vert": As_v, "As_horiz": As_h}
+
+def memorial_piscina(estado, H_m, L_m, h_par_cm, phi=30.0, gs=18.0, qs=0.0,
+                     fck=30.0, fyk=500.0, caa="III"):
+    # Reaproveita a tabela de Bares (via Carini) ja validada: TAB_RESERV_SUP/INF.
+    GAMMA_AGUA = 10.0
+    passos = []
+    fcd = fck / 1.4 / 10.0
+    fyd = fyk / 1.15 / 10.0
+    cobr = {"I": 2.0, "II": 2.5, "III": 4.0, "IV": 4.5}.get(caa, 4.0)
+    d = h_par_cm - cobr - 0.625
+    dl = cobr + 0.625
+    Ka = math.tan(math.radians(45 - phi / 2.0)) ** 2
+    cheia = estado.lower().startswith("ch")
+
+    p_agua = GAMMA_AGUA * H_m
+    p_solo = Ka * gs * H_m + Ka * qs
+    if cheia:
+        p = p_agua
+        carga = "agua interna (piscina cheia, sem solo de alivio)"
+    else:
+        p = p_solo
+        carga = "solo externo (piscina vazia)"
+
+    # Passo 1 - modelo
+    razao = H_m / L_m
+    passos.append(Passo(
+        titulo="Passo 1 - Modelo: placa com carga triangular (tabela de Bares)",
+        formula=r"\text{Parede de piscina = placa retangular sob carga triangular; esforcos pela tabela de Bares}",
+        substituicao=[
+            r"\text{Estado: " + estado + r" | carga = " + carga + r"}",
+            r"\text{H = " + _v(H_m) + r"\ m (ly) | L = " + _v(L_m) + r"\ m (lx) | h = " + _v(h_par_cm) + r"\ cm | d = " + _v(d) + r"\ cm}",
+            r"\lambda = \dfrac{l_y}{l_x} = \dfrac{" + _v(H_m) + r"}{" + _v(L_m) + r"} = " + _v(razao, 3) + (r"\ < 2\ \Rightarrow\ \text{placa bidirecional}" if razao < 2 else r"\ \ge 2\ \Rightarrow\ \text{unidirecional}"),
+        ],
+        resultado="Placa " + ("bidirecional" if razao < 2 else "unidirecional") + " | CAA " + caa + " (cob. " + _v(cobr) + " cm)",
+        norma="BARES, R. - Tabelas para placas | Carini, Piscinas e Reservatorios Enterrados",
+        obs="Piscina aberta tem topo LIVRE. Esta rotina usa a tabela de Bares de painel triangular extraida do material do Carini (mesma do reservatorio). Com sobrecarga no solo a carga vira trapezoidal - aqui adota-se o pico (a favor da seguranca).",
+    ))
+
+    # Passo 2 - pressao + coeficientes de Bares
+    ly, lx = H_m, L_m
+    if ly <= lx:
+        tab, key, l, nome = TAB_RESERV_INF, ly / lx, ly, "inferior (l = ly)"
+    else:
+        tab, key, l, nome = TAB_RESERV_SUP, lx / ly, lx, "superior (l = lx)"
+    key_c = max(0.50, min(1.00, key))
+    mxe, mye, mx, my = _interp_tab(tab, key_c)
+    if cheia:
+        sub2 = [r"p = \gamma_a\,H = 10\cdot" + _v(H_m) + r" = " + _v(p) + r"\ \mathrm{kN/m^2}\ (\text{pico na base})"]
+    else:
+        sub2 = [
+            r"K_a = \tan^2\!\left(45-\tfrac{" + _v(phi, 0) + r"}{2}\right) = " + _v(Ka, 4),
+            r"p = K_a\,\gamma_s\,H + K_a\,q_s = " + _v(p) + r"\ \mathrm{kN/m^2}",
+        ]
+    sub2.append(r"\text{razao = " + _v(key_c, 3) + r"\ \Rightarrow\ tabela de Bares " + nome + r"}")
+    sub2.append(r"m_x=" + _v(mx, 2) + r",\ m_{xe}=" + _v(mxe, 2) + r",\ m_y=" + _v(my, 2) + r",\ m_{ye}=" + _v(mye, 2))
+    passos.append(Passo(
+        titulo="Passo 2 - Pressao e coeficientes da tabela de Bares (interpolados)",
+        formula=r"M=\dfrac{m}{1000}\,p\,l^2\qquad l=\min(l_x,\,l_y)",
+        substituicao=sub2,
+        resultado="p = " + _v(p) + " kN/m2 | l = " + _v(l) + " m | coeficientes de Bares interpolados (tabela " + nome + ")",
+        norma="BARES - Tabelas para placas (carga triangular) | Carini, slide de reservatorios",
+    ))
+
+    # Passo 3 - momentos
+    fator = p * l ** 2 / 1000.0
+    Mx, Mxe, My, Mye = mx * fator, mxe * fator, my * fator, mye * fator
+    Mvert = max(abs(My), abs(Mye))
+    Mhoriz = max(abs(Mx), abs(Mxe))
+    passos.append(Passo(
+        titulo="Passo 3 - Momentos fletores na parede (servico)",
+        formula=r"M_x=\dfrac{m_x}{1000}pl^2\quad M_{xe}=\dfrac{m_{xe}}{1000}pl^2\quad M_y=\dfrac{m_y}{1000}pl^2\quad M_{ye}=\dfrac{m_{ye}}{1000}pl^2",
+        substituicao=[
+            r"\dfrac{p\,l^2}{1000} = \dfrac{" + _v(p) + r"\cdot" + _v(l) + r"^2}{1000} = " + _v(fator, 4),
+            r"M_x = " + _v(Mx, 2) + r"\quad M_{xe} = " + _v(Mxe, 2) + r"\ \mathrm{kNm/m}",
+            r"M_y = " + _v(My, 2) + r"\quad M_{ye} = " + _v(Mye, 2) + r"\ \mathrm{kNm/m}",
+        ],
+        resultado="Mvert (y) = " + _v(Mvert, 2) + " kNm/m | Mhoriz (x) = " + _v(Mhoriz, 2) + " kNm/m (servico)",
+        norma="Tabela de Bares (Carini) | momentos caracteristicos",
+    ))
+
+    # Passo 4 - flexo-tracao
+    b = 100.0
+    As_min = 0.0015 * b * h_par_cm
+    Nk = p_agua * L_m / 2.0 if cheia else 0.0   # tracao do anel (so com agua)
+    Nd = 1.4 * Nk
+    Md_v = 1.4 * Mvert
+
+    def armar(Md):
+        if Md < 0.001:
+            return 0.0, 0.0
+        disc = 1 - Md * 100 / (0.425 * b * d ** 2 * fcd)
+        if disc < 0:
+            return -1.0, -1.0
+        x = 1.25 * d * (1 - math.sqrt(max(0, disc)))
+        As = 0.85 * fcd * 0.80 * x * b / fyd
+        return round(x, 2), round(As, 2)
+
+    x_v, As_flex = armar(Md_v)
+    As_trac = Nd / fyd if Nd > 0 else 0.0
+    As_vert = max(As_flex + As_trac, As_min)
+    if Nd > 0:
+        e0 = Md_v / Nd
+        e1 = e0 - (d - dl) / 2.0
+        sub4 = [
+            r"M_d = 1{,}4\cdot" + _v(Mvert, 2) + r" = " + _v(Md_v, 2) + r"\ \mathrm{kNm/m}\quad N_d = 1{,}4\cdot" + _v(Nk, 2) + r" = " + _v(Nd, 2) + r"\ \mathrm{kN/m}",
+            r"e_0 = \dfrac{M_d}{N_d} = " + _v(e0, 2) + r"\ \mathrm{cm}\quad e_1 = e_0 - \dfrac{d-d^{\prime}}{2} = " + _v(e1, 2) + r"\ \mathrm{cm}",
+            r"A_s = A_{s,flexao} + A_{s,tracao} = " + _v(As_flex, 2) + r" + " + _v(As_trac, 2) + r" = " + _v(As_vert, 2) + r"\ \mathrm{cm^2/m}",
+        ]
+        nota = "Flexo-tracao (grande excentricidade): soma-se a armadura de flexao a parcela de tracao Nd/fyd. Carini: empregar As,min de flexao simples se x>0 (sistema do slide 28)."
+    else:
+        sub4 = [
+            r"M_d = 1{,}4\cdot" + _v(Mvert, 2) + r" = " + _v(Md_v, 2) + r"\ \mathrm{kNm/m}\ (\text{piscina vazia: so flexao do solo})",
+            r"A_s = " + _v(As_flex, 2) + r"\ \ge\ A_{s,min} = " + _v(As_min, 2) + r"\ \mathrm{cm^2/m}",
+        ]
+        nota = "Piscina vazia: o solo comprime o anel, predomina a flexao. Verificar a face externa tracionada."
+    passos.append(Passo(
+        titulo="Passo 4 - Armadura por flexo-tracao (Md = 1,4 M ; Nd = 1,4 N)",
+        formula=r"A_s = \dfrac{0{,}85 f_{cd}\,0{,}80\,x\,b}{f_{yd}} + \dfrac{N_d}{f_{yd}}\quad(\text{flexo-tracao})",
+        substituicao=sub4,
+        resultado="As vertical = " + _v(As_vert, 2) + " cm2/m" + (" (flexo-tracao)" if Nd > 0 else " (flexao)"),
+        norma="NBR 6118:2023 sec.17.2.2, 21 | Carini, flexo-tracao slide 28",
+        obs=nota,
+    ))
+
+    # Passo 5 - ELS
+    wlim = "0,10" if caa == "IV" else "0,20"
+    passos.append(Passo(
+        titulo="Passo 5 - ELS: controle de fissuracao",
+        formula=r"w_k \le w_{lim}\quad(\text{estanqueidade})",
+        substituicao=[r"\text{Verificar } w_k \le " + wlim + r"\ \mathrm{mm}\ (\text{contato com agua})."],
+        resultado="Limite de fissura wlim = " + wlim + " mm",
+        norma="NBR 6118:2023 sec.21.3.3, Tabela 13.4",
+    ))
+
+    return passos, {"p": p, "Mvert": Mvert, "Mhoriz": Mhoriz, "Nd": Nd, "As_vert": As_vert}
