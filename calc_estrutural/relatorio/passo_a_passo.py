@@ -186,3 +186,161 @@ def memorial_laje(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0, caa="II", p
     ))
 
     return passos, res
+
+def memorial_viga(bw, h, L_m, Md_kNm, Vd_kN, fck=25.0, fyk=500.0, caa="II", q_ser=None):
+    from dimensionamento.viga import (
+        _fck_props, verificar_bielas, dimensionar_estribos,
+        momento_limite_simples, armadura_simples, armadura_dupla,
+        calcular_flecha_branson, escolher_barras,
+    )
+    passos = []
+    d = h - 5.0
+    p = _fck_props(fck)
+    fcd = p["fcd"]
+    fyd = fyk / 1.15 / 10.0
+    lam = p["lam"]
+    ac = p["alpha_c"]
+    ec = p["eta_c"]
+    fctm = p["fctm"]
+    fctd = p["fctd"]
+    avv = 1 - fck / 250.0
+    Md_kNcm = Md_kNm * 100.0
+
+    # Passo 1
+    passos.append(Passo(
+        titulo="Passo 1 - Geometria e propriedades dos materiais",
+        formula=r"d \approx h - 5 \qquad f_{cd}=\dfrac{f_{ck}}{1{,}4}\qquad f_{yd}=\dfrac{f_{yk}}{1{,}15}\qquad \alpha_{v2}=1-\dfrac{f_{ck}}{250}",
+        substituicao=[
+            r"d = " + _v(h) + r" - 5 = " + _v(d) + r"\ \mathrm{cm}",
+            r"f_{cd} = " + _v(fck) + r"/1{,}4 = " + _v(fcd, 3) + r"\ \mathrm{kN/cm^2} \quad f_{yd} = " + _v(fyk) + r"/1{,}15 = " + _v(fyd, 3) + r"\ \mathrm{kN/cm^2}",
+            r"\alpha_{v2} = 1 - " + _v(fck, 0) + r"/250 = " + _v(avv, 3) + r" \quad f_{ctd} = 0{,}15\,f_{ck}^{2/3}/1{,}4 = " + _v(fctd, 4) + r"\ \mathrm{kN/cm^2}",
+        ],
+        resultado="d = " + _v(d) + " cm | fcd = " + _v(fcd, 3) + " | fyd = " + _v(fyd, 3) + " kN/cm2",
+        norma="NBR 6118:2023 sec.8.2, 14 | Carini Slide 3",
+    ))
+
+    # Passo 2 - bielas
+    biel = verificar_bielas(Vd_kN, bw, d, fck)
+    VRd2 = biel["VRd2"]
+    passos.append(Passo(
+        titulo="Passo 2 - Cisalhamento: bielas comprimidas (VRd2)",
+        formula=r"V_{Rd2} = 0{,}27\,\alpha_{v2}\,f_{cd}\,b_w\,d",
+        substituicao=[
+            r"V_{Rd2} = 0{,}27 \cdot " + _v(avv, 3) + r" \cdot " + _v(fcd, 3) + r" \cdot " + _v(bw) + r" \cdot " + _v(d) + r" = " + _v(VRd2) + r"\ \mathrm{kN}",
+        ],
+        resultado="VRd2 = " + _v(VRd2) + " kN  " + ("vs Vd = " + _v(Vd_kN) + " kN -> bielas OK" if biel["ok"] else "< Vd -> AUMENTAR secao"),
+        norma="NBR 6118:2023 sec.17.4.1.2.1 (Modelo I) | Bastos (UNESP)",
+        obs="Modelo I de Ritter-Morsch: bielas a 45 graus. Se Vd > VRd2 o concreto esmaga e estribo nao resolve.",
+    ))
+
+    # Passo 3 - Vc
+    Vc = 0.6 * fctd * bw * d
+    passos.append(Passo(
+        titulo="Passo 3 - Cisalhamento: parcela do concreto (Vc)",
+        formula=r"V_c = 0{,}6\,f_{ctd}\,b_w\,d",
+        substituicao=[
+            r"V_c = 0{,}6 \cdot " + _v(fctd, 4) + r" \cdot " + _v(bw) + r" \cdot " + _v(d) + r" = " + _v(Vc) + r"\ \mathrm{kN}",
+        ],
+        resultado="Vc = " + _v(Vc) + " kN (banzo comprimido + engrenamento + efeito pino)",
+        norma="NBR 6118:2023 sec.17.4.1.2.1 | Bastos (UNESP)",
+    ))
+
+    # Passo 4 - estribos
+    est = dimensionar_estribos(Vd_kN, bw, d, fck, fyk)
+    fywk = fyk / 10.0
+    fctm_c = fctm / 10.0
+    Asw_s_min = est["Asw_s_min"]
+    Asw_s = est["Asw_s"]
+    smax = min(0.6 * d, 30.0)
+    sub4 = [
+        r"\left(\dfrac{A_{sw}}{s}\right)_{min} = 0{,}2\,\dfrac{f_{ctm}}{f_{ywk}}\,b_w = 0{,}2 \cdot \dfrac{" + _v(fctm_c, 3) + r"}{" + _v(fywk, 1) + r"} \cdot " + _v(bw) + r" = " + _v(Asw_s_min, 4) + r"\ \mathrm{cm^2/cm}",
+    ]
+    if Vd_kN <= Vc:
+        sub4.append(r"V_d = " + _v(Vd_kN) + r" \le V_c \Rightarrow \text{usar armadura minima}")
+    else:
+        sub4.append(r"\dfrac{A_{sw}}{s} = \dfrac{V_d - V_c}{0{,}9\,d\,f_{yd}} = \dfrac{" + _v(Vd_kN) + r" - " + _v(Vc) + r"}{0{,}9 \cdot " + _v(d) + r" \cdot " + _v(fyd, 3) + r"} = " + _v(Asw_s, 4) + r"\ \mathrm{cm^2/cm}")
+    sug_txt = " | ".join(["Phi" + _v(s["phi_mm"], 1) + " c/" + str(s["s_cm"]) + "cm" for s in est["sugestoes"]]) if est["sugestoes"] else "ver tabela"
+    passos.append(Passo(
+        titulo="Passo 4 - Armadura transversal (estribos, Modelo I)",
+        formula=r"\dfrac{A_{sw}}{s} = \dfrac{V_d - V_c}{0{,}9\,d\,f_{yd}} \ge \left(\dfrac{A_{sw}}{s}\right)_{min} \qquad s_{max} = \min(0{,}6d;\ 30)",
+        substituicao=sub4,
+        resultado="Asw/s = " + _v(Asw_s, 4) + " cm2/cm (trecho " + est["trecho"] + ") | s_max = " + _v(smax) + " cm | sugestoes: " + sug_txt,
+        norma="NBR 6118:2023 sec.17.4.2 | Carini Slide 3",
+    ))
+
+    # Passo 5 - momento limite
+    lim = momento_limite_simples(bw, d, fck)
+    x_duc = lim["x_duc"]
+    Md_duc = lim["Md_duc"]
+    dupla = Md_kNcm > Md_duc
+    passos.append(Passo(
+        titulo="Passo 5 - Flexao: momento limite (simples ou dupla)",
+        formula=r"x_{duc}=0{,}45\,d \qquad M_{d,duc}=\alpha_c\,\eta_c\,f_{cd}\,\lambda\,x_{duc}\,b\left(d-\dfrac{\lambda x_{duc}}{2}\right)",
+        substituicao=[
+            r"x_{duc} = 0{,}45 \cdot " + _v(d) + r" = " + _v(x_duc) + r"\ \mathrm{cm}",
+            r"M_{d,duc} = " + _v(ac, 2) + r" \cdot " + _v(ec, 2) + r" \cdot " + _v(fcd, 3) + r" \cdot " + _v(lam, 2) + r" \cdot " + _v(x_duc) + r" \cdot " + _v(bw) + r"\left(" + _v(d) + r" - \dfrac{" + _v(lam, 2) + r" \cdot " + _v(x_duc) + r"}{2}\right) = " + _v(Md_duc) + r"\ \mathrm{kNcm}",
+        ],
+        resultado="Md = " + _v(Md_kNcm) + " kNcm " + (">" if dupla else "<=") + " Md,duc = " + _v(Md_duc) + " kNcm -> " + ("ARMADURA DUPLA" if dupla else "ARMADURA SIMPLES"),
+        norma="NBR 6118:2023 sec.14.6.4.3, 17.2.2 (x/d <= 0,45 ductilidade)",
+    ))
+
+    # Passo 6 - flexao
+    if not dupla:
+        fx = armadura_simples(Md_kNcm, bw, d, fck, fyk)
+        x = fx["x_cm"]
+        As = fx["As_cm2"]
+        x_lim = fx["x_lim"]
+        rho_min = max(0.26 * fctm / fyk, 0.0015)
+        As_min = rho_min * bw * d
+        As_adot = max(As, As_min)
+        barras = escolher_barras(As_adot)
+        bar_txt = " ou ".join([str(n) + "Phi" + _v(phi, 1) + "(" + _v(area) + ")" for n, phi, area in barras[:3]]) if barras else "-"
+        passos.append(Passo(
+            titulo="Passo 6 - Flexao: armadura simples (As)",
+            formula=r"x=1{,}25\,d\left[1-\sqrt{1-\dfrac{M_d}{0{,}425\,b\,d^2 f_{cd}}}\right] \qquad A_s=\dfrac{\alpha_c\,\eta_c\,f_{cd}\,\lambda\,x\,b}{f_{yd}}",
+            substituicao=[
+                r"x = 1{,}25 \cdot " + _v(d) + r"\left[1-\sqrt{1-\dfrac{" + _v(Md_kNcm) + r"}{0{,}425 \cdot " + _v(bw) + r" \cdot " + _v(d) + r"^2 \cdot " + _v(fcd, 3) + r"}}\right] = " + _v(x) + r"\ \mathrm{cm}",
+                r"\dfrac{x}{d} = " + _v(x / d, 3) + (r"\ \le 0{,}45 \Rightarrow \text{ductil OK}" if x <= x_lim else r"\ > 0{,}45 \Rightarrow \text{rever secao}"),
+                r"A_s = \dfrac{" + _v(ac, 2) + r" \cdot " + _v(ec, 2) + r" \cdot " + _v(fcd, 3) + r" \cdot " + _v(lam, 2) + r" \cdot " + _v(x) + r" \cdot " + _v(bw) + r"}{" + _v(fyd, 3) + r"} = " + _v(As) + r"\ \mathrm{cm^2}",
+                r"A_{s,min} = " + _v(rho_min * 100, 3) + r"\% \cdot " + _v(bw) + r" \cdot " + _v(d) + r" = " + _v(As_min) + r"\ \mathrm{cm^2}",
+            ],
+            resultado="As adotado = " + _v(As_adot) + " cm2 -> " + bar_txt,
+            norma="NBR 6118:2023 sec.17.2.2 | Tabela 17.3 (As,min, piso 0,15%)",
+            obs="Dominio 2/3 (x/d <= 0,45): ruptura ductil, a viga avisa antes de romper.",
+        ))
+        As_flecha = As_adot
+    else:
+        du = armadura_dupla(Md_kNcm, bw, d, fck, fyk, caa)
+        passos.append(Passo(
+            titulo="Passo 6 - Flexao: armadura dupla (As1 tracionada + As2 comprimida)",
+            formula=r"A_{s2}=\dfrac{M_d-M_{d,duc}}{\sigma_{s2}\,(d-d^{\prime})} \qquad A_{s1}=\dfrac{F_c+A_{s2}\sigma_{s2}}{f_{yd}}",
+            substituicao=[
+                r"d^{\prime} = " + _v(du["dl"]) + r"\ \mathrm{cm} \quad \sigma_{s2} = " + _v(du["sig_s2"], 2) + r"\ \mathrm{kN/cm^2}",
+                r"A_{s2} = " + _v(du["As2_cm2"]) + r"\ \mathrm{cm^2} \quad A_{s1} = " + _v(du["As1_cm2"]) + r"\ \mathrm{cm^2}",
+            ],
+            resultado="As1 (tracionada) = " + _v(du["As1_cm2"]) + " cm2 | As2 (comprimida) = " + _v(du["As2_cm2"]) + " cm2",
+            norma="NBR 6118:2023 sec.17.2.2 | Araujo (Dr., FURG) 2014",
+        ))
+        As_flecha = du["As1_cm2"]
+
+    # Passo 7 - flecha
+    if q_ser is not None:
+        Md_ser_kNcm = q_ser * L_m ** 2 / 8.0 * 100.0
+    else:
+        Md_ser_kNcm = Md_kNcm / 1.4
+    fl = calcular_flecha_branson(Md_ser_kNcm, As_flecha, bw, h, d, L_m, fck)
+    passos.append(Passo(
+        titulo="Passo 7 - Flecha por Branson (ELS)",
+        formula=r"I_e=\left(\dfrac{M_r}{M_a}\right)^3 I_g+\left[1-\left(\dfrac{M_r}{M_a}\right)^3\right] I_{II} \qquad \delta_\infty=(1+\varphi)\,\dfrac{5\,q\,L^4}{384\,E_{cs}\,I_e}",
+        substituicao=[
+            r"M_r = " + _v(fl["Mr"], 1) + r"\ \mathrm{kNcm} \quad M_a = " + _v(Md_ser_kNcm, 1) + r"\ \mathrm{kNcm}",
+            r"I_g = " + _v(fl["Ig"], 0) + r" \quad I_{II} = " + _v(fl["Iii"], 0) + r" \quad I_e = " + _v(fl["Ie"], 0) + r"\ \mathrm{cm^4}",
+            r"\delta_i = " + _v(fl["delta_i"], 3) + r"\ \mathrm{cm} \quad \delta_\infty = (1+2{,}5)\,\delta_i = " + _v(fl["delta_t"] * 10, 2) + r"\ \mathrm{mm}",
+            r"w_{adm} = L/250 = " + _v(fl["wadm"] * 10, 2) + r"\ \mathrm{mm}",
+        ],
+        resultado="delta_inf = " + _v(fl["delta_t"] * 10, 2) + " mm " + ("<=" if fl["ok"] else ">") + " wadm = " + _v(fl["wadm"] * 10, 2) + " mm -> " + ("OK" if fl["ok"] else "AUMENTAR h"),
+        norma="NBR 6118:2023 sec.17.3.2 | Branson / Araujo (Dr., FURG) 2014",
+        obs="Mr = momento de fissuracao; se Ma > Mr a viga fissura (estadio II) e usa-se a inercia de Branson.",
+    ))
+
+    return passos, {"d": d, "VRd2": VRd2, "Vc": Vc, "Md_duc": Md_duc, "dupla": dupla}
