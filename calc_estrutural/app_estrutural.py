@@ -5,6 +5,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
+from relatorio.passo_a_passo import memorial_laje
 
 from dimensionamento.predim import predimensionar_laje, predimensionar_viga, predimensionar_pilar
 from dimensionamento.pilar import (
@@ -32,6 +33,7 @@ with st.sidebar:
     pagina = st.radio("Módulo", [
         "🏠  Início",
         "⚖️  Levantamento de Cargas",
+        "📋  Memorial de Cálculo",
         "📐  Pré-dimensionamento",
         "🏛️  Pilar",
         "🔧  Viga",
@@ -497,3 +499,54 @@ elif pagina == "🧱  Muro de Arrimo":
         except Exception as e:
             st.error(f"Erro: {e}")
             import traceback; st.code(traceback.format_exc())
+
+elif pagina == "📋  Memorial de Cálculo":
+    st.title("📋 Memorial de Cálculo — passo a passo")
+    st.caption("Metodologia Prof. M.R. Carini (MSc, UFSC) — fórmula, substituição e norma em cada passo")
+    elem_m = st.selectbox("Elemento", [
+        "Laje Maciça", "Viga (em breve)", "Pilar (em breve)",
+        "Muro de Arrimo (em breve)", "Reservatório (em breve)", "Piscina (em breve)",
+    ])
+    if elem_m == "Laje Maciça":
+        CASOS_M = {1: "Caso 1 - 4 apoiadas", 2: "Caso 2 - 3 ap.+1 eng.(ly)",
+                   "2A": "Caso 2A", 3: "Caso 3", "3A": "Caso 3A", 4: "Caso 4",
+                   5: "Caso 5", "5A": "Caso 5A", 6: "Caso 6 - 4 engastadas"}
+        with st.form("mem_laje"):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                lx_m = st.number_input("lx — menor vão (m)", 1.5, 8.0, 3.5, 0.1)
+                ly_m = st.number_input("ly — maior vão (m)", 1.5, 10.0, 4.5, 0.1)
+                h_m = st.number_input("h — espessura (cm)", 8, 30, 10, 1)
+            with c2:
+                gk_m = st.number_input("gk revestimentos+forro (kN/m²)", 0.0, 20.0, 1.15, 0.05)
+                qk_m = st.number_input("qk (kN/m²)", 0.5, 20.0, 1.5, 0.1)
+                caso_m = st.selectbox("Caso de vinculação", list(CASOS_M.keys()),
+                                      format_func=lambda k: CASOS_M[k])
+            with c3:
+                fck_m = st.number_input("fck (MPa)", 20, 50, 25)
+                fyk_m = st.number_input("fyk (MPa)", 250, 600, 500)
+                caa_m = st.selectbox("CAA", ["I", "II", "III", "IV"], index=1)
+            ok_mem = st.form_submit_button("📋 Gerar memorial passo a passo", use_container_width=True)
+        if ok_mem:
+            try:
+                passos, _res = memorial_laje(lx_m, ly_m, h_m, gk_m, qk_m, caso_m, fck_m, fyk_m, caa_m)
+                st.divider()
+                for p in passos:
+                    st.markdown("#### " + p.titulo)
+                    if p.norma:
+                        st.caption("📖 " + p.norma)
+                    if p.formula:
+                        st.latex(p.formula)
+                    for linha in p.substituicao:
+                        st.latex(linha)
+                    if p.resultado:
+                        st.success(p.resultado)
+                    if p.obs:
+                        st.info("💡 " + p.obs)
+                    st.divider()
+            except Exception as e:
+                st.error("Erro: " + str(e))
+                import traceback
+                st.code(traceback.format_exc())
+    else:
+        st.info("Este elemento entra nas próximas fatias. Comece pela Laje Maciça.")
