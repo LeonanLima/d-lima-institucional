@@ -1,0 +1,38 @@
+{
+  "fonte": "Tabela de Bares - parede (laje retangular) sob carga triangular (hidrostatica, maxima na base). Coeficiente alfa/m da NBR 6118:2023 / notas Prof. Carini. Transcrito da imagem fornecida por Leonan em 2026-06-24.",
+  "formula": "M = (m / 1000) * p * l^2   [p = pressao na base, kN/m2 ; l = vao de referencia, m]",
+  "selecao": "Se lx <= ly: usa 'tabela_l_lx' com indice lx/ly e l=lx. Se ly < lx: usa 'tabela_l_ly' com indice ly/lx e l=ly. As duas convergem em razao=1,00. Fora de [0,50; 1,00] o interpolador clampa (nao extrapola).",
+  "colunas": ["razao", "mxe", "mye", "mx", "my"],
+  "legenda": {
+    "mxe": "momento de engaste na direcao x (negativo)",
+    "mye": "momento de engaste na direcao y (negativo)",
+    "mx": "momento de vao na direcao x (positivo)",
+    "my": "momento de vao na direcao y (positivo)"
+  },
+  "tabela_l_lx": [
+    [1.00, -28.3, -34.5, 12.2, 10.6],
+    [0.95, -30.1, -35.5, 13.3, 10.6],
+    [0.90, -31.9, -36.5, 14.3, 10.5],
+    [0.85, -33.6, -37.6, 15.3, 10.4],
+    [0.80, -35.2, -38.7, 16.2, 10.1],
+    [0.75, -36.6, -39.9, 17.2, 9.5],
+    [0.70, -37.8, -41.0, 18.0, 8.7],
+    [0.65, -38.9, -42.1, 18.8, 8.0],
+    [0.60, -39.8, -43.1, 19.5, 7.2],
+    [0.55, -40.6, -44.1, 20.1, 6.4],
+    [0.50, -41.3, -45.1, 20.6, 5.8]
+  ],
+  "tabela_l_ly": [
+    [0.50, -36.2, -62.1, 9.4, 26.0],
+    [0.55, -36.0, -60.3, 10.3, 24.6],
+    [0.60, -35.6, -57.8, 11.1, 23.1],
+    [0.65, -35.2, -54.8, 11.9, 21.4],
+    [0.70, -34.6, -51.6, 12.5, 19.7],
+    [0.75, -33.8, -48.2, 12.8, 18.0],
+    [0.80, -32.9, -45.0, 13.0, 16.3],
+    [0.85, -31.9, -42.2, 13.0, 14.8],
+    [0.90, -30.7, -39.5, 12.9, 13.3],
+    [0.95, -29.5, -37.0, 12.6, 11.9],
+    [1.00, -28.3, -34.5, 12.2, 10.6]
+  ]
+}
