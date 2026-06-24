@@ -10,6 +10,7 @@ from analise.pressoes import (
     pressao_hidrostatica, resultante_hidro,
     combinacoes_reservatorio
 )
+from dimensionamento.bares import momentos_parede, as_flexao_simples
 
 BIBLIOGRAFIA_RESERVATORIO = (
     "RESERVATORIO - Referencias:\n"
@@ -60,61 +61,50 @@ def _pressao_combinacao(comb, z, H):
 
 def paredes_dimensionar(H_m, L_m, h_par_m, fck=40.0, fyk=500.0, caa="IV"):
     """
-    Dimensionamento das paredes (modelo de placa plana, solicitacao por pressao
-    hidrostatica). NBR 6118:2023, sec.21 | Ref [1][2][3]
+    Dimensionamento das paredes como PLACA BIDIRECIONAL (tabela de Bares).
+    Contorno: 3 bordas engastadas (base + 2 laterais) + topo livre - mesma
+    tabela para todos os reservatorios e piscinas. NBR 6118:2023, sec.21 [1].
 
-    Modelo simplificado: parede vertical com base engastada e topo livre
-    (balanço vertical) para combinacao mais desfavoravel.
+    H_m = altura da parede [m] (= ly, direcao da carga triangular)
+    L_m = vao horizontal da parede [m] (= lx)
+    Combinacao CHEIO (agua por dentro, pior para parede interna).
     """
     fcd = fck / 1.4 / 10.0   # kN/cm2
     fyd = fyk / 1.15 / 10.0
     cobr = {"I":2.0,"II":2.5,"III":4.0,"IV":4.5}.get(caa, 4.5)
     h_cm = h_par_m * 100
     d = h_cm - cobr - 0.625
-
-    # COMB 1 — reservatorio CHEIO, sem solo (pior para parede interna)
-    # pressao maxima no fundo: p = gamma * H * gamma_f
-    gamma_f = 1.4   # NBR 6118:2023, sec.11.2
-    p_max = GAMMA_AGUA * H_m * gamma_f    # kN/m2
-
-    # Momento na base (viga em balanco vertical por metro de largura):
-    # M = p_tri * H / 3   (carga triangular)
-    Md_kNm = p_max * H_m**2 / 6   # kNm/m (balanço com carga triangular)
-    Vd_kN  = p_max * H_m / 2      # kN/m
-
-    # Forca de tracao circunferencial (anel horizontal, raio R=L/2):
-    # Nφ = p * R = p * L/2  [kN/m]
-    R = L_m / 2.0
-    Nd_anel = p_max * R    # kN/m
-
-    # ELU - Flexao vertical (armadura vertical interna)
-    Md_cm = Md_kNm * 100  # kNcm
     b = 100.0
-    disc = 1 - Md_cm / (0.425 * b * d**2 * fcd)
-    x = 1.25 * d * (1 - math.sqrt(max(0, disc)))
-    As_vert = 0.85 * fcd * 0.80 * x * b / fyd   # cm2/m
 
-    # ELU - Tracao (anel horizontal) — armadura horizontal
-    As_horiz = Nd_anel / fyd * 10  # cm2/m (fyd em kN/cm2)
+    gamma_f = 1.4   # NBR 6118:2023, sec.11.2
+    pd = GAMMA_AGUA * H_m * gamma_f    # pressao de calculo na base [kN/m2]
 
-    # Armadura minima NBR 6118:2023, sec.21.3 — majorada vs. lajes normais
-    As_min = max(0.15/100 * b * h_cm, 0.0015 * b * h_cm)
+    # Momentos de calculo da placa [kNm/m] via Bares (lx=L_m, ly=H_m)
+    M = momentos_parede(L_m, H_m, pd)
+    Vd = pd * H_m / 2   # cortante na base (carga triangular) [kN/m]
 
-    # ELS - Fissuração (NBR 6118:2023, sec.21.3.3 - wlim=0,1mm CAA IV)
-    w_lim = 0.10   # mm (contato com agua)
+    As_min = round(max(0.15/100 * b * h_cm, 0.0015 * b * h_cm), 2)
+    arm = {}
+    for nome, Md in (("Mx", M["Mx"]), ("My", M["My"]),
+                     ("Mxe", M["Mxe"]), ("Mye", M["Mye"])):
+        As = as_flexao_simples(Md, b, d, fcd, fyd)
+        if As is None:
+            return {"erro": f"Secao insuficiente em {nome} - aumentar espessura"}
+        arm[nome] = round(max(As, As_min), 2)
 
     return dict(
         combinacao="CHEIO (C1)",
         H=H_m, L=L_m, h_par_m=h_par_m,
-        p_max_kNm2=round(p_max,2),
-        Md_kNm=round(Md_kNm,2), Vd_kN=round(Vd_kN,2),
-        Nd_anel_kNm=round(Nd_anel,2),
-        As_vert_cm2m=round(max(As_vert, As_min), 2),
-        As_horiz_cm2m=round(max(As_horiz, As_min), 2),
-        As_min=round(As_min, 2),
-        w_lim=w_lim,
+        razao=M["razao"], l_ref=M["l_ref"],
+        p_max_kNm2=round(pd, 2), Vd_kN=round(Vd, 2),
+        Mx=M["Mx"], My=M["My"], Mxe=M["Mxe"], Mye=M["Mye"],
+        As_vao_x=arm["Mx"], As_vao_y=arm["My"],
+        As_eng_x=arm["Mxe"], As_eng_y=arm["Mye"],
+        As_cm2m=max(arm.values()),   # armadura governante [cm2/m]
+        As_min=As_min,
+        w_lim=0.10,   # mm (NBR 6118:2023, sec.21.3.3 - CAA IV)
         nota_els="Verificar fissuração wk ≤ 0,10 mm (NBR 6118:2023, sec.21.3.3)",
-        ref="[1] NBR 6118:2023, sec.21 | [2] Fusco(Dr.,USP) 2008 | [3] Carini 2023"
+        ref="[1] NBR 6118:2023, sec.21 | Bares (Carini)"
     )
 
 

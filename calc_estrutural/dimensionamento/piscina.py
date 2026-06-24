@@ -7,7 +7,7 @@
 #   [4] BASTOS, P.S.S. (Dr., UNESP) Apostila Elementos Especiais. 2017
 import math
 
-from dimensionamento.bares import momentos_parede
+from dimensionamento.bares import momentos_parede, as_flexao_simples
 
 BIBLIOGRAFIA_PISCINA = (
     "PISCINA - Referencias:\n"
@@ -51,20 +51,6 @@ def combinacoes_piscina(H_agua, phi_solo=30.0, gamma_solo=18.0, qs_kPa=0.0):
     return C1, C2, C3
 
 
-def _as_flexao(Md_kNm, b_cm, d_cm, fcd_kNcm2, fyd_kNcm2):
-    """As [cm2] de flexao simples para |Md|. O sinal de Md so define a FACE
-    (engaste negativo = face externa; vao positivo = face interna).
-    Retorna 0 se nao ha momento e None se a secao for insuficiente."""
-    Md_cm = abs(Md_kNm) * 100
-    if Md_cm < 0.01:
-        return 0.0
-    disc = 1 - Md_cm / (0.425 * b_cm * d_cm**2 * fcd_kNcm2)
-    if disc < 0:
-        return None
-    x = 1.25 * d_cm * (1 - math.sqrt(max(0.0, disc)))
-    return 0.85 * fcd_kNcm2 * 0.80 * x * b_cm / fyd_kNcm2
-
-
 def dimensionar_parede(H_agua, largura_m, espessura_m, combin,
                        fck=40.0, fyk=500.0, caa="IV"):
     """
@@ -98,7 +84,7 @@ def dimensionar_parede(H_agua, largura_m, espessura_m, combin,
     arm = {}
     for nome, Md in (("Mx", M["Mx"]), ("My", M["My"]),
                      ("Mxe", M["Mxe"]), ("Mye", M["Mye"])):
-        As = _as_flexao(Md, b, d, fcd, fyd)
+        As = as_flexao_simples(Md, b, d, fcd, fyd)
         if As is None:
             return {"erro": f"Secao insuficiente em {nome} - aumentar espessura"}
         arm[nome] = round(max(As, As_min), 2)

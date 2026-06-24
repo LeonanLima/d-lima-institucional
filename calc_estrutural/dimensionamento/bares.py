@@ -8,9 +8,25 @@
 #   p [kN/m2] = pressao na base (carga triangular hidrostatica)
 #   l [m]     = vao de referencia (lx ou ly, conforme a tabela selecionada)
 import json
+import math
 import os
 
 from core.tabelas import interp_linear
+
+
+def as_flexao_simples(Md_kNm, b_cm, d_cm, fcd_kNcm2, fyd_kNcm2):
+    """As [cm2] de flexao simples para |Md|. O sinal de Md so define a FACE
+    (engaste negativo = face externa; vao positivo = face interna).
+    Retorna 0 se nao ha momento e None se a secao for insuficiente.
+    Usado por paredes/placas de piscina e reservatorio (mesmo modelo de Bares)."""
+    Md_cm = abs(Md_kNm) * 100
+    if Md_cm < 0.01:
+        return 0.0
+    disc = 1 - Md_cm / (0.425 * b_cm * d_cm**2 * fcd_kNcm2)
+    if disc < 0:
+        return None
+    x = 1.25 * d_cm * (1 - math.sqrt(max(0.0, disc)))
+    return 0.85 * fcd_kNcm2 * 0.80 * x * b_cm / fyd_kNcm2
 
 _JSON = os.path.join(os.path.dirname(__file__), "..", "dados", "coef_bares_parede.json")
 _NOMES = ("mxe", "mye", "mx", "my")
