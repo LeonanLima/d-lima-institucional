@@ -10,7 +10,8 @@ from relatorio.passo_a_passo import memorial_laje, memorial_viga, memorial_pilar
 from dimensionamento.predim import predimensionar_laje, predimensionar_viga, predimensionar_pilar
 from dimensionamento.pilar import (
     calcular_esbeltez, excentricidade_minima, excentricidade_2a_ordem,
-    dimensionar_secao, estribo_pilar, escolher_barras, BIBLIOGRAFIA_PILAR,
+    dimensionar_secao, momento_total_pilar, estribo_pilar, escolher_barras,
+    BIBLIOGRAFIA_PILAR,
 )
 from dimensionamento.viga import (
     verificar_bielas, calcular_parcela_concreto, dimensionar_estribos,
@@ -300,10 +301,10 @@ elif pagina == "🏛️  Pilar":
         try:
             esb     = calcular_esbeltez(H, hx, hy, beta)
             exc     = excentricidade_minima(hx, hy)
-            nu      = Nd / (hx * hy * fck / 1.4)
-            e2x     = excentricidade_2a_ordem(esb["lam_x"], hx, nu)
-            e2y     = excentricidade_2a_ordem(esb["lam_y"], hy, nu)
-            dim     = dimensionar_secao(Nd, Md, hx, hy, fck, fyk, caa)
+            mt      = momento_total_pilar(Nd, Md, H, hx, hy, beta, fck)
+            e2x, e2y = mt["e2x"], mt["e2y"]
+            # Dimensiona com o momento TOTAL (e1+e2), nao com o Md cru
+            dim     = dimensionar_secao(Nd, mt["Md_design"], hx, hy, fck, fyk, caa)
             est     = estribo_pilar(16.0, min(hx, hy))
             escolha = escolher_barras(dim["As_adot"])
             col1, col2 = st.columns([1, 2])
@@ -316,6 +317,7 @@ elif pagina == "🏛️  Pilar":
                 cb.metric("lambda_y", f"{esb['lam_y']:.1f}", delta=esb["status_y"], delta_color="off")
                 st.subheader("Excentricidades")
                 st.markdown(f"e1x_min={exc['e1x_min']} cm | e1y_min={exc['e1y_min']} cm | e2x={e2x} cm | e2y={e2y} cm")
+                st.caption(f"Md informado={Md:.0f} kNcm → **Md,tot (e₁+e₂)={mt['Md_design']:.0f} kNcm** (dimensiona com este)")
                 st.subheader("Armadura longitudinal")
                 duc = "✅" if dim["ok_ductil"] else "⚠️"
                 st.success(f"**As = {dim['As_adot']:.2f} cm²** | Domínio {dim['dominio']} {duc} | As_min={dim['As_min']:.2f} | As_max={dim['As_max']:.2f} cm²")

@@ -350,16 +350,19 @@ def memorial_pilar(H, hx, hy, beta, Nd, Md_kNcm, fck=25.0, fyk=500.0, caa="II"):
     from dimensionamento.pilar import (
         _fck_props, calcular_esbeltez, excentricidade_minima, lambda1_limite,
         excentricidade_2a_ordem, dimensionar_secao, escolher_barras, estribo_pilar,
+        momento_total_pilar,
     )
     passos = []
     p = _fck_props(fck)
     fcd = p["fcd"] / 10.0
     fyd = fyk / 1.15 / 10.0
     Ac = hx * hy
-    nu = Nd / (Ac * fcd)
+    # Fonte unica das excentricidades (mesma fn que a pagina usa)
+    mt = momento_total_pilar(Nd, Md_kNcm, H, hx, hy, beta, fck)
+    nu = mt["nu"]
     esb = calcular_esbeltez(H, hx, hy, beta)
     exc = excentricidade_minima(hx, hy)
-    e0 = Md_kNcm / Nd if Nd > 0.1 else 0.0
+    e0 = mt["e0"]
     sx = r"\text{" + esb["status_x"] + r"}"
     sy = r"\text{" + esb["status_y"] + r"}"
 
@@ -392,9 +395,9 @@ def memorial_pilar(H, hx, hy, beta, Nd, Md_kNcm, fck=25.0, fyk=500.0, caa="II"):
         norma="NBR 6118:2023 sec.11.4.1, 15.8.2 | Carini Slide 4",
     ))
 
-    # Passo 3 - 2a ordem
-    e2y = excentricidade_2a_ordem(esb["lam_y"], hy, nu)
-    e2x = excentricidade_2a_ordem(esb["lam_x"], hx, nu)
+    # Passo 3 - 2a ordem (e2 vem da fonte unica)
+    e2y = mt["e2y"]
+    e2x = mt["e2x"]
     passos.append(Passo(
         titulo="Passo 3 - Excentricidade de 2a ordem (pilar-padrao)",
         formula=r"\nu=\dfrac{N_d}{A_c\,f_{cd}}\qquad e_2=0{,}0005\,\lambda^2\,\dfrac{h}{0{,}5+\nu}",
@@ -407,9 +410,9 @@ def memorial_pilar(H, hx, hy, beta, Nd, Md_kNcm, fck=25.0, fyk=500.0, caa="II"):
         norma="NBR 6118:2023 sec.15.8.3.3.2 (curvatura aproximada) | Carini Slide 4",
     ))
 
-    # Passo 4 - momento total
-    e_design = max(e0, exc["e1y_min"]) + e2y
-    Md_design = Nd * e_design
+    # Passo 4 - momento total (fonte unica)
+    e_design = mt["e_design"]
+    Md_design = mt["Md_design"]
     passos.append(Passo(
         titulo="Passo 4 - Momento total de calculo (direcao y)",
         formula=r"M_{d,tot}=N_d\,(e_1+e_2)\quad\text{com } e_1=\max(e_0,\ e_{1,min})",

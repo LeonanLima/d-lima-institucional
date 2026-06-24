@@ -67,6 +67,33 @@ def excentricidade_2a_ordem(lam, h_cm, nu):
     return round(0.0005 * lam**2 * h_cm / (0.5 + nu), 3)
 
 
+def momento_total_pilar(Nd_kN, Md_kNcm, H_cm, hx_cm, hy_cm, beta=1.0, fck=25.0):
+    """Momento total de calculo do pilar-padrao (direcao y governante).
+
+    Soma a excentricidade de 1a ordem (max entre e0 e e1,min) com a de 2a ordem
+    e devolve Md,tot = Nd*(e1+e2). A pagina Pilar deve dimensionar com ESTE
+    momento (antes usava o Md cru, ignorando e1,min e e2 - bug catalogado).
+    Fonte unica: memorial_pilar consome esta mesma funcao.
+    NBR 6118:2023, sec.11.4 / 15.8 | Ref [1][2][3].
+    """
+    fcd = _fck_props(fck)["fcd"] / 10.0   # kN/cm2
+    Ac = hx_cm * hy_cm
+    nu = Nd_kN / (Ac * fcd) if Ac * fcd > 0 else 0.0
+    esb = calcular_esbeltez(H_cm, hx_cm, hy_cm, beta)
+    exc = excentricidade_minima(hx_cm, hy_cm)
+    e0 = Md_kNcm / Nd_kN if Nd_kN > 0.1 else 0.0
+    e2y = excentricidade_2a_ordem(esb["lam_y"], hy_cm, nu)
+    e2x = excentricidade_2a_ordem(esb["lam_x"], hx_cm, nu)
+    e_design = max(e0, exc["e1y_min"]) + e2y
+    Md_design = Nd_kN * e_design
+    return dict(nu=round(nu,3), e0=round(e0,2),
+                e1x_min=exc["e1x_min"], e1y_min=exc["e1y_min"],
+                e2x=round(e2x,2), e2y=round(e2y,2),
+                e_design=round(e_design,2), Md_design=round(Md_design,1),
+                lam_x=esb["lam_x"], lam_y=esb["lam_y"],
+                ref="[1][2][3] + [4] NBR 6118:2023, sec.15.8")
+
+
 def dimensionar_secao(Nd_kN, Md_kNcm, b_cm, h_cm,
                        fck=25.0, fyk=500.0, caa="II"):
     """
