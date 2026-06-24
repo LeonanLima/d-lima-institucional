@@ -10,7 +10,7 @@ from analise.pressoes import (
     pressao_hidrostatica, resultante_hidro,
     combinacoes_reservatorio
 )
-from dimensionamento.bares import momentos_parede, as_flexao_simples
+from dimensionamento.bares import dimensionar_parede_placa
 
 BIBLIOGRAFIA_RESERVATORIO = (
     "RESERVATORIO - Referencias:\n"
@@ -61,51 +61,23 @@ def _pressao_combinacao(comb, z, H):
 
 def paredes_dimensionar(H_m, L_m, h_par_m, fck=40.0, fyk=500.0, caa="IV"):
     """
-    Dimensionamento das paredes como PLACA BIDIRECIONAL (tabela de Bares).
-    Contorno: 3 bordas engastadas (base + 2 laterais) + topo livre - mesma
-    tabela para todos os reservatorios e piscinas. NBR 6118:2023, sec.21 [1].
+    Dimensionamento das paredes como PLACA de Bares + tracao do anel = FLEXO-TRACAO
+    (metodo Carini, Reservatorios Elevados). Horizontal: flexo-tracao (momento da
+    placa + anel Nd=1,2*p*L/2); vertical: flexao simples. NBR 6118:2023, sec.21 [1].
 
-    H_m = altura da parede [m] (= ly, direcao da carga triangular)
+    H_m = altura da parede [m] (= ly, direcao da carga triangular / altura da agua)
     L_m = vao horizontal da parede [m] (= lx)
-    Combinacao CHEIO (agua por dentro, pior para parede interna).
+    Combinacao CHEIO (agua por dentro, pressao caracteristica = gamma_agua*H).
     """
-    fcd = fck / 1.4 / 10.0   # kN/cm2
-    fyd = fyk / 1.15 / 10.0
-    cobr = {"I":2.0,"II":2.5,"III":4.0,"IV":4.5}.get(caa, 4.5)
-    h_cm = h_par_m * 100
-    d = h_cm - cobr - 0.625
-    b = 100.0
-
-    gamma_f = 1.4   # NBR 6118:2023, sec.11.2
-    pd = GAMMA_AGUA * H_m * gamma_f    # pressao de calculo na base [kN/m2]
-
-    # Momentos de calculo da placa [kNm/m] via Bares (lx=L_m, ly=H_m)
-    M = momentos_parede(L_m, H_m, pd)
-    Vd = pd * H_m / 2   # cortante na base (carga triangular) [kN/m]
-
-    As_min = round(max(0.15/100 * b * h_cm, 0.0015 * b * h_cm), 2)
-    arm = {}
-    for nome, Md in (("Mx", M["Mx"]), ("My", M["My"]),
-                     ("Mxe", M["Mxe"]), ("Mye", M["Mye"])):
-        As = as_flexao_simples(Md, b, d, fcd, fyd)
-        if As is None:
-            return {"erro": f"Secao insuficiente em {nome} - aumentar espessura"}
-        arm[nome] = round(max(As, As_min), 2)
-
-    return dict(
-        combinacao="CHEIO (C1)",
-        H=H_m, L=L_m, h_par_m=h_par_m,
-        razao=M["razao"], l_ref=M["l_ref"],
-        p_max_kNm2=round(pd, 2), Vd_kN=round(Vd, 2),
-        Mx=M["Mx"], My=M["My"], Mxe=M["Mxe"], Mye=M["Mye"],
-        As_vao_x=arm["Mx"], As_vao_y=arm["My"],
-        As_eng_x=arm["Mxe"], As_eng_y=arm["Mye"],
-        As_cm2m=max(arm.values()),   # armadura governante [cm2/m]
-        As_min=As_min,
-        w_lim=0.10,   # mm (NBR 6118:2023, sec.21.3.3 - CAA IV)
-        nota_els="Verificar fissuração wk ≤ 0,10 mm (NBR 6118:2023, sec.21.3.3)",
-        ref="[1] NBR 6118:2023, sec.21 | Bares (Carini)"
-    )
+    p_base = GAMMA_AGUA * H_m    # pressao caracteristica na base [kN/m2]
+    r = dimensionar_parede_placa(H_m, L_m, h_par_m, p_base, fck, fyk, caa)
+    if "erro" not in r and r.get("As_cm2m") != 0:
+        r["combinacao"] = "CHEIO (C1)"
+        r["h_par_m"] = h_par_m
+        r["p_max_kNm2"] = round(GAMMA_AGUA * H_m * 1.4, 2)
+        r["nota_els"] = "Verificar fissuracao wk <= 0,10 mm (NBR 6118:2023, sec.21.3.3)"
+        r["ref"] = "[1] NBR 6118:2023, sec.21 | Bares + flexo-tracao (Carini)"
+    return r
 
 
 def fundo_dimensionar(H_m, L_m, B_m, h_fundo_m, fck=40.0, fyk=500.0, caa="IV"):

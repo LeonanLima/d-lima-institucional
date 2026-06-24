@@ -7,7 +7,7 @@
 #   [4] BASTOS, P.S.S. (Dr., UNESP) Apostila Elementos Especiais. 2017
 import math
 
-from dimensionamento.bares import momentos_parede, as_flexao_simples
+from dimensionamento.bares import dimensionar_parede_placa
 
 BIBLIOGRAFIA_PISCINA = (
     "PISCINA - Referencias:\n"
@@ -54,53 +54,21 @@ def combinacoes_piscina(H_agua, phi_solo=30.0, gamma_solo=18.0, qs_kPa=0.0):
 def dimensionar_parede(H_agua, largura_m, espessura_m, combin,
                        fck=40.0, fyk=500.0, caa="IV"):
     """
-    Dimensionamento da parede como PLACA BIDIRECIONAL (tabela de Bares).
-    Contorno: 3 bordas engastadas (base + 2 laterais) + topo livre.
-    O contorno engastado vale para ambas as combinacoes (cheia/vazia+solo) -
-    o empuxo do solo so inverte o sinal do momento, nao o vinculo.
-    H_agua     = altura da parede [m] (= ly, direcao da carga triangular)
-    largura_m  = vao horizontal da parede [m] (= lx)
-    Ref: Bares (NBR 6118:2023 / Carini) + NBR 6118:2023, sec.21 [1]
+    Dimensionamento da parede como PLACA de Bares + tracao do anel = FLEXO-TRACAO
+    (metodo Carini). Horizontal: flexo-tracao (momento + anel); vertical: flexao.
+    Contorno: laterais apoiadas + base engastada (+ topo apoiado se com tampa).
+    H_agua    = altura da parede [m] (= ly, direcao da carga triangular)
+    largura_m = vao horizontal da parede [m] (= lx)
+    combin    = combinacao de combinacoes_piscina (usa p_net_base caracteristico).
+    Ref: Bares + flexo-tracao (Carini) + NBR 6118:2023, sec.21 [1]
     """
-    fcd = fck / 1.4 / 10.0   # kN/cm2
-    fyd = fyk / 1.15 / 10.0  # kN/cm2
-    cobr = {"I":2.0,"II":2.5,"III":4.0,"IV":4.5}.get(caa, 4.5)
-    h_cm = espessura_m * 100
-    d = h_cm - cobr - 0.625
-    b = 100.0
-    gamma_f = 1.4
-
     p_base = combin.get("p_net_base", 0)   # kN/m2 (caracteristico)
-    pd = gamma_f * p_base                  # pressao de calculo na base
-
-    if pd <= 0:
-        return {"As_cm2m": 0, "nota": "Sem pressao liquida nesta combinacao."}
-
-    # Momentos de calculo da placa [kNm/m] via Bares (lx=largura, ly=altura)
-    M = momentos_parede(largura_m, H_agua, pd)
-    Vd = pd * H_agua / 2   # cortante na base (carga triangular) [kN/m]
-
-    As_min = round(max(0.15/100 * b * h_cm, 0.0015 * b * h_cm), 2)
-    arm = {}
-    for nome, Md in (("Mx", M["Mx"]), ("My", M["My"]),
-                     ("Mxe", M["Mxe"]), ("Mye", M["Mye"])):
-        As = as_flexao_simples(Md, b, d, fcd, fyd)
-        if As is None:
-            return {"erro": f"Secao insuficiente em {nome} - aumentar espessura"}
-        arm[nome] = round(max(As, As_min), 2)
-
-    return dict(
-        H=H_agua, largura=largura_m, h_cm=h_cm, d_cm=round(d, 1),
-        razao=M["razao"], l_ref=M["l_ref"],
-        p_base=round(p_base, 2), Vd_kN=round(Vd, 2),
-        Mx=M["Mx"], My=M["My"], Mxe=M["Mxe"], Mye=M["Mye"],
-        As_vao_x=arm["Mx"], As_vao_y=arm["My"],
-        As_eng_x=arm["Mxe"], As_eng_y=arm["Mye"],
-        As_cm2m=max(arm.values()),   # armadura governante [cm2/m]
-        As_min=As_min,
-        w_lim=0.1,  # mm (NBR 6118:2023, sec.21.3 - CAA IV)
-        ref="[1] NBR 6118:2023, sec.21 | Bares (Carini)"
-    )
+    r = dimensionar_parede_placa(H_agua, largura_m, espessura_m, p_base,
+                                 fck, fyk, caa)
+    if "erro" not in r and r.get("As_cm2m") != 0:
+        r["largura"] = largura_m
+        r["ref"] = "[1] NBR 6118:2023, sec.21 | Bares + flexo-tracao (Carini)"
+    return r
 
 
 def dimensionar_fundo(H_agua, Lx, Ly, h_fundo_m, fck=40.0, fyk=500.0, caa="IV"):
