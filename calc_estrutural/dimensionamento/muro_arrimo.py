@@ -171,19 +171,3 @@ def dimensionar_fuste(predim, empuxo, fck=25.0, fyk=500.0, caa="III"):
         As_cm2m=As_adot,
         ref="[1] Bastos(Dr.,UNESP) 2017 + [4] NBR 6118:2023, sec.17"
     )
-
-
-def imprimir_muro(predim, emp, estab, fuste):
-    print("\n" + "="*60)
-    print("DIMENSIONAMENTO - MURO DE ARRIMO | NBR 6118:2023")
-    print("="*60)
-    print("\n--- PRE-DIMENSIONAMENTO ---")
-    for k, v in predim.items(): print(f"  {k}: {v}")
-    print("\n--- EMPUXO (RANKINE) ---")
-    for k, v in emp.items(): print(f"  {k}: {v}")
-    print("\n--- ESTABILIDADE ---")
-    for k, v in estab.items(): print(f"  {k}: {v}")
-    print("\n--- FUSTE (ARMADURA) ---")
-    for k, v in fuste.items(): print(f"  {k}: {v}")
-    print()
-    print(BIBLIOGRAFIA_MURO)

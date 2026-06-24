@@ -164,17 +164,3 @@ def calcular_laje_unid(lx, h_cm, gk, qk, caso=7, fck=25.0, fyk=500.0, caa="II"):
                    "Aseng": armar(m.get("Md_eng",0))},
         ref="[1] Carini(2023) + [4] NBR 6118:2023, sec.19"
     )
-
-
-def imprimir_laje(res):
-    print("\n" + "="*60)
-    print(f"DIMENSIONAMENTO - LAJE CASO {res.get('caso','')}")
-    print("="*60)
-    for k, v in res.items():
-        if isinstance(v, dict):
-            print(f"\n  --- {k.upper()} ---")
-            for kk, vv in v.items(): print(f"    {kk}: {vv}")
-        else:
-            print(f"  {k}: {v}")
-    print()
-    print(BIBLIOGRAFIA_LAJE)

@@ -129,22 +129,3 @@ def dimensionar_fundo(H_agua, Lx, Ly, h_fundo_m, fck=40.0, fyk=500.0, caa="IV"):
         As_cm2m=round(max(As, As_min), 2),
         ref="[1] NBR 6118:2023, sec.21 | [3] Carini 2023"
     )
-
-
-def imprimir_piscina(combs, par_c1, par_c2, fundo):
-    print("\n" + "="*60)
-    print("DIMENSIONAMENTO - PISCINA | NBR 6118:2023, sec.21")
-    print("="*60)
-    print(f"\nCAA: {CAA_PISCINA} | fck_min: {FCK_MIN} MPa | w_lim: 0,10 mm")
-    for i, c in enumerate(combs, 1):
-        print(f"\n  Combinacao C{i}: {c.get('desc','')}")
-        for k,v in c.items():
-            if k != "desc": print(f"    {k}: {v}")
-    print("\n--- PAREDE (C1 - cheia) ---")
-    for k, v in par_c1.items(): print(f"  {k}: {v}")
-    print("\n--- PAREDE (C2 - vazia+solo) ---")
-    for k, v in par_c2.items(): print(f"  {k}: {v}")
-    print("\n--- FUNDO ---")
-    for k, v in fundo.items(): print(f"  {k}: {v}")
-    print()
-    print(BIBLIOGRAFIA_PISCINA)

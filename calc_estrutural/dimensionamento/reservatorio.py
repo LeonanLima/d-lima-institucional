@@ -164,17 +164,3 @@ def fundo_dimensionar(H_m, L_m, B_m, h_fundo_m, fck=40.0, fyk=500.0, caa="IV"):
         Md_vazio=round(Md_vazio,2),  arm_vazio=armar(Md_vazio),
         ref="[1] NBR 6118:2023, sec.21 | [3] Carini 2023"
     )
-
-
-def imprimir_reservatorio(predim, par, fund):
-    print("\n" + "="*60)
-    print("DIMENSIONAMENTO - RESERVATORIO | NBR 6118:2023, sec.21")
-    print("="*60)
-    print("\n--- PRE-DIMENSIONAMENTO ---")
-    for k, v in predim.items(): print(f"  {k}: {v}")
-    print("\n--- PAREDES ---")
-    for k, v in par.items(): print(f"  {k}: {v}")
-    print("\n--- FUNDO ---")
-    for k, v in fund.items(): print(f"  {k}: {v}")
-    print()
-    print(BIBLIOGRAFIA_RESERVATORIO)

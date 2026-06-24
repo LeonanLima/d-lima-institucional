@@ -186,18 +186,3 @@ def escolher_barras(As_cm2):
         if n >= 4:
             sugestoes.append((n, phi, round(n*Aphi,2)))
     return sugestoes[:5]
-
-
-def imprimir_pilar(esb, dim, est=None):
-    print("\n" + "="*60)
-    print("DIMENSIONAMENTO - PILAR | NBR 6118:2023")
-    print("="*60)
-    print("\n--- ESBELTEZ ---")
-    for k, v in esb.items(): print(f"  {k}: {v}")
-    print("\n--- FLEXO-COMPRESSAO ---")
-    for k, v in dim.items(): print(f"  {k}: {v}")
-    if est:
-        print("\n--- ESTRIBOS ---")
-        for k, v in est.items(): print(f"  {k}: {v}")
-    print()
-    print(BIBLIOGRAFIA_PILAR)

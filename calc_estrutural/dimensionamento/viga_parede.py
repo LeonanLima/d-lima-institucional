@@ -101,18 +101,3 @@ def armadura_tirante_escolher(As_cm2, fyd_MPa=435.0):
         if 2 <= n <= 12:
             sugs.append({"n": n, "phi_mm": phi, "As_prov": round(n*A, 2)})
     return sugs[:4]
-
-
-def imprimir_viga_parede(classif, modelo):
-    print("\n" + "="*60)
-    print("DIMENSIONAMENTO - VIGA-PAREDE | NBR 6118:2023, sec.22.6")
-    print("="*60)
-    print("\n--- CLASSIFICACAO ---")
-    for k, v in classif.items(): print(f"  {k}: {v}")
-    print("\n--- MODELO BIELA-TIRANTE ---")
-    for k, v in modelo.items(): print(f"  {k}: {v}")
-    print("\n  Sugestoes tirante:")
-    for s in armadura_tirante_escolher(modelo["As_tirante_cm2"]):
-        print(f"    {s}")
-    print()
-    print(BIBLIOGRAFIA_VP)

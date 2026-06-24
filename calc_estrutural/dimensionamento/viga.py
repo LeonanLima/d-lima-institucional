@@ -212,18 +212,3 @@ def escolher_barras(As_cm2):
         if 2 <= n <= 10:
             sugs.append((n, phi, round(n*AREA_BARRA[phi], 2)))
     return sugs[:5]
-
-
-def imprimir_viga(res_cor, res_flex, res_el=None):
-    print("\n" + "="*60)
-    print("DIMENSIONAMENTO - VIGA | NBR 6118:2023")
-    print("="*60)
-    print("\n--- CISALHAMENTO ---")
-    for k, v in res_cor.items(): print(f"  {k}: {v}")
-    print("\n--- FLEXAO ---")
-    for k, v in res_flex.items(): print(f"  {k}: {v}")
-    if res_el:
-        print("\n--- ELS FLECHA ---")
-        for k, v in res_el.items(): print(f"  {k}: {v}")
-    print()
-    print(BIBLIOGRAFIA_VIGA)

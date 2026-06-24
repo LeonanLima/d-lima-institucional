@@ -97,14 +97,3 @@ def predimensionar_reservatorio(volume_m3: float,
         "obs": "CAA IV obrigatoria (NBR 6118:2023, sec.6.4) | wk <= 0,1mm",
         "ref": "[5] Araujo (Dr., FURG) 2014 + [1] NBR 6118:2023, sec.21",
     }
-
-
-def imprimir_predim(tipo: str, res: dict):
-    print("\n" + "="*55)
-    print(f"PRE-DIMENSIONAMENTO - {tipo.upper()}")
-    print("="*55)
-    for k, v in res.items():
-        if k != "outras":
-            print(f"  {k}: {v}")
-    print()
-    print(BIBLIOGRAFIA_PREDIM)
