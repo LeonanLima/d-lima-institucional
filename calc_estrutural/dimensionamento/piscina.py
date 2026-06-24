@@ -7,6 +7,8 @@
 #   [4] BASTOS, P.S.S. (Dr., UNESP) Apostila Elementos Especiais. 2017
 import math
 
+from dimensionamento.bares import momentos_parede
+
 BIBLIOGRAFIA_PISCINA = (
     "PISCINA - Referencias:\n"
     "  [1] NBR 6118:2023, sec.21 (contato com liquidos)\n"
@@ -49,44 +51,69 @@ def combinacoes_piscina(H_agua, phi_solo=30.0, gamma_solo=18.0, qs_kPa=0.0):
     return C1, C2, C3
 
 
-def dimensionar_parede(H_agua, espessura_m, combin, fck=40.0, fyk=500.0, caa="IV"):
+def _as_flexao(Md_kNm, b_cm, d_cm, fcd_kNcm2, fyd_kNcm2):
+    """As [cm2] de flexao simples para |Md|. O sinal de Md so define a FACE
+    (engaste negativo = face externa; vao positivo = face interna).
+    Retorna 0 se nao ha momento e None se a secao for insuficiente."""
+    Md_cm = abs(Md_kNm) * 100
+    if Md_cm < 0.01:
+        return 0.0
+    disc = 1 - Md_cm / (0.425 * b_cm * d_cm**2 * fcd_kNcm2)
+    if disc < 0:
+        return None
+    x = 1.25 * d_cm * (1 - math.sqrt(max(0.0, disc)))
+    return 0.85 * fcd_kNcm2 * 0.80 * x * b_cm / fyd_kNcm2
+
+
+def dimensionar_parede(H_agua, largura_m, espessura_m, combin,
+                       fck=40.0, fyk=500.0, caa="IV"):
     """
-    Dimensionamento da parede de piscina (modelo balanco vertical).
-    Ref: Bastos [4] + NBR 6118:2023, sec.21 [1]
+    Dimensionamento da parede como PLACA BIDIRECIONAL (tabela de Bares).
+    Contorno: 3 bordas engastadas (base + 2 laterais) + topo livre.
+    O contorno engastado vale para ambas as combinacoes (cheia/vazia+solo) -
+    o empuxo do solo so inverte o sinal do momento, nao o vinculo.
+    H_agua     = altura da parede [m] (= ly, direcao da carga triangular)
+    largura_m  = vao horizontal da parede [m] (= lx)
+    Ref: Bares (NBR 6118:2023 / Carini) + NBR 6118:2023, sec.21 [1]
     """
-    fcd = fck / 1.4 / 10.0
-    fyd = fyk / 1.15 / 10.0
+    fcd = fck / 1.4 / 10.0   # kN/cm2
+    fyd = fyk / 1.15 / 10.0  # kN/cm2
     cobr = {"I":2.0,"II":2.5,"III":4.0,"IV":4.5}.get(caa, 4.5)
     h_cm = espessura_m * 100
     d = h_cm - cobr - 0.625
-
-    p_base = combin.get("p_net_base", 0)   # kN/m2
+    b = 100.0
     gamma_f = 1.4
 
-    # Momento no engaste da base (carga triangular):
-    Md = gamma_f * p_base * H_agua**2 / 6   # kNm/m
-    Vd = gamma_f * p_base * H_agua / 2      # kN/m
+    p_base = combin.get("p_net_base", 0)   # kN/m2 (caracteristico)
+    pd = gamma_f * p_base                  # pressao de calculo na base
 
-    # Forca de tracao horizontal (anel, raio = L/2 se for circular ou retang.)
-    # Simplificacao: usar como viga em balanco e ignorar efeito anel
-    Md_cm = Md * 100
-    b = 100.0
-    if Md_cm < 0.01:
-        return {"As_cm2m": 0, "Md": 0, "nota": "Sem momento nesta comb."}
-    disc = 1 - Md_cm / (0.425 * b * d**2 * fcd)
-    if disc < 0:
-        return {"erro": "Seção insuficiente - aumentar espessura"}
-    x = 1.25 * d * (1 - math.sqrt(max(0, disc)))
-    As = 0.85 * fcd * 0.80 * x * b / fyd
-    As_min = max(0.15/100 * b * h_cm, 0.0015 * b * h_cm)
-    As_adot = round(max(As, As_min), 2)
+    if pd <= 0:
+        return {"As_cm2m": 0, "nota": "Sem pressao liquida nesta combinacao."}
+
+    # Momentos de calculo da placa [kNm/m] via Bares (lx=largura, ly=altura)
+    M = momentos_parede(largura_m, H_agua, pd)
+    Vd = pd * H_agua / 2   # cortante na base (carga triangular) [kN/m]
+
+    As_min = round(max(0.15/100 * b * h_cm, 0.0015 * b * h_cm), 2)
+    arm = {}
+    for nome, Md in (("Mx", M["Mx"]), ("My", M["My"]),
+                     ("Mxe", M["Mxe"]), ("Mye", M["Mye"])):
+        As = _as_flexao(Md, b, d, fcd, fyd)
+        if As is None:
+            return {"erro": f"Secao insuficiente em {nome} - aumentar espessura"}
+        arm[nome] = round(max(As, As_min), 2)
 
     return dict(
-        H=H_agua, h_cm=h_cm, d_cm=round(d,1),
-        p_base=round(p_base,2), Md_kNm=round(Md,2), Vd_kN=round(Vd,2),
-        As_cm2m=As_adot, As_min=round(As_min,2),
+        H=H_agua, largura=largura_m, h_cm=h_cm, d_cm=round(d, 1),
+        razao=M["razao"], l_ref=M["l_ref"],
+        p_base=round(p_base, 2), Vd_kN=round(Vd, 2),
+        Mx=M["Mx"], My=M["My"], Mxe=M["Mxe"], Mye=M["Mye"],
+        As_vao_x=arm["Mx"], As_vao_y=arm["My"],
+        As_eng_x=arm["Mxe"], As_eng_y=arm["Mye"],
+        As_cm2m=max(arm.values()),   # armadura governante [cm2/m]
+        As_min=As_min,
         w_lim=0.1,  # mm (NBR 6118:2023, sec.21.3 - CAA IV)
-        ref="[1] NBR 6118:2023, sec.21 | [4] Bastos(Dr.,UNESP) 2017"
+        ref="[1] NBR 6118:2023, sec.21 | Bares (Carini)"
     )
 
 

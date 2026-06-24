@@ -80,7 +80,7 @@ def _muro():
 
 def _piscina():
     combs = combinacoes_piscina(1.5, 30, 18)
-    dim_par_pisc(1.5, 0.15, combs[0], 40, 500, "IV")
+    dim_par_pisc(1.5, 8.0, 0.15, combs[0], 40, 500, "IV")
     dim_fundo_pisc(1.5, 8.0, 4.0, 0.15, 40, 500, "IV")
 
 
