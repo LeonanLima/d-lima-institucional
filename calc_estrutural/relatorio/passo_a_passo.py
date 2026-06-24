@@ -23,7 +23,7 @@ def _v(x, dec=2):
 
 
 def memorial_laje(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0, caa="II", psi2=0.3):
-    res = calcular_laje_macica(lx, ly, h_cm, gk, qk, caso, fck, fyk, caa)
+    res = calcular_laje_macica(lx, ly, h_cm, gk, qk, caso, fck, fyk, caa, psi2)
     passos = []
 
     # Passo 1 - classificacao
@@ -39,11 +39,11 @@ def memorial_laje(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0, caa="II", p
         obs="" if bidir else "Para lambda > 2 o correto e laje unidirecional (casos 7-10).",
     ))
 
-    # Passo 2 - cargas
-    PP = 25.0 * h_cm / 100.0
+    # Passo 2 - cargas (lidas do resultado canonico - fonte unica)
+    PP = res["PP_kNm2"]
     g_total = gk + PP
-    fd = 1.4 * g_total + 1.4 * qk
-    fd_ser = g_total + psi2 * qk
+    fd = res["fd_kNm2"]
+    fd_ser = res["fd_ser_kNm2"]
     passos.append(Passo(
         titulo="Passo 2 - Cargas de calculo",
         formula=r"f_d = 1{,}4\,(g_k + PP) + 1{,}4\,q_k \qquad f_{d,ser} = (g_k + PP) + \psi_2\,q_k",

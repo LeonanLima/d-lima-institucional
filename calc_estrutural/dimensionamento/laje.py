@@ -32,11 +32,14 @@ COEF_CARINI = {
 }
 
 
-def calcular_laje_macica(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0, caa="II"):
+def calcular_laje_macica(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0,
+                         caa="II", psi2=0.3):
     """
     Dimensionamento completo de laje macica bidirecional.
     Ref: Carini [1] + Araujo [2] + NBR 6118:2023 [4].
     lx, ly em metros | h_cm em cm | gk, qk em kN/m2
+    psi2: fator de combinacao quase-permanente (NBR 6118:2023, Tabela 11.2):
+          residencial 0,3 | comercial/escritorio 0,4 | garagem/biblioteca 0,6.
     """
     relacao = round(ly / lx, 3)
     bidirecional = relacao <= 2.0
@@ -45,8 +48,6 @@ def calcular_laje_macica(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0, caa=
     PP = 25.0 * h_cm / 100.0       # kN/m2
     g_total = gk + PP
     fd = 1.4 * g_total + 1.4 * qk  # ELU
-
-    psi2 = {"residencial":0.3, "comercial":0.4, "garagem":0.6}.get("residencial", 0.3)
     fd_ser = g_total + psi2 * qk    # ELS
 
     # Momentos e reacoes (Carini [1], Tabela coeficientes)
@@ -94,7 +95,7 @@ def calcular_laje_macica(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0, caa=
     return dict(
         lx=lx, ly=ly, relacao=relacao, tipo="BIDIRECIONAL" if bidirecional else "UNIDIRECIONAL",
         h_cm=h_cm, PP_kNm2=round(PP,2),
-        fd_kNm2=round(fd,2), fd_ser_kNm2=round(fd_ser,2),
+        fd_kNm2=round(fd,2), fd_ser_kNm2=round(fd_ser,2), psi2=psi2,
         caso=caso,
         momentos={
             "Mdx_pos":  round(Mdx,  3),

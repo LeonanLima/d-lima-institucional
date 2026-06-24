@@ -414,10 +414,14 @@ elif pagina == "🟦  Laje Maciça":
             fck  = st.number_input("fck (MPa)", 20, 50, 25)
             fyk  = st.number_input("fyk (MPa)", 250, 600, 500)
             caa  = st.selectbox("CAA", ["I","II","III","IV"])
+            psi2 = st.selectbox("ψ₂ (ELS)", [0.3, 0.4, 0.6],
+                                format_func=lambda v: {0.3:"0,3 residencial",
+                                0.4:"0,4 comercial/escritório",
+                                0.6:"0,6 garagem/biblioteca"}[v])
         ok_l = st.form_submit_button("Calcular", use_container_width=True)
     if ok_l:
         try:
-            r = calcular_laje_macica(lx, ly, h_cm, gk, qk, caso, fck, fyk, caa)
+            r = calcular_laje_macica(lx, ly, h_cm, gk, qk, caso, fck, fyk, caa, psi2)
             col1, col2 = st.columns(2)
             with col1:
                 st.subheader("Momentos (kNm/m)")
