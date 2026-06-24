@@ -50,7 +50,6 @@ from dimensionamento.piscina import (
 from dimensionamento.viga_parede import (
     classificar_viga_parede, modelo_biela_tirante, imprimir_viga_parede
 )
-from analise.portico import analisar, imprimir_resultados
 from relatorio.memorial import gerar_memorial
 
 

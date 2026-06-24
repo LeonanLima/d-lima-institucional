@@ -1,9 +1,8 @@
 """
 modelo.py - Estruturas de dados do programa DLIMA Estrutural
-Representa nos, barras, secoes, lajes e paredes para analise estrutural
+Representa secoes, lajes e paredes para dimensionamento de elementos.
 """
 from dataclasses import dataclass, field
-from typing import Optional, List
 import math
 
 
@@ -75,88 +74,6 @@ class Secao:
 
     @property
     def G(self): return self.material.G
-
-
-@dataclass
-class No:
-    """
-    No do portico espacial - 6 graus de liberdade (DOF)
-    DOF: [ux, uy, uz, theta_x, theta_y, theta_z]
-    Coordenadas em metros, restricoes boolean (True = fixo)
-    """
-    id: int
-    x: float = 0.0   # [m]
-    y: float = 0.0   # [m]
-    z: float = 0.0   # [m]
-    # restricoes: True = deslocamento/rotacao impedido
-    restricoes: List[bool] = field(default_factory=lambda: [False]*6)
-    # cargas nodais: [Fx, Fy, Fz, Mx, My, Mz] em [kN, kNm]
-    cargas: List[float] = field(default_factory=lambda: [0.0]*6)
-
-    def apoio_engastado(self):
-        self.restricoes = [True]*6
-
-    def apoio_articulado(self):
-        self.restricoes = [True, True, True, False, False, False]
-
-    def apoio_deslizante_x(self):
-        self.restricoes = [False, True, True, False, False, False]
-
-    def aplicar_carga(self, Fx=0, Fy=0, Fz=0, Mx=0, My=0, Mz=0):
-        self.cargas = [Fx, Fy, Fz, Mx, My, Mz]
-
-
-@dataclass
-class Barra:
-    """
-    Barra de portico espacial - conecta dois nos
-    Tipo: "pilar", "viga_x", "viga_y", "diagonal"
-    Cargas distribuidas: [(tipo, valor, posicao)] - em desenvolvimento
-    """
-    id: int
-    no_i: No
-    no_j: No
-    secao: Secao
-    tipo: str = "viga"
-    # cargas distribuidas: [(intensidade_kNm, ax_ini, ax_fim)] no eixo local
-    q_distribuida: List[tuple] = field(default_factory=list)
-
-    @property
-    def L(self):
-        dx = self.no_j.x - self.no_i.x
-        dy = self.no_j.y - self.no_i.y
-        dz = self.no_j.z - self.no_i.z
-        return math.sqrt(dx**2 + dy**2 + dz**2)
-
-    @property
-    def vetor_eixo(self):
-        L = self.L
-        dx = (self.no_j.x - self.no_i.x) / L
-        dy = (self.no_j.y - self.no_i.y) / L
-        dz = (self.no_j.z - self.no_i.z) / L
-        return (dx, dy, dz)
-
-
-@dataclass
-class Estrutura:
-    """Estrutura completa do portico espacial"""
-    nome: str = "Estrutura"
-    nos: List[No] = field(default_factory=list)
-    barras: List[Barra] = field(default_factory=list)
-
-    def adicionar_no(self, no: No):
-        self.nos.append(no)
-        return no
-
-    def adicionar_barra(self, barra: Barra):
-        self.barras.append(barra)
-        return barra
-
-    def no_por_id(self, id: int) -> Optional[No]:
-        return next((n for n in self.nos if n.id == id), None)
-
-    @property
-    def n_dof(self): return len(self.nos) * 6
 
 
 @dataclass

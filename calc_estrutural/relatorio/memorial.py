@@ -129,7 +129,6 @@ def gerar_memorial(resultados: dict, saida: str = "memorial.pdf", dados_obra: di
         "muro":        ("8. MURO DE ARRIMO", "muro"),
         "piscina":     ("9. PISCINA", "piscina"),
         "viga_parede": ("10. VIGA-PAREDE", "viga_parede"),
-        "portico":     ("11. ANALISE DO PORTICO (FEM 3D)", "portico"),
     }
 
     for chave, (titulo_sec, key) in secs.items():
