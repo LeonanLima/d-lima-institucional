@@ -149,12 +149,15 @@ def armadura_dupla(Md_kNcm, b_cm, d_cm, fck, fyk=500.0, caa="II"):
 
 
 def as_minima_viga(bw_cm, d_cm, fck, fyk=500.0):
-    """As,min para vigas - NBR 6118:2023, Tabela 17.3 | Ref [4]"""
+    """As,min para vigas - NBR 6118:2023, Tabela 17.3 | Ref [4]
+
+    rho_min = max(0,26 fctm/fyk ; 0,15%). fctm e fyk em MPa -> rho ja e fracao;
+    As_min = rho_min * bw * d (NAO dividir por 100 de novo).
+    """
     fctm = 0.3*fck**(2/3) if fck <= 50 else 2.12*math.log(1+0.1*fck+8)
-    fyk_ref = fyk
-    rho_min = 0.26 * fctm / fyk_ref   # NBR 6118:2023, Tabela 17.3
-    As_min = rho_min / 100 * bw_cm * d_cm
-    return dict(As_min=round(As_min,3), rho_min=round(rho_min,4),
+    rho_min = max(0.26 * fctm / fyk, 0.0015)   # piso 0,15% (NBR Tabela 17.3)
+    As_min = rho_min * bw_cm * d_cm
+    return dict(As_min=round(As_min,3), rho_min=round(rho_min,5),
                 ref="[4] NBR 6118:2023, Tabela 17.3")
 
 

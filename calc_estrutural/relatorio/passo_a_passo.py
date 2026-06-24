@@ -191,7 +191,7 @@ def memorial_viga(bw, h, L_m, Md_kNm, Vd_kN, fck=25.0, fyk=500.0, caa="II", q_se
     from dimensionamento.viga import (
         _fck_props, verificar_bielas, dimensionar_estribos,
         momento_limite_simples, armadura_simples, armadura_dupla,
-        calcular_flecha_branson, escolher_barras,
+        calcular_flecha_branson, escolher_barras, as_minima_viga,
     )
     passos = []
     d = h - 5.0
@@ -290,8 +290,9 @@ def memorial_viga(bw, h, L_m, Md_kNm, Vd_kN, fck=25.0, fyk=500.0, caa="II", q_se
         x = fx["x_cm"]
         As = fx["As_cm2"]
         x_lim = fx["x_lim"]
-        rho_min = max(0.26 * fctm / fyk, 0.0015)
-        As_min = rho_min * bw * d
+        asm = as_minima_viga(bw, d, fck, fyk)
+        rho_min = asm["rho_min"]
+        As_min = asm["As_min"]
         As_adot = max(As, As_min)
         barras = escolher_barras(As_adot)
         bar_txt = " ou ".join([str(n) + "Phi" + _v(phi, 1) + "(" + _v(area) + ")" for n, phi, area in barras[:3]]) if barras else "-"

@@ -14,7 +14,7 @@ from dimensionamento.pilar import (
 )
 from dimensionamento.viga import (
     verificar_bielas, calcular_parcela_concreto, dimensionar_estribos,
-    armadura_simples, calcular_flecha_branson, BIBLIOGRAFIA_VIGA,
+    armadura_simples, calcular_flecha_branson, as_minima_viga, BIBLIOGRAFIA_VIGA,
 )
 from dimensionamento.laje import calcular_laje_macica, BIBLIOGRAFIA_LAJE
 from dimensionamento.muro_arrimo import (
@@ -380,7 +380,9 @@ elif pagina == "🔧  Viga":
                     st.warning(f"Armadura dupla necessária — Md={Md_kNm:.1f} kNm > Md,duc={flex['Md_duc']/100:.1f} kNm")
                 else:
                     duc = "✅" if flex["ok_ductil"] else "⚠️ x>xlim"
-                    st.success(f"**As={flex['As_cm2']:.2f} cm²** | x={flex['x_cm']:.2f} cm | xlim={flex['x_lim']:.2f} cm  {duc}")
+                    asm = as_minima_viga(bw, d, fck, fyk)
+                    As_adot = max(flex["As_cm2"], asm["As_min"])
+                    st.success(f"**As={As_adot:.2f} cm²** (As,mín={asm['As_min']:.2f}) | x={flex['x_cm']:.2f} cm | xlim={flex['x_lim']:.2f} cm  {duc}")
                 st.subheader("Flecha ELS (Branson)")
                 wt   = ela.get("w_total_mm", ela.get("delta_t", 0))
                 wlim = ela.get("wadm_mm", ela.get("lim_cm", 0))
