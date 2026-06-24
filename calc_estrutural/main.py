@@ -274,12 +274,12 @@ MENU = """
 def main():
     if RICH_OK:
         console.print(Panel(
-            "[bold cyan]SISTEMA DE CALCULO ESTRUTURAL — NBR 6118:2023[/bold cyan]\n"
+            "[bold cyan]SISTEMA DE CALCULO ESTRUTURAL - NBR 6118:2023[/bold cyan]\n"
             "[dim]Prof. Carini | Bastos | Araujo | Fusco | Caputo[/dim]",
             expand=False))
     else:
         print("="*60)
-        print("SISTEMA DE CALCULO ESTRUTURAL — NBR 6118:2023")
+        print("SISTEMA DE CALCULO ESTRUTURAL - NBR 6118:2023")
         print("Prof. Carini | Bastos | Araujo | Fusco | Caputo")
         print("="*60)
 
