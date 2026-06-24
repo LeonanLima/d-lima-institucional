@@ -4,6 +4,7 @@
 import math
 from dataclasses import dataclass, field
 from dimensionamento.laje import calcular_laje_macica, COEF_CARINI
+from core.tabelas import interp_linear
 
 COBR_CAA = {"I": 1.5, "II": 2.0, "III": 3.5, "IV": 4.5}
 
@@ -545,14 +546,11 @@ def memorial_muro(H_m, phi, gs, qs=0.0, fck=25.0, fyk=500.0, caa="III"):
 
 
 def _interp_tab(tab, key):
-    """Interpolacao linear na tabela [(razao, mxe, mye, mx, my), ...]."""
-    key = max(tab[0][0], min(tab[-1][0], key))
-    for i in range(len(tab) - 1):
-        r0, r1 = tab[i], tab[i + 1]
-        if r0[0] <= key <= r1[0]:
-            f = (key - r0[0]) / (r1[0] - r0[0]) if r1[0] != r0[0] else 0.0
-            return [r0[j] + f * (r1[j] - r0[j]) for j in range(1, 5)]
-    return list(tab[-1][1:])
+    """Interpolacao linear na tabela [(razao, mxe, mye, mx, my), ...].
+
+    Delega ao motor unico core.tabelas.interp_linear (Fatia 4/A4).
+    """
+    return interp_linear(tab, key)
 
 
 # Tabela Carini - parede de reservatorio (painel com carga triangular)
