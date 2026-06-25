@@ -147,6 +147,51 @@ def render_passos(passos):
         st.divider()
 
 
+def linhas_verificacoes(verificacoes):
+    """Monta as linhas do painel valor x LIMITE x status (sem Streamlit).
+
+    Separada do render para ser testavel sem UI. Cada linha traz valor,
+    limite, unidade, folga, utilizacao (%) e status legivel. Ref. campos
+    de core.resultado.Verificacao (duck typing: nome/valor/limite/unidade/
+    operador/status/folga/utilizacao/passou).
+    """
+    linhas = []
+    for v in verificacoes:
+        u = f" {v.unidade}" if v.unidade else ""
+        op = "≤" if getattr(v, "operador", "<=") == "<=" else "≥"
+        util = v.utilizacao
+        util_txt = "—" if util == float("inf") else f"{util * 100:.0f}%"
+        linhas.append({
+            "Verificação": v.nome,
+            "Valor": f"{v.valor:.3g}{u}",
+            "Limite": f"{op} {v.limite:.3g}{u}",
+            "Folga": f"{v.folga:.3g}{u}",
+            "Uso": util_txt,
+            "Status": "✅ OK" if v.passou else "❌ NÃO OK",
+        })
+    return linhas
+
+
+def render_verificacoes(verificacoes, titulo="Verificações (valor × LIMITE × status)"):
+    """Painel unico de verificacoes normativas para qualquer elemento.
+
+    Recebe uma lista de Verificacao (core.resultado) e desenha:
+      - banner verde/vermelho com o veredito global;
+      - tabela valor x limite x folga x uso x status.
+    Centraliza o que antes era markdown solto e dessincronizado por pagina.
+    """
+    if not verificacoes:
+        return
+    st.subheader(titulo)
+    reprovadas = [v for v in verificacoes if not v.passou]
+    if reprovadas:
+        nomes = ", ".join(v.nome for v in reprovadas)
+        st.error(f"❌ {len(reprovadas)} verificação(ões) NÃO atendida(s): {nomes}")
+    else:
+        st.success("✅ Todas as verificações atendidas (ELU + ELS).")
+    st.table(linhas_verificacoes(verificacoes))
+
+
 def show_erro(e):
     """Exibe exceção com traceback — padrão único de erro nas abas."""
     st.error("Erro: " + str(e))
