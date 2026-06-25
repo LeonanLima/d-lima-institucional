@@ -68,6 +68,25 @@ def _dark_fig(w=5, h=4):
     ax.title.set_color("#e2e8f0")
     return fig, ax
 
+def render_detalhe_dist(As_cm2m, posicao, seq=1, largura_cm=100):
+    # Renderiza uma linha de detalhamento de armadura distribuida (cm2/m).
+    if not As_cm2m or As_cm2m <= 0:
+        return
+    b = detalhar_por_espacamento(As_cm2m, largura_cm=largura_cm,
+                                 nome_seq=seq, posicao=posicao)
+    st.markdown(f"- **{b.nome}** Ø{b.phi_mm:g} c/{b.espacamento_cm:g}cm — "
+                f"{b.posicao} (As,prov={b.As_prov_cm2:.2f} ≥ {As_cm2m:.2f} cm²/m)")
+
+def render_detalhe_conc(As_cm2, posicao, seq=1, comprimento_cm=None):
+    # Renderiza uma linha de detalhamento de armadura concentrada (cm2).
+    if not As_cm2 or As_cm2 <= 0:
+        return
+    b = detalhar_por_quantidade(As_cm2, nome_seq=seq, posicao=posicao,
+                                comprimento_cm=comprimento_cm)
+    st.markdown(f"- **{b.nome}** {b.quantidade}×Ø{b.phi_mm:g} — {b.posicao} "
+                f"(As,prov={b.As_prov_cm2:.2f} ≥ {As_cm2:.2f} cm²)"
+                + (f" — {b.comprimento_cm:g}cm" if b.comprimento_cm else ""))
+
 def fig_secao_pilar(hx, hy, As_adot, escolha):
     fig, ax = _dark_fig(3.5, 3.5)
     ax.add_patch(mpatches.FancyBboxPatch((0,0), hx, hy, boxstyle="square,pad=0",
@@ -351,6 +370,11 @@ elif pagina == "🏛️  Pilar":
                 st.table([{"n": n, "Ø mm": phi, "As prov cm2": ap} for n, phi, ap in escolha])
                 st.subheader("Estribos")
                 st.markdown(f"Ø{est['phi_est_mm']:.0f} mm | s={est['s_max_cm']} cm | s_red={est['s_red_cm']} cm")
+                st.subheader("🔩 Detalhamento (p/ obra)")
+                render_detalhe_conc(dim["As_adot"], "longitudinal (flexo-compressão)",
+                                    seq=1, comprimento_cm=round(H)+40)
+                st.markdown(f"- **N2** estribo Ø{est['phi_est_mm']:.0f} c/{est['s_max_cm']:g}cm "
+                            f"(s_red={est['s_red_cm']:g}cm nas extremidades)")
             with st.expander("Referências"):
                 st.text(BIBLIOGRAFIA_PILAR)
         except Exception as e:
@@ -557,6 +581,9 @@ elif pagina == "🧱  Muro de Arrimo":
                     ca.metric("Md (kNm/m)", f"{fus['Md_kNm']:.2f}")
                     cb.metric("Vd (kN/m)", f"{fus['Vd_kN']:.2f}")
                     cc.metric("As vert. (cm2/m)", f"{fus['As_cm2m']:.2f}")
+                    st.subheader("🔩 Detalhamento (p/ obra)")
+                    render_detalhe_dist(fus['As_cm2m'], "vertical do fuste (face de terra)", seq=1)
+                    render_detalhe_dist(0.2*fus['As_cm2m'], "distribuição horizontal", seq=2)
             with st.expander("Geometria do pré-dimensionamento"):
                 st.json({k:v for k,v in pm.items() if k!="ref"})
             with st.expander("Referências"):
@@ -609,12 +636,20 @@ elif pagina == "🛢️  Reservatório":
                 with st.expander("Momentos de cálculo (kNm/m) e detalhes"):
                     st.json({k: par[k] for k in ("Mx", "Mxe", "My", "Mye", "razao", "d_cm", "p_max_kNm2") if k in par})
                 st.caption("💧 " + par.get("nota_els", ""))
+                st.subheader("🔩 Detalhamento da parede (p/ obra)")
+                render_detalhe_dist(par['As_vao_x'], "horizontal — vão (face interna)", seq=1)
+                render_detalhe_dist(par['As_eng_x'], "horizontal — engaste (face externa)", seq=2)
+                render_detalhe_dist(par['As_vao_y'], "vertical — vão", seq=3)
+                render_detalhe_dist(par['As_eng_y'], "vertical — engaste (base)", seq=4)
             fun = fundo_dimensionar(H_m, L_m, B_m, h_fun_cm / 100.0, fck_r, fyk_r, "IV")
             st.subheader("Fundo (laje)")
             ca, cb = st.columns(2)
             ac, av = fun["arm_cheio"], fun["arm_vazio"]
             ca.metric("As cheio (cm²/m)", f"{ac.get('As_cm2', 0):.2f}", delta=f"Md {fun['Md_cheio']:.1f}")
             cb.metric("As vazio (cm²/m)", f"{av.get('As_cm2', 0):.2f}", delta=f"Md {fun['Md_vazio']:.1f}")
+            st.subheader("🔩 Detalhamento do fundo (p/ obra)")
+            render_detalhe_dist(max(ac.get('As_cm2', 0), av.get('As_cm2', 0)),
+                                "fundo — governante (cheio/vazio)", seq=1)
             with st.expander("Referências"):
                 st.text(BIBLIOGRAFIA_RESERVATORIO)
         except Exception as e:
@@ -665,6 +700,11 @@ elif pagina == "🏊  Piscina":
                     cc.metric("As vert. vão", f"{par['As_vao_y']:.2f}")
                     cd.metric("As vert. engaste", f"{par['As_eng_y']:.2f}")
                     st.caption(f"Nd anel = {par['Nd_anel_kNm']:.2f} kN/m · Vd = {par['Vd_kN']:.2f} kN/m · As gov. = {par['As_cm2m']:.2f} cm²/m")
+                    st.markdown("**🔩 Detalhamento:**")
+                    render_detalhe_dist(par['As_vao_x'], "horizontal — vão", seq=1)
+                    render_detalhe_dist(par['As_eng_x'], "horizontal — engaste", seq=2)
+                    render_detalhe_dist(par['As_vao_y'], "vertical — vão", seq=3)
+                    render_detalhe_dist(par['As_eng_y'], "vertical — engaste (base)", seq=4)
             fun = dimensionar_fundo(H_a, Lx, Ly, h_fun_cm / 100.0, fck_p, fyk_p, "IV")
             st.subheader("Fundo (laje)")
             if "erro" in fun:
@@ -675,6 +715,8 @@ elif pagina == "🏊  Piscina":
                 ca, cb = st.columns(2)
                 ca.metric("As fundo (cm²/m)", f"{fun['As_cm2m']:.2f}")
                 cb.metric("Md (kNm/m)", f"{fun.get('Md_kNm', 0):.2f}")
+                st.markdown("**🔩 Detalhamento:**")
+                render_detalhe_dist(fun['As_cm2m'], "fundo — principal", seq=1)
             with st.expander("Referências"):
                 st.text(BIBLIOGRAFIA_PISCINA)
         except Exception as e:
