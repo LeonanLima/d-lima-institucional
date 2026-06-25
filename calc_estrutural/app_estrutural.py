@@ -22,6 +22,14 @@ from dimensionamento.muro_arrimo import (
     predimensionar_muro, calcular_empuxo, verificar_estabilidade,
     dimensionar_fuste, BIBLIOGRAFIA_MURO,
 )
+from dimensionamento.reservatorio import (
+    predimensionar_reservatorio, paredes_dimensionar, fundo_dimensionar,
+    BIBLIOGRAFIA_RESERVATORIO,
+)
+from dimensionamento.piscina import (
+    combinacoes_piscina, dimensionar_parede, dimensionar_fundo,
+    BIBLIOGRAFIA_PISCINA,
+)
 
 st.set_page_config(page_title="Calc Estrutural NBR 6118:2023",
                    page_icon="🏗️", layout="wide",
@@ -40,6 +48,8 @@ with st.sidebar:
         "🔧  Viga",
         "🟦  Laje Maciça",
         "🧱  Muro de Arrimo",
+        "🛢️  Reservatório",
+        "🏊  Piscina",
     ])
 
 # ── helpers gráficos ──────────────────────────────────────────
@@ -504,6 +514,122 @@ elif pagina == "🧱  Muro de Arrimo":
                 st.json({k:v for k,v in pm.items() if k!="ref"})
             with st.expander("Referências"):
                 st.text(BIBLIOGRAFIA_MURO)
+        except Exception as e:
+            st.error(f"Erro: {e}")
+            import traceback; st.code(traceback.format_exc())
+
+elif pagina == "🛢️  Reservatório":
+    st.title("🛢️ Reservatório")
+    st.caption("Paredes: placa de Bares + flexo-tração (Carini) · Fundo: laje · NBR 6118:2023 sec.21 (CAA IV)")
+    with st.form("reserv_dim"):
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.subheader("Geometria")
+            H_m = st.number_input("H — altura da água (m)", 1.0, 8.0, 2.4, 0.1)
+            L_m = st.number_input("L — vão da parede (m)", 1.0, 12.0, 4.75, 0.05)
+            B_m = st.number_input("B — largura em planta (m)", 1.0, 12.0, 4.75, 0.05)
+        with c2:
+            st.subheader("Espessuras")
+            h_par_cm = st.number_input("h parede (cm)", 12, 40, 20, 1)
+            h_fun_cm = st.number_input("h fundo (cm)", 12, 40, 20, 1)
+        with c3:
+            st.subheader("Concreto")
+            fck_r = st.number_input("fck (MPa, mín 40)", 40, 50, 40)
+            fyk_r = st.number_input("fyk (MPa)", 250, 600, 500)
+        ok_rd = st.form_submit_button("Calcular", use_container_width=True)
+    with st.expander("Pré-dimensionar a partir do volume"):
+        vol = st.number_input("Volume (m³)", 1.0, 500.0, 20.0, 1.0, key="volr")
+        if st.button("Sugerir geometria", key="predimr"):
+            st.json({k: v for k, v in predimensionar_reservatorio(vol).items() if k != "ref"})
+    if ok_rd:
+        try:
+            par = paredes_dimensionar(H_m, L_m, h_par_cm / 100.0, fck_r, fyk_r, "IV")
+            st.subheader("Paredes (cheio) — placa de Bares + flexo-tração")
+            if "erro" in par:
+                st.error(par["erro"])
+            elif par.get("As_cm2m") == 0:
+                st.info(par.get("nota", "Sem pressão líquida nesta combinação."))
+            else:
+                ca, cb, cc, cd = st.columns(4)
+                ca.metric("As horiz. vão (cm²/m)", f"{par['As_vao_x']:.2f}")
+                cb.metric("As horiz. engaste", f"{par['As_eng_x']:.2f}")
+                cc.metric("As vert. vão", f"{par['As_vao_y']:.2f}")
+                cd.metric("As vert. engaste", f"{par['As_eng_y']:.2f}")
+                ca, cb, cc = st.columns(3)
+                ca.metric("Nd anel (kN/m)", f"{par['Nd_anel_kNm']:.2f}")
+                cb.metric("Vd (kN/m)", f"{par['Vd_kN']:.2f}")
+                cc.metric("As governante", f"{par['As_cm2m']:.2f}")
+                with st.expander("Momentos de cálculo (kNm/m) e detalhes"):
+                    st.json({k: par[k] for k in ("Mx", "Mxe", "My", "Mye", "razao", "d_cm", "p_max_kNm2") if k in par})
+                st.caption("💧 " + par.get("nota_els", ""))
+            fun = fundo_dimensionar(H_m, L_m, B_m, h_fun_cm / 100.0, fck_r, fyk_r, "IV")
+            st.subheader("Fundo (laje)")
+            ca, cb = st.columns(2)
+            ac, av = fun["arm_cheio"], fun["arm_vazio"]
+            ca.metric("As cheio (cm²/m)", f"{ac.get('As_cm2', 0):.2f}", delta=f"Md {fun['Md_cheio']:.1f}")
+            cb.metric("As vazio (cm²/m)", f"{av.get('As_cm2', 0):.2f}", delta=f"Md {fun['Md_vazio']:.1f}")
+            with st.expander("Referências"):
+                st.text(BIBLIOGRAFIA_RESERVATORIO)
+        except Exception as e:
+            st.error(f"Erro: {e}")
+            import traceback; st.code(traceback.format_exc())
+
+elif pagina == "🏊  Piscina":
+    st.title("🏊 Piscina")
+    st.caption("Paredes: placa de Bares + flexo-tração (Carini) · 3 combinações · NBR 6118:2023 sec.21")
+    with st.form("pisc_dim"):
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            st.subheader("Geometria")
+            H_a = st.number_input("H — altura da água (m)", 1.0, 6.0, 1.5, 0.1)
+            larg = st.number_input("L — vão da parede (m)", 1.0, 12.0, 4.0, 0.1)
+            Lx = st.number_input("Lx fundo (m)", 1.0, 20.0, 4.0, 0.1)
+            Ly = st.number_input("Ly fundo (m)", 1.0, 20.0, 8.0, 0.1)
+        with c2:
+            st.subheader("Espessuras / Solo")
+            h_par_cm = st.number_input("h parede (cm)", 12, 40, 20, 1, key="hparpd")
+            h_fun_cm = st.number_input("h fundo (cm)", 12, 40, 20, 1, key="hfunpd")
+            phi = st.number_input("φ solo (graus)", 15.0, 45.0, 30.0, 1.0, key="phipd")
+            gs = st.number_input("γ solo (kN/m³)", 14.0, 22.0, 18.0, 0.5, key="gspd")
+            qs = st.number_input("Sobrecarga qs (kN/m²)", 0.0, 30.0, 0.0, 1.0, key="qspd")
+        with c3:
+            st.subheader("Concreto")
+            fck_p = st.number_input("fck (MPa, mín 40)", 40, 50, 40, key="fckpd")
+            fyk_p = st.number_input("fyk (MPa)", 250, 600, 500, key="fykpd")
+        ok_pd = st.form_submit_button("Calcular", use_container_width=True)
+    if ok_pd:
+        try:
+            C1, C2, C3 = combinacoes_piscina(H_a, phi, gs, qs)
+            st.subheader("Combinações de carga")
+            st.table([{"Comb": n, "Descrição": c["desc"], "p_net base (kN/m²)": c["p_net_base"]}
+                      for n, c in (("C1", C1), ("C2", C2), ("C3", C3))])
+            esp = h_par_cm / 100.0
+            for nome, comb in (("C1 — cheia", C1), ("C2 — vazia (solo externo)", C2)):
+                par = dimensionar_parede(H_a, larg, esp, comb, fck_p, fyk_p, "IV")
+                st.subheader(f"Parede — {nome}")
+                if "erro" in par:
+                    st.error(par["erro"])
+                elif par.get("As_cm2m") == 0:
+                    st.info(par.get("nota", "Sem pressão líquida nesta combinação."))
+                else:
+                    ca, cb, cc, cd = st.columns(4)
+                    ca.metric("As horiz. vão (cm²/m)", f"{par['As_vao_x']:.2f}")
+                    cb.metric("As horiz. engaste", f"{par['As_eng_x']:.2f}")
+                    cc.metric("As vert. vão", f"{par['As_vao_y']:.2f}")
+                    cd.metric("As vert. engaste", f"{par['As_eng_y']:.2f}")
+                    st.caption(f"Nd anel = {par['Nd_anel_kNm']:.2f} kN/m · Vd = {par['Vd_kN']:.2f} kN/m · As gov. = {par['As_cm2m']:.2f} cm²/m")
+            fun = dimensionar_fundo(H_a, Lx, Ly, h_fun_cm / 100.0, fck_p, fyk_p, "IV")
+            st.subheader("Fundo (laje)")
+            if "erro" in fun:
+                st.error(fun["erro"])
+            elif fun.get("As_cm2m") == 0:
+                st.info(fun.get("nota", "Peso próprio ≥ pressão da água: sem tração no fundo."))
+            else:
+                ca, cb = st.columns(2)
+                ca.metric("As fundo (cm²/m)", f"{fun['As_cm2m']:.2f}")
+                cb.metric("Md (kNm/m)", f"{fun.get('Md_kNm', 0):.2f}")
+            with st.expander("Referências"):
+                st.text(BIBLIOGRAFIA_PISCINA)
         except Exception as e:
             st.error(f"Erro: {e}")
             import traceback; st.code(traceback.format_exc())
