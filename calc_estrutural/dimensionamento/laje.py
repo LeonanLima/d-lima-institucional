@@ -78,7 +78,8 @@ def calcular_laje_macica(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0,
     Rdye = coef["rye"] * fd * lx    if coef["rye"]  else 0
 
     # ELU: dimensionamento da armadura (Carini [1], Araujo [2])
-    cobr = {"I":1.5,"II":2.0,"III":3.5,"IV":4.5}.get(caa, 2.0)
+    # Cobrimento nominal de LAJE - NBR 6118:2023 Tabela 7.2 (Dc=10mm padrao).
+    cobr = {"I":2.0,"II":2.5,"III":3.5,"IV":4.5}.get(caa, 2.5)
     d = h_cm - cobr - 0.5    # d estimado (cobrimento + Phi10/2)
     b = 100.0                 # largura unitaria [cm/m]
     fcd = fck / 1.4 / 10.0   # kN/cm2
@@ -165,7 +166,8 @@ def calcular_laje_unid(lx, h_cm, gk, qk, caso=7, fck=25.0, fyk=500.0, caa="II"):
     }
     m = momentos_casos.get(caso, momentos_casos[7])
 
-    cobr = {"I":1.5,"II":2.0,"III":3.5,"IV":4.5}.get(caa, 2.0)
+    # Cobrimento nominal de LAJE - NBR 6118:2023 Tabela 7.2 (Dc=10mm padrao).
+    cobr = {"I":2.0,"II":2.5,"III":3.5,"IV":4.5}.get(caa, 2.5)
     d = h_cm - cobr - 0.5
     b = 100.0
     fcd = fck / 1.4 / 10.0

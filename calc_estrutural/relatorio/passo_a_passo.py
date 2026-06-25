@@ -9,7 +9,8 @@ from dimensionamento.bares import (
 )
 from dimensionamento.flexo_tracao import as_min_flexo_tracao
 
-COBR_CAA = {"I": 1.5, "II": 2.0, "III": 3.5, "IV": 4.5}
+# Cobrimento nominal de LAJE - NBR 6118:2023 Tabela 7.2 (Dc=10mm padrao).
+COBR_CAA = {"I": 2.0, "II": 2.5, "III": 3.5, "IV": 4.5}
 
 
 @dataclass
