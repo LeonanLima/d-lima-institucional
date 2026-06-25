@@ -172,12 +172,31 @@ def linhas_verificacoes(verificacoes):
     return linhas
 
 
+def _tabela_markdown(linhas):
+    """Converte as linhas (list de dict) numa tabela markdown.
+
+    Renderizada via st.markdown para NAO depender de pandas/numpy (st.table
+    importa pandas, que quebra com ABI numpy incompativel). Tabela pequena e
+    so texto, entao markdown e suficiente e robusto.
+    """
+    if not linhas:
+        return ""
+    cols = list(linhas[0].keys())
+    cabecalho = "| " + " | ".join(cols) + " |"
+    separador = "| " + " | ".join("---" for _ in cols) + " |"
+    corpo = [
+        "| " + " | ".join(str(linha[c]) for c in cols) + " |"
+        for linha in linhas
+    ]
+    return "\n".join([cabecalho, separador, *corpo])
+
+
 def render_verificacoes(verificacoes, titulo="Verificações (valor × LIMITE × status)"):
     """Painel unico de verificacoes normativas para qualquer elemento.
 
     Recebe uma lista de Verificacao (core.resultado) e desenha:
       - banner verde/vermelho com o veredito global;
-      - tabela valor x limite x folga x uso x status.
+      - tabela valor x limite x folga x uso x status (markdown, sem pandas).
     Centraliza o que antes era markdown solto e dessincronizado por pagina.
     """
     if not verificacoes:
@@ -189,7 +208,7 @@ def render_verificacoes(verificacoes, titulo="Verificações (valor × LIMITE ×
         st.error(f"❌ {len(reprovadas)} verificação(ões) NÃO atendida(s): {nomes}")
     else:
         st.success("✅ Todas as verificações atendidas (ELU + ELS).")
-    st.table(linhas_verificacoes(verificacoes))
+    st.markdown(_tabela_markdown(linhas_verificacoes(verificacoes)))
 
 
 def show_erro(e):

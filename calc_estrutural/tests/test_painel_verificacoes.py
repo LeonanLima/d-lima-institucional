@@ -1,6 +1,6 @@
 # tests/test_painel_verificacoes.py - trava as linhas do painel de verificacoes
 from core.resultado import verif_max, verif_min
-from ui.componentes import linhas_verificacoes
+from ui.componentes import linhas_verificacoes, _tabela_markdown
 
 
 def test_linha_ok_max():
@@ -29,3 +29,18 @@ def test_linha_min_usa_simbolo_maior():
 
 def test_lista_vazia():
     assert linhas_verificacoes([]) == []
+
+
+def test_tabela_markdown_estrutura():
+    # tabela markdown sem pandas (imune a ABI numpy/pandas): cabecalho + sep + 1 linha
+    linhas = linhas_verificacoes([verif_max("Flecha (ELS)", 12.0, 16.0, "mm")])
+    md = _tabela_markdown(linhas)
+    partes = md.split("\n")
+    assert partes[0].startswith("| Verificação |")
+    assert set(partes[1].replace(" ", "")) <= {"|", "-"}   # linha separadora
+    assert "Flecha (ELS)" in partes[2]
+    assert "✅ OK" in partes[2]
+
+
+def test_tabela_markdown_vazia():
+    assert _tabela_markdown([]) == ""
