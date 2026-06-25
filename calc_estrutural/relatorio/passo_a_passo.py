@@ -702,7 +702,7 @@ def memorial_reservatorio(tipo, estado, H_m, L_m, h_par_cm, phi=30.0, gs=18.0,
     return passos, r
 
 def memorial_piscina(estado, H_m, L_m, h_par_cm, phi=30.0, gs=18.0, qs=0.0,
-                     fck=30.0, fyk=500.0, caa="III"):
+                     fck=40.0, fyk=500.0, caa="IV"):
     """Memorial da parede de piscina: placa de Bares + flexo-tracao (Carini).
 
     Mesmo motor canonico do reservatorio (dimensionar_parede_placa). Piscina

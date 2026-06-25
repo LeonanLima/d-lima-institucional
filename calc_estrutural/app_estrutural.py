@@ -841,12 +841,12 @@ elif pagina == "📋  Memorial de Cálculo":
                 gs_pi = st.number_input("γ solo (kN/m³)", 14.0, 22.0, 18.0, 0.5, key="gspi")
             with c3:
                 qs_pi = st.number_input("Sobrecarga no solo qs (kN/m²)", 0.0, 30.0, 0.0, 1.0, key="qspi")
-                fck_pi = st.number_input("fck (MPa)", 25, 50, 30, key="fckpi")
+                fck_pi = st.number_input("fck (MPa, mín 40)", 40, 50, 40, key="fckpi")
                 fyk_pi = st.number_input("fyk (MPa)", 250, 600, 500, key="fykpi")
             ok_pi = st.form_submit_button("📋 Gerar memorial passo a passo", use_container_width=True)
         if ok_pi:
             try:
-                passos, _r = memorial_piscina(estado_pi, H_pi, L_pi, hpar_pi, phi_pi, gs_pi, qs_pi, fck_pi, fyk_pi, "III")
+                passos, _r = memorial_piscina(estado_pi, H_pi, L_pi, hpar_pi, phi_pi, gs_pi, qs_pi, fck_pi, fyk_pi, "IV")
                 st.divider()
                 for p in passos:
                     st.markdown("#### " + p.titulo)

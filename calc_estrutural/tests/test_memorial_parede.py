@@ -23,13 +23,13 @@ def test_reservatorio_cheio_bate_com_motor_canonico():
 
 def test_memorial_tem_os_quatro_momentos_e_flexotracao():
     passos, r = memorial_piscina("Cheia", 1.5, 4.0, 20,
-                                 fck=30, fyk=500, caa="III")
+                                 fck=40, fyk=500, caa="IV")
     titulos = " | ".join(p.titulo for p in passos)
     assert "Mx, Mxe, My, Mye" in titulos          # os 4 momentos
     assert "flexo-tracao" in titulos.lower()       # horizontal
     assert "VERTICAL" in titulos                    # flexao vertical
-    # consistencia com o motor canonico
-    esperado = dimensionar_parede_placa(1.5, 4.0, 0.20, 10.0 * 1.5, 30, 500, "III")
+    # consistencia com o motor canonico (CAA IV, fck 40 - NBR 6118 sec.21)
+    esperado = dimensionar_parede_placa(1.5, 4.0, 0.20, 10.0 * 1.5, 40, 500, "IV")
     assert r["As_cm2m"] == esperado["As_cm2m"]
 
 
