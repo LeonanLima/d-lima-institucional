@@ -111,12 +111,13 @@ class TestLaje:
         assert m["Mdx_pos"] == pytest.approx(10.14, abs=0.05)
         assert m["Mdy_pos"] == pytest.approx(4.094, abs=0.05)
 
-    @pytest.mark.xfail(reason="BUG: flecha unidirecional aproximada devolve valores "
-                              "absurdos (w_total ~15000 mm) e wadm rotulado em mm mas "
-                              "vale ~L/250 em cm. Corrigir e remover o xfail.",
-                       strict=True)
     def test_flecha_sanidade(self, res):
+        # Flecha de placa (Timoshenko/Carini) interpolada por lambda=ly/lx=1,29.
         els = res["els_flecha"]
-        # Para esta laje, L/250 = 3500/250 = 14 mm e a flecha real deve ser < wadm.
+        # L/250 = 3500/250 = 14 mm (NBR 6118:2023 Tabela 13.3).
         assert els["wadm_mm"] == pytest.approx(14.0, abs=1.0)
-        assert els["w_total_mm"] < els["wadm_mm"]
+        # alpha interpolado entre 0,00564 (lambda 1,2) e 0,00638 (1,3).
+        assert els["alpha_flecha"] == pytest.approx(0.00627, abs=2e-4)
+        assert els["w_total_mm"] == pytest.approx(7.0, abs=1.0)
+        assert els["w_total_mm"] < els["wadm_mm"]   # flecha OK
+        assert els["ok"] is True

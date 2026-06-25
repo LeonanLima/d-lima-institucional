@@ -5,7 +5,11 @@
 #   [2] ARAUJO, J.M. (Dr., FURG) Curso de Concreto Armado. v.2. 2014
 #   [3] BASTOS, P.S.S. (Dr., UNESP) Lajes - Concreto Armado I. 2017
 #   [4] NBR 6118:2023, secoes 13.2.4, 14.7, 19.3, 19.4
+#   [5] TIMOSHENKO & WOINOWSKY-KRIEGER, Theory of Plates and Shells, Tab.35
+#       (coef. de flecha de placa retangular apoiada nos 4 bordos, carga uniforme)
 import math
+
+from core.tabelas import interp_linear
 
 BIBLIOGRAFIA_LAJE = (
     "LAJE - Referencias:\n"
@@ -30,6 +34,18 @@ COEF_CARINI = {
     "5A":{"mx":0.0531,"my":0.0254,"mxe":-0.0943,"mye":-0.0508,"rx":None, "ry":0.2828,"rxe":0.1935,"rye":0.4713},
     6:  {"mx":0.0359,"my":0.0143,"mxe":-0.0716,"mye":-0.0289,"rx":None, "ry":None, "rxe":0.1103,"rye":0.4299},
 }
+
+# Coeficiente de flecha de placa retangular APOIADA nos 4 bordos sob carga
+# uniforme (Timoshenko [5], Tab.35; mesma familia dos wc do Carini):
+#   w0 = alpha * fd_ser * lx^4 / D , com D = Ecs*h^3 / [12*(1-nu^2)] , nu=0,2.
+# Indexado por lambda = ly/lx in [1,0 ; 2,0]; fora do intervalo o interp clampa.
+# Para casos com engaste (2-6) a placa e mais rigida -> usar este alpha (caso 1)
+# e CONSERVADOR (superestima a flecha, a favor da seguranca).
+ALPHA_FLECHA_4APOIOS = [
+    [1.0, 0.00406], [1.1, 0.00485], [1.2, 0.00564], [1.3, 0.00638],
+    [1.4, 0.00705], [1.5, 0.00772], [1.6, 0.00830], [1.7, 0.00883],
+    [1.8, 0.00931], [1.9, 0.00974], [2.0, 0.01013],
+]
 
 
 def calcular_laje_macica(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0,
@@ -82,15 +98,21 @@ def calcular_laje_macica(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0,
                 "x_cm": round(x, 2),
                 "ok_ductil": x <= 0.45*d}
 
-    # ELS: flecha simplificada (formula aproximada, Araujo [2])
-    ai = min(0.8 + 0.2*fck/80, 1.0)
-    Ecs = ai * 5600 * math.sqrt(fck)   # MPa (granito alpha_E=1.0)
-    D = Ecs * (h_cm/100)**3 / (12 * (1 - 0.04))  # rigidez placa (nu=0.2)
-    # Coeficiente de flecha para caso 1 bidirecional (aprox.)
-    Md_ser = fd_ser * lx**2 / 8   # kNm/m (valor aproximado)
-    w0_aprox = 5 * fd_ser * (lx*100)**4 / (384 * Ecs * b*(h_cm/100)**3/12 * 1e4)
-    w_total = w0_aprox * (1 + 2.5)   # fluencia phi=2.5
-    wadm = (lx*100) / 250.0
+    # ELS: flecha de placa (NBR 6118:2023 sec.17.3.2 + Timoshenko [5] / Carini [1])
+    #   w0 = alpha(lambda) * fd_ser * lx^4 / D   (placa retangular, carga uniforme)
+    #   D  = Ecs * h^3 / [12*(1-nu^2)] , nu=0,2 (NBR 6118:2023 sec.8.2.9)
+    ai = min(0.8 + 0.2*fck/80, 1.0)              # NBR 6118:2023 sec.8.2.8
+    Ecs_MPa = ai * 5600 * math.sqrt(fck)         # MPa (granito alpha_E=1.0)
+    Ecs = Ecs_MPa * 1000.0                        # kN/m2 (1 MPa = 1000 kN/m2)
+    h_m = h_cm / 100.0
+    nu = 0.20
+    D = Ecs * h_m**3 / (12 * (1 - nu**2))         # kNm (rigidez de placa)
+    lam_fl = min(max(ly / lx, 1.0), 2.0)          # tabela vale em [1,0 ; 2,0]
+    alpha_fl = interp_linear(ALPHA_FLECHA_4APOIOS, lam_fl)[0]
+    w0_m = alpha_fl * fd_ser * lx**4 / D          # flecha imediata [m]
+    w_total_m = w0_m * (1 + 2.5)                  # fluencia phi=2,5 (NBR 6118 simplif.)
+    wadm_m = lx / 250.0                            # NBR 6118:2023 Tabela 13.3
+    w0_aprox, w_total, wadm = w0_m, w_total_m, wadm_m
 
     return dict(
         lx=lx, ly=ly, relacao=relacao, tipo="BIDIRECIONAL" if bidirecional else "UNIDIRECIONAL",
@@ -114,10 +136,12 @@ def calcular_laje_macica(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0,
             "Asye_neg": armar(Mdye),
         },
         els_flecha={
-            "w0_mm": round(w0_aprox*10, 2),
-            "w_total_mm": round(w_total*10, 2),
-            "wadm_mm": round(wadm, 2),
-            "ok": (w_total*10 <= wadm),
+            "w0_mm": round(w0_aprox*1000, 2),
+            "w_total_mm": round(w_total*1000, 2),
+            "wadm_mm": round(wadm*1000, 2),
+            "lambda_flecha": round(lam_fl, 3),
+            "alpha_flecha": round(alpha_fl, 5),
+            "ok": (w_total <= wadm),
         },
         ref="[1] Carini(2023) + [2] Araujo(Dr.,FURG) 2014 + [4] NBR 6118:2023"
     )

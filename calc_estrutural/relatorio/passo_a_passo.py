@@ -181,12 +181,13 @@ def memorial_laje(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0, caa="II", p
         formula=r"w_\infty = (1 + \varphi)\,w_0 \qquad w_{adm} = \dfrac{l_x}{250}",
         substituicao=[
             r"E_{cs} = " + _v(ai, 3) + r" \cdot 5600 \sqrt{" + _v(fck, 0) + r"} = " + _v(Ecs, 0) + r"\ \mathrm{MPa}",
+            r"\lambda = l_y/l_x = " + _v(els["lambda_flecha"], 3) + r" \Rightarrow \alpha = " + _v(els["alpha_flecha"], 5) + r"\quad(w_0 = \alpha\,f_{d,ser}\,l_x^4/D)",
             r"w_0 = " + _v(els["w0_mm"]) + r"\ \mathrm{mm} \quad w_\infty = (1 + 2{,}5)\,w_0 = " + _v(els["w_total_mm"]) + r"\ \mathrm{mm}",
-            r"w_{adm} = " + _v(lx * 100, 0) + r"/250 = " + _v(els["wadm_mm"]) + r"\ \mathrm{mm}",
+            r"w_{adm} = \dfrac{l_x}{250} = \dfrac{" + _v(lx * 1000, 0) + r"\,\mathrm{mm}}{250} = " + _v(els["wadm_mm"]) + r"\ \mathrm{mm}",
         ],
         resultado="w_inf = " + _v(els["w_total_mm"]) + " mm " + ("<=" if els["ok"] else ">") + " w_adm = " + _v(els["wadm_mm"]) + " mm -> " + ("OK" if els["ok"] else "AUMENTAR h"),
-        norma="NBR 6118:2023 sec.13.3, Tabela 13.3 | fluencia phi = 2,5",
-        obs="Flecha por estimativa simplificada de placa. O metodo rigoroso usa os coeficientes wc de Carini por caso de vinculacao.",
+        norma="NBR 6118:2023 sec.17.3.2, Tabela 13.3 | fluencia phi = 2,5",
+        obs="Flecha de placa: alpha(lambda) de Timoshenko/Carini (placa apoiada 4 bordos) interpolado por lambda=ly/lx. Casos com engaste usam o mesmo alpha (conservador).",
     ))
 
     return passos, res
