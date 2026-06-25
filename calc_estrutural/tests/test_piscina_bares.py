@@ -1,4 +1,4 @@
-"""Parede de piscina como placa de Bares (3 engastes + topo livre)."""
+"""Parede de piscina como placa de Bares (laterais apoiadas + base engastada; topo livre)."""
 import pytest
 
 from dimensionamento.piscina import combinacoes_piscina, dimensionar_parede

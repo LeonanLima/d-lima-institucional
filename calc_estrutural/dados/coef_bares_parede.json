@@ -1,6 +1,7 @@
 {
   "fonte": "Tabela de Bares - parede (laje retangular) sob carga triangular (hidrostatica, maxima na base). Coeficiente alfa/m da NBR 6118:2023 / notas Prof. Carini. Transcrito da imagem fornecida por Leonan em 2026-06-24.",
   "formula": "M = (m / 1000) * p * l^2   [p = pressao na base, kN/m2 ; l = vao de referencia, m]",
+  "contorno": "Vinculacao real (slides do Carini): bordas LATERAIS APOIADAS + BASE ENGASTADA. Topo APOIADO quando ha tampa (reservatorio fechado); topo LIVRE quando aberto (piscina). A tabela numerica vale para os dois casos de topo. NAO confundir com 'topo livre + 3 engastes' (modelo antigo, incorreto).",
   "selecao": "Se lx <= ly: usa 'tabela_l_lx' com indice lx/ly e l=lx. Se ly < lx: usa 'tabela_l_ly' com indice ly/lx e l=ly. As duas convergem em razao=1,00. Fora de [0,50; 1,00] o interpolador clampa (nao extrapola).",
   "colunas": ["razao", "mxe", "mye", "mx", "my"],
   "legenda": {
