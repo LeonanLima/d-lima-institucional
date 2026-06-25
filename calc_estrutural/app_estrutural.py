@@ -30,6 +30,7 @@ from dimensionamento.piscina import (
     combinacoes_piscina, dimensionar_parede, dimensionar_fundo,
     BIBLIOGRAFIA_PISCINA,
 )
+from analise.esforcos import resolver_viga_biapoiada, CargaDistribuida
 
 st.set_page_config(page_title="Calc Estrutural NBR 6118:2023",
                    page_icon="🏗️", layout="wide",
@@ -80,24 +81,36 @@ def fig_secao_pilar(hx, hy, As_adot, escolha):
     plt.tight_layout()
     return fig
 
-def fig_diagrama_viga(L, Md, Vd):
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7, 3))
+def fig_diagrama_viga(L, q, w_total_mm=None):
+    # Diagramas reais do solver 1D (analise.esforcos) a partir da carga q
+    # distribuida: M(x), V(x) e linha elastica. A elastica e escalada para
+    # bater com a flecha total de Branson (w_total_mm), quando informada.
+    r = resolver_viga_biapoiada(L, distribuidas=[CargaDistribuida(q)], EI=1.0)
+    x, M, V, d = r["x"], r["M"], r["V"], r["delta"]
+    n = 3 if w_total_mm else 2
+    fig, axes = plt.subplots(1, n, figsize=(3.4 * n, 3))
     fig.patch.set_facecolor("#0f172a")
-    x = np.linspace(0, L, 120)
-    for ax in (ax1, ax2):
+    for ax in axes:
         ax.set_facecolor("#0f172a"); ax.tick_params(colors="#94a3b8")
         for sp in ax.spines.values(): sp.set_color("#334155")
         ax.axhline(0, color="#475569", lw=0.8)
-    M = Md * 4 * x * (L - x) / L**2
-    V = Vd * (1 - 2*x/L)
-    ax1.fill_between(x, M, alpha=0.45, color="#38bdf8")
-    ax1.plot(x, M, color="#38bdf8", lw=2)
-    ax1.set_title("Momento M (kNm)", color="#e2e8f0", fontsize=9)
-    ax1.set_xlabel("x (m)", color="#94a3b8")
-    ax2.fill_between(x, V, alpha=0.45, color="#f59e0b")
-    ax2.plot(x, V, color="#f59e0b", lw=2)
-    ax2.set_title("Cortante V (kN)", color="#e2e8f0", fontsize=9)
-    ax2.set_xlabel("x (m)", color="#94a3b8")
+        ax.set_xlabel("x (m)", color="#94a3b8")
+    axes[0].fill_between(x, M, alpha=0.45, color="#38bdf8")
+    axes[0].plot(x, M, color="#38bdf8", lw=2)
+    axes[0].set_title(f"M(x)  máx={r['M_max_kNm']:.1f} kNm",
+                      color="#e2e8f0", fontsize=9)
+    axes[1].fill_between(x, V, alpha=0.45, color="#f59e0b")
+    axes[1].plot(x, V, color="#f59e0b", lw=2)
+    axes[1].set_title(f"V(x)  máx={r['V_max_kN']:.1f} kN",
+                      color="#e2e8f0", fontsize=9)
+    if w_total_mm:
+        dmax = r["delta_max_m"] or 1.0
+        esc = (w_total_mm / dmax) if dmax else 0.0   # mm por unidade de forma
+        elast = [-di * esc for di in d]              # p/ baixo no plot
+        axes[2].plot(x, elast, color="#34d399", lw=2)
+        axes[2].fill_between(x, elast, alpha=0.30, color="#34d399")
+        axes[2].set_title(f"Linha elástica  máx={w_total_mm:.2f} mm",
+                          color="#e2e8f0", fontsize=9)
     plt.tight_layout()
     return fig
 
@@ -375,9 +388,10 @@ elif pagina == "🔧  Viga":
             As_ok  = flex.get("As_cm2", 0.01)
             # calcular_flecha_branson(Md_ser_kNcm, As_cm2, bw_cm, h_cm, d_cm, L_m, fck)
             ela = calcular_flecha_branson(Md_ser, As_ok, bw, hv, d, L_m, fck)
+            wt   = ela.get("w_total_mm", ela.get("delta_t", 0))
             col1, col2 = st.columns([1, 2])
             with col1:
-                st.pyplot(fig_diagrama_viga(L_m, Md_kNm, Vd_kN))
+                st.pyplot(fig_diagrama_viga(L_m, q_ser, wt))
             with col2:
                 biel_s = "✅ OK" if biel["ok"] else "❌ Aumentar seção"
                 st.subheader("Bielas comprimidas")
