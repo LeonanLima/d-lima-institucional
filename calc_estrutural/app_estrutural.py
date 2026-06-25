@@ -600,6 +600,12 @@ elif pagina == "🧱  Muro de Arrimo":
                 cb.metric("FSD deslizamento"+(" ✅" if est["FSD_ok"] else " ❌"), f"{est['FSD']:.3f}", delta="min 1,5")
                 if not est["FSD_ok"]:
                     st.warning("FSD < 1,5 — aumente a base B para 0,6 a 0,7 x H ou adicione chave de cisalhamento.")
+                render_verificacoes([
+                    verif_min("FST — tombamento", est["FST"], 1.5,
+                              "", "NBR 6118 / Caputo (FS≥1,5)"),
+                    verif_min("FSD — deslizamento", est["FSD"], 1.5,
+                              "", "NBR 6118 / Caputo (FS≥1,5)"),
+                ])
                 st.subheader("Fuste")
                 if "erro" in fus:
                     st.error(fus["erro"])
