@@ -372,6 +372,16 @@ elif pagina == "🏛️  Pilar":
                 st.table([{"n": n, "Ø mm": phi, "As prov cm2": ap} for n, phi, ap in escolha])
                 st.subheader("Estribos")
                 st.markdown(f"Ø{est['phi_est_mm']:.0f} mm | s={est['s_max_cm']} cm | s_red={est['s_red_cm']} cm")
+                render_verificacoes([
+                    verif_max("Esbeltez λx (método pilar-padrão)", esb["lam_x"],
+                              90.0, "", "NBR 6118 §15.8.1 (λ≤90)"),
+                    verif_max("Esbeltez λy (método pilar-padrão)", esb["lam_y"],
+                              90.0, "", "NBR 6118 §15.8.1 (λ≤90)"),
+                    verif_min("Armadura mínima", dim["As_adot"], dim["As_min"],
+                              "cm²", "NBR 6118 §17.3.5.3"),
+                    verif_max("Armadura máxima", dim["As_adot"], dim["As_max"],
+                              "cm²", "NBR 6118 §17.3.5.3 (taxa 8%)"),
+                ])
                 st.subheader("🔩 Detalhamento (p/ obra)")
                 render_detalhe_conc(dim["As_adot"], "longitudinal (flexo-compressão)",
                                     seq=1, comprimento_cm=round(H)+40)
@@ -531,6 +541,10 @@ elif pagina == "🟦  Laje Maciça":
                 st.metric("delta_total", f"{wt:.2f} mm")
                 st.metric("delta_adm L/250", f"{wadm:.2f} mm")
                 st.markdown(f"**{f_ok}**")
+            render_verificacoes([
+                verif_max("Flecha total (ELS)", wt, wadm,
+                          "mm", "NBR 6118 §13.3 (L/250)"),
+            ])
             st.subheader("🔩 Detalhamento (p/ obra)")
             seq = 1
             for nome, dados in r.get("armaduras", {}).items():
