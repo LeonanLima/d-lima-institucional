@@ -31,6 +31,9 @@ from dimensionamento.piscina import (
     BIBLIOGRAFIA_PISCINA,
 )
 from analise.esforcos import resolver_viga_biapoiada, CargaDistribuida
+from detalhamento.armaduras import (
+    detalhar_por_quantidade, detalhar_por_espacamento, texto_para_obra,
+)
 
 st.set_page_config(page_title="Calc Estrutural NBR 6118:2023",
                    page_icon="🏗️", layout="wide",
@@ -414,6 +417,25 @@ elif pagina == "🔧  Viga":
                 wlim = ela.get("wadm_mm", ela.get("lim_cm", 0))
                 f_ok = "✅" if ela.get("ok") else "❌ Aumentar h"
                 st.markdown(f"delta_total={wt:.2f} mm | lim={wlim:.2f} mm  {f_ok}")
+                if "erro" not in flex:
+                    st.subheader("🔩 Detalhamento (p/ obra)")
+                    barras = [
+                        detalhar_por_quantidade(As_adot, nome_seq=1,
+                                                posicao="longitudinal (flexão)",
+                                                comprimento_cm=round(L_m*100)+30),
+                    ]
+                    sug0 = est2.get("sugestoes", [])
+                    if sug0:
+                        s0 = sug0[0]
+                        barras.append(detalhar_por_espacamento(
+                            0.01, largura_cm=L_m*100, nome_seq=2,
+                            posicao="estribo", phi_mm=s0["phi_mm"],
+                            s_max_cm=s0["s_cm"]))
+                    for b in barras:
+                        st.markdown(f"- **{b.nome}** {b.quantidade}×Ø{b.phi_mm:g}"
+                                    + (f" c/{b.espacamento_cm:g}cm" if b.espacamento_cm else "")
+                                    + f" — {b.posicao}"
+                                    + (f" — {b.comprimento_cm:g}cm" if b.comprimento_cm else ""))
             with st.expander("Referências"):
                 st.text(BIBLIOGRAFIA_VIGA)
         except Exception as e:
@@ -472,6 +494,17 @@ elif pagina == "🟦  Laje Maciça":
                 st.metric("delta_total", f"{wt:.2f} mm")
                 st.metric("delta_adm L/250", f"{wadm:.2f} mm")
                 st.markdown(f"**{f_ok}**")
+            st.subheader("🔩 Detalhamento (p/ obra)")
+            seq = 1
+            for nome, dados in r.get("armaduras", {}).items():
+                As = dados.get("As_cm2", 0) if isinstance(dados, dict) else 0
+                if not As:
+                    continue
+                b = detalhar_por_espacamento(As, largura_cm=100, nome_seq=seq,
+                                             posicao=nome.replace("_", " "))
+                st.markdown(f"- **{b.nome}** Ø{b.phi_mm:g} c/{b.espacamento_cm:g}cm "
+                            f"— {b.posicao} (As,prov={b.As_prov_cm2:.2f} ≥ {As:.2f} cm²/m)")
+                seq += 1
             with st.expander("Referências"):
                 st.text(BIBLIOGRAFIA_LAJE)
         except Exception as e:
