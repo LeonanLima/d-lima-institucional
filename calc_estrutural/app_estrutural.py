@@ -34,6 +34,8 @@ from analise.esforcos import resolver_viga_biapoiada, CargaDistribuida
 from detalhamento.armaduras import (
     detalhar_por_quantidade, detalhar_por_espacamento, texto_para_obra,
 )
+from core.resultado import verif_max, verif_min
+from ui.componentes import render_verificacoes
 
 st.set_page_config(page_title="Calc Estrutural NBR 6118:2023",
                    page_icon="🏗️", layout="wide",
@@ -441,6 +443,17 @@ elif pagina == "🔧  Viga":
                 wlim = ela.get("wadm_mm", ela.get("lim_cm", 0))
                 f_ok = "✅" if ela.get("ok") else "❌ Aumentar h"
                 st.markdown(f"delta_total={wt:.2f} mm | lim={wlim:.2f} mm  {f_ok}")
+                verifs = [
+                    verif_max("Cisalhamento (bielas)", Vd_kN, biel["VRd2"],
+                              "kN", "NBR 6118 §17.4.2.2"),
+                    verif_max("Flecha total (ELS)", wt, wlim,
+                              "mm", "NBR 6118 §13.3 Tab.13.3"),
+                ]
+                if "erro" not in flex:
+                    verifs.append(verif_max("Ductilidade (x ≤ x_lim)",
+                                  flex["x_cm"], flex["x_lim"], "cm",
+                                  "NBR 6118 §14.6.4.3"))
+                render_verificacoes(verifs)
                 if "erro" not in flex:
                     st.subheader("🔩 Detalhamento (p/ obra)")
                     barras = [
