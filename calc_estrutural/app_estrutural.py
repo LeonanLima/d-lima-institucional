@@ -35,7 +35,7 @@ from detalhamento.armaduras import (
     detalhar_por_quantidade, detalhar_por_espacamento, texto_para_obra,
 )
 from core.resultado import verif_max, verif_min
-from ui.componentes import render_verificacoes
+from ui.componentes import render_verificacoes, render_tabela
 
 st.set_page_config(page_title="Calc Estrutural NBR 6118:2023",
                    page_icon="🏗️", layout="wide",
@@ -291,7 +291,7 @@ elif pagina == "⚖️  Levantamento de Cargas":
 
     with tab3:
         st.subheader("Cargas variáveis mínimas — NBR 6120:2019, Tabela 2")
-        st.table([{"Uso / Ambiente": k, "qk (kN/m2)": v} for k, v in CARGAS_NBR6120.items()])
+        render_tabela([{"Uso / Ambiente": k, "qk (kN/m2)": v} for k, v in CARGAS_NBR6120.items()])
 
 elif pagina == "📐  Pré-dimensionamento":
     st.title("📐 Pré-dimensionamento")
@@ -369,7 +369,7 @@ elif pagina == "🏛️  Pilar":
                 duc = "✅" if dim["ok_ductil"] else "⚠️"
                 st.success(f"**As = {dim['As_adot']:.2f} cm²** | Domínio {dim['dominio']} {duc} | As_min={dim['As_min']:.2f} | As_max={dim['As_max']:.2f} cm²")
                 st.subheader("Sugestões de barras")
-                st.table([{"n": n, "Ø mm": phi, "As prov cm2": ap} for n, phi, ap in escolha])
+                render_tabela([{"n": n, "Ø mm": phi, "As prov cm2": ap} for n, phi, ap in escolha])
                 st.subheader("Estribos")
                 st.markdown(f"Ø{est['phi_est_mm']:.0f} mm | s={est['s_max_cm']} cm | s_red={est['s_red_cm']} cm")
                 render_verificacoes([
@@ -439,7 +439,7 @@ elif pagina == "🔧  Viga":
                 st.markdown(f"Vc={Vc:.1f} kN | Asw/s={est2['Asw_s']:.4f} cm²/cm")
                 sug = est2.get("sugestoes",[])
                 if sug:
-                    st.table([{"Ø mm": s["phi_mm"],"s cm": s["s_cm"],"Asw/s prov": s["Asw_s_prov"]} for s in sug])
+                    render_tabela([{"Ø mm": s["phi_mm"],"s cm": s["s_cm"],"Asw/s prov": s["Asw_s_prov"]} for s in sug])
                 st.subheader("Flexão")
                 if "erro" in flex:
                     st.warning(f"Armadura dupla necessária — Md={Md_kNm:.1f} kNm > Md,duc={flex['Md_duc']/100:.1f} kNm")
@@ -721,8 +721,8 @@ elif pagina == "🏊  Piscina":
         try:
             C1, C2, C3 = combinacoes_piscina(H_a, phi, gs, qs)
             st.subheader("Combinações de carga")
-            st.table([{"Comb": n, "Descrição": c["desc"], "p_net base (kN/m²)": c["p_net_base"]}
-                      for n, c in (("C1", C1), ("C2", C2), ("C3", C3))])
+            render_tabela([{"Comb": n, "Descrição": c["desc"], "p_net base (kN/m²)": c["p_net_base"]}
+                           for n, c in (("C1", C1), ("C2", C2), ("C3", C3))])
             esp = h_par_cm / 100.0
             for nome, comb in (("C1 — cheia", C1), ("C2 — vazia (solo externo)", C2)):
                 par = dimensionar_parede(H_a, larg, esp, comb, fck_p, fyk_p, "IV")

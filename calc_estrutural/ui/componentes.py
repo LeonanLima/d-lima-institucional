@@ -191,6 +191,18 @@ def _tabela_markdown(linhas):
     return "\n".join([cabecalho, separador, *corpo])
 
 
+def render_tabela(linhas):
+    """Renderiza uma list[dict] como tabela, SEM pandas (via markdown).
+
+    Substituto direto de st.table para list de dicts: st.table importa pandas,
+    que quebra com ABI numpy incompativel. Use para qualquer tabela simples de
+    texto/numeros (cargas, bitolas, combinacoes...).
+    """
+    if not linhas:
+        return
+    st.markdown(_tabela_markdown(linhas))
+
+
 def render_verificacoes(verificacoes, titulo="Verificações (valor × LIMITE × status)"):
     """Painel unico de verificacoes normativas para qualquer elemento.
 
