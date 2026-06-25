@@ -75,7 +75,8 @@ def paredes_dimensionar(H_m, L_m, h_par_m, fck=40.0, fyk=500.0, caa="IV"):
         r["combinacao"] = "CHEIO (C1)"
         r["h_par_m"] = h_par_m
         r["p_max_kNm2"] = round(GAMMA_AGUA * H_m * 1.4, 2)
-        r["nota_els"] = "Verificar fissuracao wk <= 0,10 mm (NBR 6118:2023, sec.21.3.3)"
+        r["nota_els"] = (f"Fissuracao: wk = {r.get('wk_mm', 0):.3f} mm "
+                         f"(limite 0,10 mm - NBR 6118:2023, sec.21.3.3)")
         r["ref"] = "[1] NBR 6118:2023, sec.21 | Bares + flexo-tracao (Carini)"
     return r
 

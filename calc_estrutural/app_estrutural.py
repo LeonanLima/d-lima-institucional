@@ -669,6 +669,11 @@ elif pagina == "🛢️  Reservatório":
                 with st.expander("Momentos de cálculo (kNm/m) e detalhes"):
                     st.json({k: par[k] for k in ("Mx", "Mxe", "My", "Mye", "razao", "d_cm", "p_max_kNm2") if k in par})
                 st.caption("💧 " + par.get("nota_els", ""))
+                if par.get("wk_mm", 0) > 0:
+                    render_verificacoes([
+                        verif_max("Fissuração wk (ELS-W)", par["wk_mm"], par["w_lim"],
+                                  "mm", "NBR 6118:2023, sec.21.3.3 (CAA IV)"),
+                    ])
                 st.subheader("🔩 Detalhamento da parede (p/ obra)")
                 render_detalhe_dist(par['As_vao_x'], "horizontal — vão (face interna)", seq=1)
                 render_detalhe_dist(par['As_eng_x'], "horizontal — engaste (face externa)", seq=2)
@@ -733,6 +738,11 @@ elif pagina == "🏊  Piscina":
                     cc.metric("As vert. vão", f"{par['As_vao_y']:.2f}")
                     cd.metric("As vert. engaste", f"{par['As_eng_y']:.2f}")
                     st.caption(f"Nd anel = {par['Nd_anel_kNm']:.2f} kN/m · Vd = {par['Vd_kN']:.2f} kN/m · As gov. = {par['As_cm2m']:.2f} cm²/m")
+                    if par.get("wk_mm", 0) > 0:
+                        render_verificacoes([
+                            verif_max("Fissuração wk (ELS-W)", par["wk_mm"], par["w_lim"],
+                                      "mm", "NBR 6118:2023, sec.21.3.3 (CAA IV)"),
+                        ])
                     st.markdown("**🔩 Detalhamento:**")
                     render_detalhe_dist(par['As_vao_x'], "horizontal — vão", seq=1)
                     render_detalhe_dist(par['As_eng_x'], "horizontal — engaste", seq=2)

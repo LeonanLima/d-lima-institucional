@@ -11,10 +11,13 @@ import json
 import math
 import os
 
+from core.fissuracao import verificar_fissuracao
 from core.tabelas import interp_linear
 from dimensionamento.flexo_tracao import (
     dimensionar_flexo_tracao, as_min_flexo_tracao,
 )
+
+PHI_FISSURA_MM = 12.5   # bitola adotada na verificacao de wk (consistente c/ d)
 
 
 def as_flexao_simples(Md_kNm, b_cm, d_cm, fcd_kNcm2, fyd_kNcm2):
@@ -130,6 +133,22 @@ def dimensionar_parede_placa(H_m, L_m, espessura_m, p_base_carac,
         As_vao_y=round(max(as_vy, As_min), 2),
         As_eng_y=round(max(as_ey, As_min), 2),
     )
+
+    # Fissuracao wk (ELS-W): flexao vertical PURA (My vao / Mye engaste), face
+    # mais critica. M de servico = M_d/1,4 (retira o gamma_f usado em pd_mom).
+    # NBR 6118:2023, 17.3.3.2 / 21.3.3 (wlim=0,10 mm em contato c/ liquidos).
+    wk_mm, wk_face, sigma_s = 0.0, "", 0.0
+    faces_y = (("vao_y", M["My"], arm["As_vao_y"]),
+               ("eng_y", M["Mye"], arm["As_eng_y"]))
+    for nome, m_fat, as_face in faces_y:
+        if as_face <= 0 or abs(m_fat) < 0.01:
+            continue
+        m_serv_kncm = abs(m_fat) / 1.4 * 100.0
+        ab, t2 = verificar_fissuracao(m_serv_kncm, as_face, b, d, h_cm, fck,
+                                      PHI_FISSURA_MM)
+        if ab.wk_mm > wk_mm:
+            wk_mm, wk_face, sigma_s = ab.wk_mm, nome, t2.sigma_s_mpa
+
     return dict(
         H=H_m, L=L_m, h_cm=h_cm, d_cm=round(d, 1),
         razao=M["razao"], l_ref=M["l_ref"],
@@ -139,5 +158,6 @@ def dimensionar_parede_placa(H_m, L_m, espessura_m, p_base_carac,
         As_vao_x=arm["As_vao_x"], As_vao_y=arm["As_vao_y"],
         As_eng_x=arm["As_eng_x"], As_eng_y=arm["As_eng_y"],
         As_cm2m=max(arm.values()), As_min=As_min,
-        w_lim=0.10,
+        w_lim=0.10, wk_mm=round(wk_mm, 4), wk_face=wk_face,
+        sigma_s_mpa=round(sigma_s, 1), phi_fissura_mm=PHI_FISSURA_MM,
     )
