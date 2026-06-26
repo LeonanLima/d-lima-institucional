@@ -89,6 +89,24 @@ def render_detalhe_conc(As_cm2, posicao, seq=1, comprimento_cm=None):
                 f"(As,prov={b.As_prov_cm2:.2f} ≥ {As_cm2:.2f} cm²)"
                 + (f" — {b.comprimento_cm:g}cm" if b.comprimento_cm else ""))
 
+def render_passos(passos):
+    # Renderiza a lista de passos de um memorial (titulo, norma, formula,
+    # substituicao, resultado, obs). Usado por todos os elementos do Memorial.
+    st.divider()
+    for p in passos:
+        st.markdown("#### " + p.titulo)
+        if p.norma:
+            st.caption("📖 " + p.norma)
+        if p.formula:
+            st.latex(p.formula)
+        for linha in p.substituicao:
+            st.latex(linha)
+        if p.resultado:
+            st.success(p.resultado)
+        if p.obs:
+            st.info("💡 " + p.obs)
+        st.divider()
+
 def fig_secao_pilar(hx, hy, As_adot, escolha):
     fig, ax = _dark_fig(3.5, 3.5)
     ax.add_patch(mpatches.FancyBboxPatch((0,0), hx, hy, boxstyle="square,pad=0",
@@ -796,20 +814,7 @@ elif pagina == "📋  Memorial de Cálculo":
         if ok_mem:
             try:
                 passos, _res = memorial_laje(lx_m, ly_m, h_m, gk_m, qk_m, caso_m, fck_m, fyk_m, caa_m)
-                st.divider()
-                for p in passos:
-                    st.markdown("#### " + p.titulo)
-                    if p.norma:
-                        st.caption("📖 " + p.norma)
-                    if p.formula:
-                        st.latex(p.formula)
-                    for linha in p.substituicao:
-                        st.latex(linha)
-                    if p.resultado:
-                        st.success(p.resultado)
-                    if p.obs:
-                        st.info("💡 " + p.obs)
-                    st.divider()
+                render_passos(passos)
             except Exception as e:
                 st.error("Erro: " + str(e))
                 import traceback
@@ -833,20 +838,7 @@ elif pagina == "📋  Memorial de Cálculo":
         if ok_v:
             try:
                 passos, _r = memorial_viga(bw_v, hv_v, L_v, Md_v, Vd_v, fck_v, fyk_v, caa_v, qser_v)
-                st.divider()
-                for p in passos:
-                    st.markdown("#### " + p.titulo)
-                    if p.norma:
-                        st.caption("📖 " + p.norma)
-                    if p.formula:
-                        st.latex(p.formula)
-                    for linha in p.substituicao:
-                        st.latex(linha)
-                    if p.resultado:
-                        st.success(p.resultado)
-                    if p.obs:
-                        st.info("💡 " + p.obs)
-                    st.divider()
+                render_passos(passos)
             except Exception as e:
                 st.error("Erro: " + str(e))
                 import traceback
@@ -870,20 +862,7 @@ elif pagina == "📋  Memorial de Cálculo":
         if ok_p:
             try:
                 passos, _r = memorial_pilar(H_p, hx_p, hy_p, beta_p, Nd_p, Md_p, fck_p, fyk_p, caa_p)
-                st.divider()
-                for p in passos:
-                    st.markdown("#### " + p.titulo)
-                    if p.norma:
-                        st.caption("📖 " + p.norma)
-                    if p.formula:
-                        st.latex(p.formula)
-                    for linha in p.substituicao:
-                        st.latex(linha)
-                    if p.resultado:
-                        st.success(p.resultado)
-                    if p.obs:
-                        st.info("💡 " + p.obs)
-                    st.divider()
+                render_passos(passos)
             except Exception as e:
                 st.error("Erro: " + str(e))
                 import traceback
@@ -905,20 +884,7 @@ elif pagina == "📋  Memorial de Cálculo":
         if ok_mu:
             try:
                 passos, _r = memorial_muro(H_mu, phi_mu, gs_mu, qs_mu, fck_mu, fyk_mu, caa_mu)
-                st.divider()
-                for p in passos:
-                    st.markdown("#### " + p.titulo)
-                    if p.norma:
-                        st.caption("📖 " + p.norma)
-                    if p.formula:
-                        st.latex(p.formula)
-                    for linha in p.substituicao:
-                        st.latex(linha)
-                    if p.resultado:
-                        st.success(p.resultado)
-                    if p.obs:
-                        st.info("💡 " + p.obs)
-                    st.divider()
+                render_passos(passos)
             except Exception as e:
                 st.error("Erro: " + str(e))
                 import traceback
@@ -942,20 +908,7 @@ elif pagina == "📋  Memorial de Cálculo":
         if ok_r:
             try:
                 passos, _r = memorial_reservatorio(tipo_r, estado_r, H_r, L_r, hpar_r, phi_r, gs_r, fck_r, fyk_r, "IV")
-                st.divider()
-                for p in passos:
-                    st.markdown("#### " + p.titulo)
-                    if p.norma:
-                        st.caption("📖 " + p.norma)
-                    if p.formula:
-                        st.latex(p.formula)
-                    for linha in p.substituicao:
-                        st.latex(linha)
-                    if p.resultado:
-                        st.success(p.resultado)
-                    if p.obs:
-                        st.info("💡 " + p.obs)
-                    st.divider()
+                render_passos(passos)
             except Exception as e:
                 st.error("Erro: " + str(e))
                 import traceback
@@ -979,20 +932,7 @@ elif pagina == "📋  Memorial de Cálculo":
         if ok_pi:
             try:
                 passos, _r = memorial_piscina(estado_pi, H_pi, L_pi, hpar_pi, phi_pi, gs_pi, qs_pi, fck_pi, fyk_pi, "IV")
-                st.divider()
-                for p in passos:
-                    st.markdown("#### " + p.titulo)
-                    if p.norma:
-                        st.caption("📖 " + p.norma)
-                    if p.formula:
-                        st.latex(p.formula)
-                    for linha in p.substituicao:
-                        st.latex(linha)
-                    if p.resultado:
-                        st.success(p.resultado)
-                    if p.obs:
-                        st.info("💡 " + p.obs)
-                    st.divider()
+                render_passos(passos)
             except Exception as e:
                 st.error("Erro: " + str(e))
                 import traceback
