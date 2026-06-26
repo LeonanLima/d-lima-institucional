@@ -49,9 +49,12 @@ as considerações do Musso — par com [tabela maciça do Musso](../calc_estrut
 - [x] **Fatia trel-3** `relatorio/memorial_trelicada.py` — `memorial_laje_trelicada`
   (6 passos, lê do canônico, tabela de aço editável da vigota). Em arquivo próprio
   porque passo_a_passo.py já passou de 800 linhas.
-- [ ] **Fatia trel-4** UI Streamlit: novo elemento/página "Laje Treliçada" em
-  app_estrutural.py (inputs: lx, e, capa, h, bw, vinculação, gk, qk, enchimento;
-  abas Dimensionamento + Memorial + tabela da vigota).
+- [x] **Fatia trel-4** UI Streamlit: página "Laje Treliçada" em app_estrutural.py
+  (sidebar 🟨; inputs lx/e/capa/h/bw/vinculação/gk/qk/enchimento + materiais;
+  abas Dimensionamento [esforços, armadura, painel de verificações flecha/cortante/
+  ductilidade, critério Musso, tabela da vigota] + Memorial passo a passo). Default
+  lx=3,5 e=40 bw=9 passa limpo. py_compile OK; suíte 108 passed. Falta só verificação
+  visual no navegador (streamlit run).
 - [ ] **Fatia trel-5** (opcional) golden com EXEMPLO numérico real dos slides 23-25
   do Musso, se Leonan fornecer (hoje o golden usa caso verificável por 1os princípios).
 
