@@ -11,7 +11,7 @@ import json
 import math
 import os
 
-from core.fissuracao import verificar_fissuracao
+from core.fissuracao import verificar_fissuracao, verificar_fissuracao_flexotracao
 from core.tabelas import interp_linear
 from dimensionamento.flexo_tracao import (
     dimensionar_flexo_tracao, as_min_flexo_tracao,
@@ -134,9 +134,13 @@ def dimensionar_parede_placa(H_m, L_m, espessura_m, p_base_carac,
         As_eng_y=round(max(as_ey, As_min), 2),
     )
 
-    # Fissuracao wk (ELS-W): flexao vertical PURA (My vao / Mye engaste), face
-    # mais critica. M de servico = M_d/1,4 (retira o gamma_f usado em pd_mom).
+    # Fissuracao wk (ELS-W): face mais critica entre as 4 posicoes.
+    # M de servico = M_d/1,4 (retira o gamma_f=1,4 usado em pd_mom);
+    # N de servico do anel = Nd_anel/1,2 (retira o gamma_f=1,2 do normal).
+    #  - VERTICAL (y): flexao pura (a carga vertical nao traciona o anel).
+    #  - HORIZONTAL (x): flexo-tracao (momento da placa + tracao do anel).
     # NBR 6118:2023, 17.3.3.2 / 21.3.3 (wlim=0,10 mm em contato c/ liquidos).
+    n_serv_anel = Nd_anel / 1.2
     wk_mm, wk_face, sigma_s = 0.0, "", 0.0
     faces_y = (("vao_y", M["My"], arm["As_vao_y"]),
                ("eng_y", M["Mye"], arm["As_eng_y"]))
@@ -148,6 +152,17 @@ def dimensionar_parede_placa(H_m, L_m, espessura_m, p_base_carac,
                                       PHI_FISSURA_MM)
         if ab.wk_mm > wk_mm:
             wk_mm, wk_face, sigma_s = ab.wk_mm, nome, t2.sigma_s_mpa
+    faces_x = (("vao_x", M["Mx"], arm["As_vao_x"]),
+               ("eng_x", M["Mxe"], arm["As_eng_x"]))
+    for nome, m_fat, as_face in faces_x:
+        if as_face <= 0:
+            continue
+        m_serv_kncm = abs(m_fat) / 1.4 * 100.0
+        ab, ft = verificar_fissuracao_flexotracao(
+            m_serv_kncm, n_serv_anel, as_face, b, d, h_cm, fck,
+            PHI_FISSURA_MM, d_linha)
+        if ab.wk_mm > wk_mm:
+            wk_mm, wk_face, sigma_s = ab.wk_mm, nome, ft.sigma_s_mpa
 
     return dict(
         H=H_m, L=L_m, h_cm=h_cm, d_cm=round(d, 1),

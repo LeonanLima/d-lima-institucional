@@ -641,17 +641,26 @@ def _passos_parede_bares(r, p_base, H_m, L_m, h_par_cm, fck, caa):
     ))
 
     # Passo 6 - As,min, governante, cisalhamento e ELS
-    wlim = "0,10" if caa == "IV" else "0,20"
+    wlim_num = r.get("w_lim", 0.10)
+    wlim = _v(wlim_num, 2)
+    wk = r.get("wk_mm", 0.0)
+    wk_face = r.get("wk_face", "")
+    sigma_s = r.get("sigma_s_mpa", 0.0)
+    veredito = "OK" if wk <= wlim_num else "NAO PASSA - aumentar As/espessura"
+    # a face governante x = flexo-tracao (placa + anel); y = flexao pura.
+    tipo_face = "flexo-tracao" if wk_face.endswith("_x") else "flexao"
     passos.append(Passo(
-        titulo="Passo 6 - Armadura minima, governante, cisalhamento e ELS",
-        formula=r"A_{s,min}=\rho_{min}\,b\,h \qquad w_k \le w_{lim}\ (\text{estanqueidade})",
+        titulo="Passo 6 - Armadura minima, governante, cisalhamento e ELS-W (wk)",
+        formula=r"A_{s,min}=\rho_{min}\,b\,h \qquad w_k \le w_{lim}\ (\text{estanqueidade, Estadio II})",
         substituicao=[
             r"A_{s,min} = " + _v(r["As_min"], 2) + r"\ \mathrm{cm^2/m}\quad A_{s,gov} = " + _v(r["As_cm2m"], 2) + r"\ \mathrm{cm^2/m}",
             r"V_d = 1{,}4\,p\,\dfrac{H}{2} = " + _v(r["Vd_kN"], 2) + r"\ \mathrm{kN/m}",
-            r"w_k \le " + wlim + r"\ \mathrm{mm}\quad(\text{contato com agua, CAA " + caa + r"})",
+            r"\sigma_s = " + _v(sigma_s, 1) + r"\ \mathrm{MPa}\ (\text{face } " + (wk_face or "-") + r",\ " + tipo_face + r")",
+            r"w_k = " + _v(wk, 3) + r" \le w_{lim} = " + wlim + r"\ \mathrm{mm}\quad(\text{contato com agua, CAA " + caa + r"}) \Rightarrow \text{" + veredito + r"}",
         ],
-        resultado="As governante = " + _v(r["As_cm2m"], 2) + " cm2/m | Vd = " + _v(r["Vd_kN"], 2) + " kN/m | wlim = " + wlim + " mm",
-        norma="NBR 6118:2023 sec.17.4, 21.3.3, Tabela 13.4 | Carini, flexo-tracao slide 31",
+        resultado="As governante = " + _v(r["As_cm2m"], 2) + " cm2/m | Vd = " + _v(r["Vd_kN"], 2) + " kN/m | wk = " + _v(wk, 3) + " <= " + wlim + " mm (" + veredito + ")",
+        norma="NBR 6118:2023 sec.17.3.3.2, 17.4, 21.3.3, Tabela 13.4 | Carini, flexo-tracao slide 31",
+        obs="wk verificado nas 4 faces no Estadio II: vertical (flexao pura) e horizontal (flexo-tracao: placa + anel). Governa a face mais critica.",
     ))
 
     return passos
