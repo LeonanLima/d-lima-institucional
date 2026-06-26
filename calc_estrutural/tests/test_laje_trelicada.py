@@ -90,6 +90,64 @@ class TestSecaoT_LN_na_nervura:
         assert a["secao"] == "retangular (LN na mesa)"
 
 
+class TestTrelicadaRomanioViga:
+    """Caso ancorado em FORMA COMERCIAL real (Romanio RO80, Musso slides 24-25).
+
+    Os slides 23-25 do Musso NAO trazem um exemplo numerico transcrivel: o slide 23
+    ("dimensionamento automatico" da nervurada) e uma IMAGEM de planilha (sem camada
+    de texto, igual ao exemplo automatico da macica no slide 20) e os slides 24-25
+    sao catalogos de formas Romanio (RO 600x600x180, RO 650x650x210, RO 800x800).
+    Em vez de travar um exemplo inexistente, este golden usa a geometria da forma
+    real RO80 (intereixo e=80 cm) e confere por primeiros principios.
+
+    Valor do caso: e=80 cm com bw=9 cm (<=12) cai no ramo b) do Musso (§13.4.2) e
+    exercita o criterio de cisalhamento "viga" END-TO-END por calcular_laje_trelicada
+    (os outros goldens so testam o ramo "viga" no helper _criterio_cisalhamento),
+    chegando a precisa_estribo=True.
+
+    lx=5,0 | e=80 | capa=5 | h=25 | bw=9 | gk=1,5 qk=2,0 | apoio/apoio.
+    """
+
+    @pytest.fixture(scope="class")
+    def r(self):
+        return calcular_laje_trelicada(lx=5.0, e_cm=80, h_capa_cm=5, h_total_cm=25,
+                                       bw_cm=9, gk=1.5, qk=2.0,
+                                       vinculacao="apoio_apoio")
+
+    def test_pp_e_carga(self, r):
+        # A_c = 80*5 + 9*20 = 580 cm2 ; PP = 25*(580/1e4)/0,80 = 1,8125 kN/m2
+        assert r["PP_kNm2"] == pytest.approx(1.81, abs=0.01)
+        # fd = 1,4*(1,5+1,8125+2,0) = 7,4375
+        assert r["fd_kNm2"] == pytest.approx(7.44, abs=0.01)
+
+    def test_esforcos(self, r):
+        assert r["momentos"]["Md_pos_kNm_m"] == pytest.approx(23.242, abs=0.01)
+        assert r["momentos"]["Md_pos_nerv"] == pytest.approx(18.594, abs=0.01)
+        assert r["momentos"]["Vd_nerv"] == pytest.approx(14.875, abs=0.01)
+
+    def test_armadura_LN_na_mesa(self, r):
+        a = r["armaduras"]["As_pos"]
+        assert a["secao"] == "retangular (LN na mesa)"
+        assert a["As_cm2"] == pytest.approx(1.98, abs=0.02)
+        assert a["ok_ductil"] is True
+
+    def test_criterio_viga_end_to_end(self, r):
+        # e=80, bw=9 (<=12): ramo b) -> "viga"; VRd1 < VSd -> exige estribo
+        c = r["cisalhamento"]
+        assert c["criterio"] == "viga"
+        assert c["VRd1_nerv_kN"] == pytest.approx(10.16, abs=0.05)
+        assert c["ok"] is False
+        assert c["precisa_estribo"] is True
+
+    def test_flecha_passa(self, r):
+        f = r["els_flecha"]
+        assert f["I_T_cm4"] == pytest.approx(26229.9, abs=2.0)
+        assert f["yt_cm"] == pytest.approx(6.38, abs=0.02)
+        assert f["w0_mm"] == pytest.approx(4.02, abs=0.05)
+        # h=25 em 5 m c/ capa 5 passa na flecha (w_total=14,1 mm < L/250=20 mm)
+        assert f["ok"] is True
+
+
 def test_inercia_T_retangular_degenera():
     # se bf==bw e hf==h, secao T degenera p/ retangulo: I = b*h^3/12
     I, yt = _inercia_T(10.0, 10.0, 20.0, 20.0)

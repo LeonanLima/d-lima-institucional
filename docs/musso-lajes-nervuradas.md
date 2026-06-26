@@ -57,8 +57,15 @@ as considerações do Musso — par com [tabela maciça do Musso](../calc_estrut
   Verificação visual FEITA (2026-06-26, streamlit run): página abre, calcula, abas
   Dimensionamento (esforços, armadura, painel de verificações tudo ✅, nota do critério
   Musso, tabela da vigota c/ ★) e Memorial renderizam corretas.
-- [ ] **Fatia trel-5** (opcional, BLOQUEADA) golden com EXEMPLO numérico real dos slides 23-25
-  do Musso, se Leonan fornecer (hoje o golden usa caso verificável por 1os princípios).
+- [x] **Fatia trel-5** golden ancorado em FORMA COMERCIAL real `tests/test_laje_trelicada.py`
+  (`TestTrelicadaRomanioViga`: RO80, e=80 cm). DESBLOQUEADA — verificou-se que os
+  slides 23-25 NÃO trazem exemplo numérico transcrível: slide 23 ("dimensionamento
+  automático" da nervurada) é IMAGEM de planilha sem camada de texto (igual ao auto
+  da maciça no slide 20); slides 24-25 são catálogos de formas Romanio. Em vez de
+  esperar um exemplo inexistente, o golden usa a geometria da forma real RO80 e
+  confere por 1os princípios; o caso e=80/bw=9 cai no ramo b) do Musso e exercita o
+  critério de cisalhamento "viga" END-TO-END (precisa_estribo=True), cobrindo o ramo
+  que antes só era testado no helper. Suíte 113 passed.
 
 ## Plano de implementação (laje treliçada, método do Musso) — referência
 
