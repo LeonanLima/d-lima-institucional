@@ -53,9 +53,11 @@ as considerações do Musso — par com [tabela maciça do Musso](../calc_estrut
   (sidebar 🟨; inputs lx/e/capa/h/bw/vinculação/gk/qk/enchimento + materiais;
   abas Dimensionamento [esforços, armadura, painel de verificações flecha/cortante/
   ductilidade, critério Musso, tabela da vigota] + Memorial passo a passo). Default
-  lx=3,5 e=40 bw=9 passa limpo. py_compile OK; suíte 108 passed. Falta só verificação
-  visual no navegador (streamlit run).
-- [ ] **Fatia trel-5** (opcional) golden com EXEMPLO numérico real dos slides 23-25
+  lx=3,5 e=40 bw=9 passa limpo. py_compile OK; suíte 108 passed.
+  Verificação visual FEITA (2026-06-26, streamlit run): página abre, calcula, abas
+  Dimensionamento (esforços, armadura, painel de verificações tudo ✅, nota do critério
+  Musso, tabela da vigota c/ ★) e Memorial renderizam corretas.
+- [ ] **Fatia trel-5** (opcional, BLOQUEADA) golden com EXEMPLO numérico real dos slides 23-25
   do Musso, se Leonan fornecer (hoje o golden usa caso verificável por 1os princípios).
 
 ## Plano de implementação (laje treliçada, método do Musso) — referência
