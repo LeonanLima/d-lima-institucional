@@ -927,17 +927,26 @@ def _pg_memorial():
         with st.form("mem_reserv"):
             c1, c2, c3 = st.columns(3)
             with c1:
-                tipo_r = st.selectbox("Tipo", ["Elevado", "Enterrado"], key="tipor")
-                estado_r = st.selectbox("Estado", ["Cheio", "Vazio"], key="estr")
-                H_r = st.number_input("H — altura da água (m)", 1.0, 8.0, 2.4, 0.1, key="hr")
+                tipo_r = st.selectbox("Tipo", ["Elevado", "Enterrado"], key="tipor",
+                    help="Elevado: água por dentro. Enterrado vazio: o solo empurra a parede por fora (empuxo ativo).")
+                estado_r = st.selectbox("Estado", ["Cheio", "Vazio"], key="estr",
+                    help="Cheio: pressão da água. Vazio: sem água (enterrado → empuxo do solo; elevado → só armadura mínima).")
+                H_r = st.number_input("H — altura da água = lᵧ (m)", 1.0, 8.0, 2.4, 0.1, key="hr",
+                    help="Altura da lâmina d'água (direção vertical, lᵧ). Define a pressão na base: p = γ·H.")
             with c2:
-                L_r = st.number_input("L — maior vão da parede (m)", 1.0, 12.0, 4.75, 0.05, key="lr")
-                hpar_r = st.number_input("h — espessura da parede (cm)", 12, 40, 20, 1, key="hparr")
-                phi_r = st.number_input("φ solo (graus, só enterrado)", 15.0, 45.0, 30.0, 1.0, key="phir")
+                L_r = st.number_input("L — maior vão horizontal = lₓ (m)", 1.0, 12.0, 4.75, 0.05, key="lr",
+                    help="Distância horizontal entre apoios da parede (lₓ). É o vão que flete a placa na horizontal e gera a tração do anel.")
+                hpar_r = st.number_input("h — espessura da parede (cm)", 12, 40, 20, 1, key="hparr",
+                    help="Espessura da parede de concreto. A altura útil sai de d = h − cobrimento − Ø/2.")
+                phi_r = st.number_input("φ solo (graus, só enterrado)", 15.0, 45.0, 30.0, 1.0, key="phir",
+                    help="Ângulo de atrito interno do solo. Só usado em reservatório ENTERRADO VAZIO; entra no empuxo ativo Ka = tan²(45 − φ/2).")
             with c3:
-                gs_r = st.number_input("γ solo (kN/m³, só enterrado)", 14.0, 22.0, 18.0, 0.5, key="gsr")
-                fck_r = st.number_input("fck (MPa, mín 40)", 40, 50, 40, key="fckr")
-                fyk_r = st.number_input("fyk (MPa)", 250, 600, 500, key="fykr")
+                gs_r = st.number_input("γ solo (kN/m³, só enterrado)", 14.0, 22.0, 18.0, 0.5, key="gsr",
+                    help="Peso específico do solo. Só usado em reservatório enterrado vazio: p = Ka·γ_solo·H.")
+                fck_r = st.number_input("fck (MPa, mín 40)", 40, 50, 40, key="fckr",
+                    help="Resistência característica do concreto à compressão. NBR 6118 sec.21 exige fck ≥ 40 MPa (CAA IV) para estanqueidade.")
+                fyk_r = st.number_input("fyk (MPa)", 250, 600, 500, key="fykr",
+                    help="Resistência característica do aço ao escoamento (CA-50 → 500 MPa).")
             ok_r = st.form_submit_button("📋 Gerar memorial passo a passo", use_container_width=True)
         if ok_r:
             try:
@@ -952,17 +961,26 @@ def _pg_memorial():
         with st.form("mem_pisc"):
             c1, c2, c3 = st.columns(3)
             with c1:
-                estado_pi = st.selectbox("Estado", ["Cheia", "Vazia"], key="estpi")
-                H_pi = st.number_input("H — altura da água (m)", 1.0, 6.0, 1.5, 0.1, key="hpi")
-                L_pi = st.number_input("L — maior vão da parede (m)", 1.0, 12.0, 4.0, 0.1, key="lpi")
+                estado_pi = st.selectbox("Estado", ["Cheia", "Vazia"], key="estpi",
+                    help="Cheia: pressão da água por dentro. Vazia: o solo externo empurra a parede (empuxo ativo).")
+                H_pi = st.number_input("H — altura da água = lᵧ (m)", 1.0, 6.0, 1.5, 0.1, key="hpi",
+                    help="Altura da lâmina d'água (direção vertical, lᵧ). Define a pressão na base: p = γ·H.")
+                L_pi = st.number_input("L — maior vão horizontal = lₓ (m)", 1.0, 12.0, 4.0, 0.1, key="lpi",
+                    help="Distância horizontal entre apoios da parede (lₓ). É o vão que flete a placa na horizontal e gera a tração do anel.")
             with c2:
-                hpar_pi = st.number_input("h — espessura da parede (cm)", 12, 40, 20, 1, key="hparpi")
-                phi_pi = st.number_input("φ solo (graus)", 15.0, 45.0, 30.0, 1.0, key="phipi")
-                gs_pi = st.number_input("γ solo (kN/m³)", 14.0, 22.0, 18.0, 0.5, key="gspi")
+                hpar_pi = st.number_input("h — espessura da parede (cm)", 12, 40, 20, 1, key="hparpi",
+                    help="Espessura da parede de concreto. A altura útil sai de d = h − cobrimento − Ø/2.")
+                phi_pi = st.number_input("φ solo (graus)", 15.0, 45.0, 30.0, 1.0, key="phipi",
+                    help="Ângulo de atrito interno do solo. Usado quando a piscina está vazia; entra no empuxo ativo Ka = tan²(45 − φ/2).")
+                gs_pi = st.number_input("γ solo (kN/m³)", 14.0, 22.0, 18.0, 0.5, key="gspi",
+                    help="Peso específico do solo. Com a piscina vazia: p = Ka·(γ_solo·H + qs).")
             with c3:
-                qs_pi = st.number_input("Sobrecarga no solo qs (kN/m²)", 0.0, 30.0, 0.0, 1.0, key="qspi")
-                fck_pi = st.number_input("fck (MPa, mín 40)", 40, 50, 40, key="fckpi")
-                fyk_pi = st.number_input("fyk (MPa)", 250, 600, 500, key="fykpi")
+                qs_pi = st.number_input("Sobrecarga no solo qs (kN/m²)", 0.0, 30.0, 0.0, 1.0, key="qspi",
+                    help="Carga aplicada na superfície do solo ao lado da piscina (ex.: piso, veículo). Soma ao empuxo: p = Ka·(γ_solo·H + qs).")
+                fck_pi = st.number_input("fck (MPa, mín 40)", 40, 50, 40, key="fckpi",
+                    help="Resistência característica do concreto à compressão. NBR 6118 sec.21 exige fck ≥ 40 MPa (CAA IV).")
+                fyk_pi = st.number_input("fyk (MPa)", 250, 600, 500, key="fykpi",
+                    help="Resistência característica do aço ao escoamento (CA-50 → 500 MPa).")
             ok_pi = st.form_submit_button("📋 Gerar memorial passo a passo", use_container_width=True)
         if ok_pi:
             try:
