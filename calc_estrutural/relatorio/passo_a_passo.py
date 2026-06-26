@@ -21,10 +21,44 @@ class Passo:
     resultado: str = ""
     norma: str = ""
     obs: str = ""
+    legenda: list = field(default_factory=list)   # ["x = ... (significado)", ...]
+    tabela: list = field(default_factory=list)    # list[dict] opcional (ex.: Ka por solo)
 
 
 def _v(x, dec=2):
     return ("{:." + str(dec) + "f}").format(x).replace(".", ",")
+
+
+# Descricao profissional de cada caso de flexo-tracao (no lugar do nome interno).
+CASO_FT_TEXTO = {
+    "flexao_simples": "flexao simples (tracao do anel desprezivel)",
+    "grande_simples": "flexo-tracao com grande excentricidade (armadura simples)",
+    "grande_dupla": "flexo-tracao com grande excentricidade (exige armadura dupla)",
+    "pequena": "flexo-tracao com pequena excentricidade (secao integralmente tracionada)",
+}
+
+
+def _tabela_ka(phi_atual):
+    """Tabela de Ka = tan^2(45 - phi/2) para faixas tipicas de solo (para leigo).
+
+    O pior cenario do reservatorio/piscina VAZIO e o menor phi (maior Ka, maior
+    empuxo). Marca a faixa do phi informado para o usuario se situar.
+    """
+    solos = [
+        ("Argila mole", 15), ("Argila rija / silte", 22),
+        ("Areia fofa", 28), ("Areia media", 32),
+        ("Areia compacta", 36), ("Pedregulho / areia densa", 40),
+    ]
+    linhas = []
+    for nome, phi in solos:
+        ka = math.tan(math.radians(45 - phi / 2.0)) ** 2
+        marca = " ◀ phi informado" if abs(phi - phi_atual) <= 3 else ""
+        linhas.append({
+            "Solo (tipico)": nome + marca,
+            "phi (graus)": _v(phi, 0),
+            "Ka = tan2(45-phi/2)": _v(ka, 3),
+        })
+    return linhas
 
 
 def memorial_laje(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0, caa="II", psi2=0.3):
@@ -620,8 +654,8 @@ def _passos_parede_bares(r, p_base, H_m, L_m, h_par_cm, fck, caa):
         formula=r"N_d = 1{,}2\,p\,\dfrac{L}{2}\qquad(\text{momento da placa + tracao do anel = flexo-tracao})",
         substituicao=[
             r"N_d = 1{,}2 \cdot " + _v(p_base) + r" \cdot \dfrac{" + _v(L_m) + r"}{2} = " + _v(Nd, 2) + r"\ \mathrm{kN/m}",
-            r"\text{Vao } (M_x): \text{caso " + str(fvx.get("caso", "-")) + r"},\ e_0=" + _v(fvx.get("e0") or 0, 2) + r",\ x=" + _v(fvx.get("x_cm") or 0, 2) + r"\ \Rightarrow A_{s1}=" + _v(fvx.get("As1_cm2") or 0, 2) + r"\ \mathrm{cm^2/m}",
-            r"\text{Engaste } (M_{xe}): \text{caso " + str(fex.get("caso", "-")) + r"},\ x=" + _v(fex.get("x_cm") or 0, 2) + r"\ \Rightarrow A_{s1}=" + _v(fex.get("As1_cm2") or 0, 2) + r"\ \mathrm{cm^2/m}",
+            r"\text{Vao } (M_x):\ \text{" + CASO_FT_TEXTO.get(fvx.get("caso"), str(fvx.get("caso", "-"))) + r"};\ e_0=" + _v(fvx.get("e0") or 0, 2) + r"\ \mathrm{cm},\ x=" + _v(fvx.get("x_cm") or 0, 2) + r"\ \mathrm{cm}\ \Rightarrow A_{s1}=" + _v(fvx.get("As1_cm2") or 0, 2) + r"\ \mathrm{cm^2/m}",
+            r"\text{Engaste } (M_{xe}):\ \text{" + CASO_FT_TEXTO.get(fex.get("caso"), str(fex.get("caso", "-"))) + r"};\ x=" + _v(fex.get("x_cm") or 0, 2) + r"\ \mathrm{cm}\ \Rightarrow A_{s1}=" + _v(fex.get("As1_cm2") or 0, 2) + r"\ \mathrm{cm^2/m}",
         ],
         resultado="As horizontal: vao = " + _v(r["As_vao_x"], 2) + " | engaste = " + _v(r["As_eng_x"], 2) + " cm2/m (flexo-tracao)",
         norma="NBR 6118:2023 sec.17.2.2, 21 | Carini, flexo-tracao slides 25-31",
@@ -712,13 +746,22 @@ def memorial_reservatorio(tipo, estado, H_m, L_m, h_par_cm, phi=30.0, gs=18.0,
         formula=r"d = h - c - \tfrac{\phi_b}{2} \qquad p_{base}=\gamma\,H\ \ \text{(agua)}\ \ \text{ou}\ \ p=K_a\,\gamma_s\,H\ \ \text{(solo)}",
         substituicao=[
             r"\text{Tipo: " + tipo + r" | Estado: " + estado + r" | carga = " + carga + r"}",
-            r"\text{Legenda: } l_x=L\ (\text{vao horizontal}),\ l_y=H\ (\text{altura}),\ h=\text{espessura},\ d=\text{altura util},\ c=\text{cobrimento}",
             r"H = l_y = " + _v(H_m) + r"\ \mathrm{m}\quad L = l_x = " + _v(L_m) + r"\ \mathrm{m}\quad h = " + _v(h_par_cm) + r"\ \mathrm{cm}",
-            r"d = h - c - \tfrac{\phi_b}{2} = " + _v(h_par_cm) + r" - " + _v(cobr) + r" - \tfrac{1{,}25}{2} = " + _v(d) + r"\ \mathrm{cm}\quad(\phi_b=12{,}5\ \mathrm{mm})",
+            r"d = h - c - \tfrac{\phi_b}{2} = " + _v(h_par_cm) + r" - " + _v(cobr) + r" - \tfrac{1{,}25}{2} = " + _v(d) + r"\ \mathrm{cm}",
         ] + linhas_p,
         resultado="CAA " + caa + " (cob. " + _v(cobr) + " cm) | d = " + _v(d) + " cm | p = " + _v(p) + " kN/m2 | placa de Bares",
         norma="Carini, Reservatorios Elevados, slides 14-15 | NBR 6118:2023 sec.21",
-        obs="lx = L (horizontal, direcao do anel); ly = H (altura). Horizontal = flexo-tracao (placa + anel); vertical = flexao. Com tampa o topo apoia.",
+        legenda=[
+            r"$l_x = L$ — maior vao horizontal da parede (direcao do anel de tracao)",
+            r"$l_y = H$ — altura (" + ("agua" if not usa_solo else "parede / empuxo do solo") + ")",
+            r"$h$ — espessura da parede; $c$ — cobrimento; $\phi_b$ = 12,5 mm (bitola adotada)",
+            r"$d = h - c - \phi_b/2$ — altura util (centro do aco a borda comprimida)",
+            r"$p$ — pressao na base; $\gamma_a$ = 10 kN/m³ (agua); $K_a$ — coef. de empuxo ativo do solo",
+        ],
+        tabela=_tabela_ka(phi) if usa_solo else [],
+        obs=("Pior cenario do reservatorio VAZIO: menor phi -> maior Ka -> maior empuxo do solo (mais armadura). "
+             "Melhor cenario: maior phi. " if usa_solo else "")
+            + "lx = L (horizontal, direcao do anel); ly = H (altura). Horizontal = flexo-tracao (placa + anel); vertical = flexao.",
     )]
 
     r = dimensionar_parede_placa(H_m, L_m, h_par_cm / 100.0, p, fck, fyk, caa)
@@ -766,14 +809,22 @@ def memorial_piscina(estado, H_m, L_m, h_par_cm, phi=30.0, gs=18.0, qs=0.0,
         formula=r"\lambda=\tfrac{l_y}{l_x}\qquad d = h - c - \tfrac{\phi_b}{2}\qquad p=\gamma\,H\ \text{ou}\ K_a\,(\gamma_s H+q_s)",
         substituicao=[
             r"\text{Estado: " + estado + r" | carga = " + carga + r"}",
-            r"\text{Legenda: } l_x=L\ (\text{vao horizontal}),\ l_y=H\ (\text{altura}),\ h=\text{espessura},\ d=\text{altura util},\ c=\text{cobrimento}",
             r"H = l_y = " + _v(H_m) + r"\ \mathrm{m}\quad L = l_x = " + _v(L_m) + r"\ \mathrm{m}\quad h = " + _v(h_par_cm) + r"\ \mathrm{cm}",
-            r"d = h - c - \tfrac{\phi_b}{2} = " + _v(h_par_cm) + r" - " + _v(cobr) + r" - \tfrac{1{,}25}{2} = " + _v(d) + r"\ \mathrm{cm}\quad(\phi_b=12{,}5\ \mathrm{mm})",
+            r"d = h - c - \tfrac{\phi_b}{2} = " + _v(h_par_cm) + r" - " + _v(cobr) + r" - \tfrac{1{,}25}{2} = " + _v(d) + r"\ \mathrm{cm}",
             r"\lambda = \dfrac{l_y}{l_x} = \dfrac{" + _v(H_m) + r"}{" + _v(L_m) + r"} = " + _v(razao, 3) + (r"\ < 2\ \Rightarrow\ \text{placa bidirecional}" if razao < 2 else r"\ \ge 2\ \Rightarrow\ \text{unidirecional}"),
         ] + linhas_p,
         resultado="Placa " + ("bidirecional" if razao < 2 else "unidirecional") + " | d = " + _v(d) + " cm | p = " + _v(p) + " kN/m2 | CAA " + caa + " (cob. " + _v(cobr) + " cm)",
         norma="BARES, R. - Tabelas para placas | Carini, Piscinas e Reservatorios",
-        obs="lx = L (horizontal); ly = H (altura). Horizontal = flexo-tracao (placa + anel); vertical = flexao. Com sobrecarga no solo a carga vira trapezoidal - adota-se o pico.",
+        legenda=[
+            r"$l_x = L$ — maior vao horizontal da parede (direcao do anel de tracao)",
+            r"$l_y = H$ — altura (" + ("agua" if cheia else "parede / empuxo do solo") + ")",
+            r"$h$ — espessura da parede; $c$ — cobrimento; $\phi_b$ = 12,5 mm (bitola adotada)",
+            r"$d = h - c - \phi_b/2$ — altura util; $\lambda = l_y/l_x$ — relacao de lados",
+            r"$p$ — pressao na base; $\gamma_a$ = 10 kN/m³ (agua); $K_a$ — empuxo ativo; $q_s$ — sobrecarga no solo",
+        ],
+        tabela=_tabela_ka(phi) if not cheia else [],
+        obs=("Pior cenario da piscina VAZIA: menor phi -> maior Ka -> maior empuxo do solo. " if not cheia else "")
+            + "lx = L (horizontal); ly = H (altura). Horizontal = flexo-tracao (placa + anel); vertical = flexao. Com sobrecarga a carga vira trapezoidal - adota-se o pico.",
     )]
 
     r = dimensionar_parede_placa(H_m, L_m, h_par_cm / 100.0, p, fck, fyk, caa)
