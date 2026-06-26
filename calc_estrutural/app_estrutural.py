@@ -812,7 +812,16 @@ def _pg_memorial():
         "Laje Maciça", "Viga", "Pilar",
         "Muro de Arrimo", "Reservatório", "Piscina",
     ])
-    if elem_m == "Laje Maciça":
+
+    MEMORIAIS = {}
+    def mem_handler(nome):
+        def _deco(fn):
+            MEMORIAIS[nome] = fn
+            return fn
+        return _deco
+
+    @mem_handler("Laje Maciça")
+    def _mem_laje():
         CASOS_M = {1: "Caso 1 - 4 apoiadas", 2: "Caso 2 - 3 ap.+1 eng.(ly)",
                    "2A": "Caso 2A", 3: "Caso 3", "3A": "Caso 3A", 4: "Caso 4",
                    5: "Caso 5", "5A": "Caso 5A", 6: "Caso 6 - 4 engastadas"}
@@ -840,7 +849,8 @@ def _pg_memorial():
                 st.error("Erro: " + str(e))
                 import traceback
                 st.code(traceback.format_exc())
-    elif elem_m == "Viga":
+    @mem_handler("Viga")
+    def _mem_viga():
         with st.form("mem_viga"):
             c1, c2, c3 = st.columns(3)
             with c1:
@@ -864,7 +874,8 @@ def _pg_memorial():
                 st.error("Erro: " + str(e))
                 import traceback
                 st.code(traceback.format_exc())
-    elif elem_m == "Pilar":
+    @mem_handler("Pilar")
+    def _mem_pilar():
         with st.form("mem_pilar"):
             c1, c2, c3 = st.columns(3)
             with c1:
@@ -888,7 +899,8 @@ def _pg_memorial():
                 st.error("Erro: " + str(e))
                 import traceback
                 st.code(traceback.format_exc())
-    elif elem_m == "Muro de Arrimo":
+    @mem_handler("Muro de Arrimo")
+    def _mem_muro():
         with st.form("mem_muro"):
             c1, c2, c3 = st.columns(3)
             with c1:
@@ -910,7 +922,8 @@ def _pg_memorial():
                 st.error("Erro: " + str(e))
                 import traceback
                 st.code(traceback.format_exc())
-    elif elem_m == "Reservatório":
+    @mem_handler("Reservatório")
+    def _mem_reservatorio():
         with st.form("mem_reserv"):
             c1, c2, c3 = st.columns(3)
             with c1:
@@ -934,7 +947,8 @@ def _pg_memorial():
                 st.error("Erro: " + str(e))
                 import traceback
                 st.code(traceback.format_exc())
-    elif elem_m == "Piscina":
+    @mem_handler("Piscina")
+    def _mem_piscina():
         with st.form("mem_pisc"):
             c1, c2, c3 = st.columns(3)
             with c1:
@@ -958,8 +972,10 @@ def _pg_memorial():
                 st.error("Erro: " + str(e))
                 import traceback
                 st.code(traceback.format_exc())
-    else:
-        st.info("Falta apenas a Viga-parede (proxima fatia).")
+    MEMORIAIS.get(
+        elem_m,
+        lambda: st.info("Falta apenas a Viga-parede (proxima fatia)."),
+    )()
 
 # ── despacho ──────────────────────────────────────────────────
 PAGINAS.get(pagina, _pg_inicio)()
