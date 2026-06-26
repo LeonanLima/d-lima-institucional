@@ -8,7 +8,7 @@ from dimensionamento.bares import (
     dimensionar_parede_placa, coeficientes_parede, momentos_parede,
 )
 from dimensionamento.flexo_tracao import as_min_flexo_tracao
-from detalhamento.armaduras import tabela_espacamento
+from detalhamento.armaduras import tabela_espacamento, tabela_telas
 
 # Cobrimento nominal de LAJE - NBR 6118:2023 Tabela 7.2 (Dc=10mm padrao).
 COBR_CAA = {"I": 2.0, "II": 2.5, "III": 3.5, "IV": 4.5}
@@ -163,6 +163,7 @@ def memorial_laje(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0, caa="II", p
     ]
     letras = "abcd"
     idx = 0
+    arm_laje = []   # (nome, As_adot) por face -> alimenta o detalhamento
     for mk, nome in pares:
         Md = mts[mk]
         if abs(Md) < 0.001:
@@ -172,6 +173,7 @@ def memorial_laje(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0, caa="II", p
         x = 1.25 * d * (1 - math.sqrt(max(0, disc)))
         As = 0.85 * fcd * 0.80 * x * b / fyd
         As_adot = max(As, As_min)
+        arm_laje.append((nome, As_adot))
         xd = x / d
         ductil = xd <= 0.45
         passos.append(Passo(
@@ -224,6 +226,57 @@ def memorial_laje(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0, caa="II", p
         resultado="w_inf = " + _v(els["w_total_mm"]) + " mm " + ("<=" if els["ok"] else ">") + " w_adm = " + _v(els["wadm_mm"]) + " mm -> " + ("OK" if els["ok"] else "AUMENTAR h"),
         norma="NBR 6118:2023 sec.17.3.2, Tabela 13.3 | fluencia phi = 2,5",
         obs="Flecha de placa: alpha(lambda) de Timoshenko/Carini (placa apoiada 4 bordos) interpolado por lambda=ly/lx. Casos com engaste usam o mesmo alpha (conservador).",
+    ))
+
+    # Passo 9 - Detalhamento: tabela de barras avulsas (Leonan escolhe a bitola).
+    tab_barras = []
+    for nome, as_face in arm_laje:
+        for opt in tabela_espacamento(as_face):
+            tab_barras.append({
+                "Face": nome,
+                "As exig (cm²/m)": _v(as_face, 2),
+                "Ø (mm)": _v(opt["phi_mm"], 1),
+                "Espac. (cm)": _v(opt["s_cm"], 1),
+                "As prov (cm²/m)": _v(opt["As_prov_cm2m"], 2),
+                "Barras/m": opt["n"],
+                "Rec.": "★" if opt.get("recomendada") else "",
+            })
+    passos.append(Passo(
+        titulo="Passo 9 - Detalhamento: barras avulsas (escolha a bitola da obra)",
+        formula=r"A_{s,prov} = \dfrac{a_\phi \cdot 100}{s}\quad(\phi\ \text{c/ espacamento } s)",
+        resultado="Cada face traz as bitolas que atendem o As; ★ = recomendada (mais fina). Edite conforme a obra.",
+        norma="NBR 6118:2023 sec.18, 20.1 | NBR 7480:2022 (bitolas comerciais)",
+        tabela=tab_barras,
+        obs="Espacamento entre S_min (7,5 cm) e S_max (20 cm). Alternativa industrializada no passo seguinte (malha POP).",
+    ))
+
+    # Passo 10 - Detalhamento alternativo: malha POP (tela soldada Q, NBR 7481).
+    as_max = max((a for _, a in arm_laje), default=0.0)
+    telas = tabela_telas(as_max) if as_max > 0 else []
+    if telas:
+        tab_telas = [{
+            "Tela (malha POP)": t["tela"],
+            "As (cm²/m)": _v(t["As_cm2m"], 2),
+            "Malha (cm)": _v(t["malha_cm"], 0) + "×" + _v(t["malha_cm"], 0),
+            "Ø fio (mm)": _v(t["phi_mm"], 1),
+            "Rec.": "★" if t.get("recomendada") else "",
+        } for t in telas]
+        res_tela = ("Tela " + telas[0]["tela"] + " (As " + _v(telas[0]["As_cm2m"], 2)
+                    + " cm²/m) cobre o maior As (" + _v(as_max, 2) + " cm²/m). ★ = recomendada.")
+        obs_tela = ("A tela e bidirecional (mesmo As nas duas direcoes); dimensiona-se pela face "
+                    "mais armada. Onde houver momento negativo, complementar com tela/barras na face superior.")
+    else:
+        tab_telas = []
+        res_tela = ("As exigido (" + _v(as_max, 2) + " cm²/m) acima da maior tela comercial (Q-785 = 7,85): "
+                    "detalhar com barras avulsas (passo anterior).")
+        obs_tela = "Telas POP vao ate Q-785 (7,85 cm²/m). Acima disso, usar barras."
+    passos.append(Passo(
+        titulo="Passo 10 - Detalhamento alternativo: malha POP (tela soldada)",
+        formula=r"A_{s,tela} \ge A_{s,exig}\quad(\text{tela quadrada serie Q, NBR 7481})",
+        resultado=res_tela,
+        norma="NBR 7481:2020 (telas soldadas) | NBR 6118:2023 sec.18",
+        tabela=tab_telas,
+        obs=obs_tela,
     ))
 
     return passos, res
