@@ -281,6 +281,26 @@ def memorial_laje(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0, caa="II", p
 
     return passos, res
 
+def _tabela_barras(barras, limite=5, posicao=None, As_exig=None):
+    """Converte opcoes de barras concentradas (n, phi, area) numa tabela de aco.
+
+    barras: list de (n_barras, phi_mm, As_prov_cm2) ja ordenada (mais fina 1o).
+    O projetista escolhe o arranjo que melhor se enquadra na obra; ★ = recomendado.
+    """
+    linhas = []
+    for i, (n, phi, area) in enumerate(barras[:limite]):
+        linha = {}
+        if posicao is not None:
+            linha["Posição"] = posicao
+        if As_exig is not None:
+            linha["As exig (cm²)"] = _v(As_exig, 2)
+        linha["Arranjo"] = str(n) + " Ø " + _v(phi, 1)
+        linha["As prov (cm²)"] = _v(area, 2)
+        linha["Rec."] = "★" if i == 0 else ""
+        linhas.append(linha)
+    return linhas
+
+
 def memorial_viga(bw, h, L_m, Md_kNm, Vd_kN, fck=25.0, fyk=500.0, caa="II", q_ser=None):
     from dimensionamento.viga import (
         _fck_props, verificar_bielas, dimensionar_estribos,
@@ -399,9 +419,10 @@ def memorial_viga(bw, h, L_m, Md_kNm, Vd_kN, fck=25.0, fyk=500.0, caa="II", q_se
                 r"A_s = \dfrac{" + _v(ac, 2) + r" \cdot " + _v(ec, 2) + r" \cdot " + _v(fcd, 3) + r" \cdot " + _v(lam, 2) + r" \cdot " + _v(x) + r" \cdot " + _v(bw) + r"}{" + _v(fyd, 3) + r"} = " + _v(As) + r"\ \mathrm{cm^2}",
                 r"A_{s,min} = " + _v(rho_min * 100, 3) + r"\% \cdot " + _v(bw) + r" \cdot " + _v(d) + r" = " + _v(As_min) + r"\ \mathrm{cm^2}",
             ],
-            resultado="As adotado = " + _v(As_adot) + " cm2 -> " + bar_txt,
+            resultado="As adotado = " + _v(As_adot) + " cm2 -> escolha o arranjo na tabela (★ = recomendado)",
             norma="NBR 6118:2023 sec.17.2.2 | Tabela 17.3 (As,min, piso 0,15%)",
-            obs="Dominio 2/3 (x/d <= 0,45): ruptura ductil, a viga avisa antes de romper.",
+            obs="Dominio 2/3 (x/d <= 0,45): ruptura ductil, a viga avisa antes de romper. Escolha a bitola que padroniza com a obra.",
+            tabela=_tabela_barras(barras, As_exig=As_adot),
         ))
         As_flecha = As_adot
     else:
@@ -413,8 +434,11 @@ def memorial_viga(bw, h, L_m, Md_kNm, Vd_kN, fck=25.0, fyk=500.0, caa="II", q_se
                 r"d^{\prime} = " + _v(du["dl"]) + r"\ \mathrm{cm} \quad \sigma_{s2} = " + _v(du["sig_s2"], 2) + r"\ \mathrm{kN/cm^2}",
                 r"A_{s2} = " + _v(du["As2_cm2"]) + r"\ \mathrm{cm^2} \quad A_{s1} = " + _v(du["As1_cm2"]) + r"\ \mathrm{cm^2}",
             ],
-            resultado="As1 (tracionada) = " + _v(du["As1_cm2"]) + " cm2 | As2 (comprimida) = " + _v(du["As2_cm2"]) + " cm2",
+            resultado="As1 (tracionada) = " + _v(du["As1_cm2"]) + " cm2 | As2 (comprimida) = " + _v(du["As2_cm2"]) + " cm2 -> arranjos na tabela",
             norma="NBR 6118:2023 sec.17.2.2 | Araujo (Dr., FURG) 2014",
+            tabela=(_tabela_barras(escolher_barras(du["As1_cm2"]), posicao="As1 (tração)", As_exig=du["As1_cm2"])
+                    + _tabela_barras(escolher_barras(du["As2_cm2"]), posicao="As2 (compr.)", As_exig=du["As2_cm2"])),
+            obs="Escolha os arranjos (★ = recomendado) que padronizam com a obra.",
         ))
         As_flecha = du["As1_cm2"]
 
