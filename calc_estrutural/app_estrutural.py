@@ -101,21 +101,32 @@ def render_detalhe_conc(As_cm2, posicao, seq=1, comprimento_cm=None):
                 + (f" — {b.comprimento_cm:g}cm" if b.comprimento_cm else ""))
 
 def render_passos(passos):
-    # Renderiza a lista de passos de um memorial (titulo, norma, formula,
-    # substituicao, resultado, obs). Usado por todos os elementos do Memorial.
+    # Renderiza a lista de passos de um memorial. Vista limpa: titulo + resultado
+    # sempre visiveis; formula, substituicao, variaveis e tabela ficam dentro de
+    # um expander ("Ver calculo"), revelados ao clicar, sem perder informacao.
     st.divider()
     for p in passos:
         st.markdown("#### " + p.titulo)
-        if p.norma:
-            st.caption("📖 " + p.norma)
-        if p.formula:
-            st.latex(p.formula)
-        for linha in p.substituicao:
-            st.latex(linha)
         if p.resultado:
             st.success(p.resultado)
-        if p.obs:
-            st.info("💡 " + p.obs)
+        tem_detalhe = p.formula or p.substituicao or p.legenda or p.tabela or p.obs
+        if tem_detalhe:
+            with st.expander("🔍 Ver cálculo, fórmulas e variáveis"):
+                if p.norma:
+                    st.caption("📖 " + p.norma)
+                if p.formula:
+                    st.latex(p.formula)
+                for linha in p.substituicao:
+                    st.latex(linha)
+                if p.legenda:
+                    st.markdown("**O que é cada variável:**")
+                    st.markdown("\n".join("- " + s for s in p.legenda))
+                if p.tabela:
+                    render_tabela(p.tabela)
+                if p.obs:
+                    st.info("💡 " + p.obs)
+        elif p.norma:
+            st.caption("📖 " + p.norma)
         st.divider()
 
 def fig_secao_pilar(hx, hy, As_adot, escolha):
