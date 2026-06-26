@@ -537,12 +537,16 @@ def _pg_viga():
 @pagina_handler("🟦  Laje Maciça")
 def _pg_laje():
     st.title("🟦 Laje Maciça Bidirecional")
-    st.caption("Coeficientes Carini — Casos 1-6 | NBR 6118:2023 §19")
-    CASOS = {1:"Caso 1 — 4 bordas apoiadas",2:"Caso 2 — 3 ap.+1 eng.(ly)",
-             "2A":"Caso 2A — 3 ap.+1 eng.(lx)",3:"Caso 3 — 2 ap.+2 eng. opostos (ly)",
-             "3A":"Caso 3A — 2 ap.+2 eng. opostos (lx)",4:"Caso 4 — 2 ap.+2 eng. adjacentes",
-             5:"Caso 5 — 1 ap.+3 eng.","5A":"Caso 5A — 1 ap.+3 eng.(alt.)",
-             6:"Caso 6 — 4 bordas engastadas"}
+    st.caption("Tabela Musso (UFES) — tipos 1-9, interpolada por β=b/a | NBR 6118:2023 §19")
+    CASOS = {1:"Tipo 1 — 4 bordas apoiadas",
+             2:"Tipo 2 — 3 ap.+1 eng. (eng. no vão menor)",
+             3:"Tipo 3 — 2 ap.+2 eng. opostos (vão menor)",
+             4:"Tipo 4 — 3 ap.+1 eng. (eng. no vão maior)",
+             5:"Tipo 5 — 2 ap.+2 eng. adjacentes",
+             6:"Tipo 6 — 1 ap.+3 eng. (livre = vão maior)",
+             7:"Tipo 7 — 2 ap.+2 eng. opostos (vão maior)",
+             8:"Tipo 8 — 1 ap.+3 eng. (livre = vão menor)",
+             9:"Tipo 9 — 4 bordas engastadas"}
     with st.form("laje"):
         c1, c2, c3 = st.columns(3)
         with c1:

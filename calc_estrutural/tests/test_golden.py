@@ -105,19 +105,19 @@ class TestLaje:
         return calcular_laje_macica(3.5, 4.5, 10, 1.5, 1.5, 1, 25, 500, "II")
 
     def test_momentos(self, res):
-        # Caracterização: trava o valor atual. NOTA: COEF_CARINI só tem λ=1,0;
-        # aqui λ=ly/lx=1,29 → coeficiente aproximado (a corrigir na Fatia 4/A4).
+        # Tabela Musso (tipo 1) interpolada por beta=b/a=4,5/3,5=1,286.
+        # Mdx = ma*fd*a^2, Mdy = mb*fd*a^2 (a=menor vao=3,5; fd=7,7 kN/m2).
         m = res["momentos"]
-        assert m["Mdx_pos"] == pytest.approx(10.14, abs=0.05)
-        assert m["Mdy_pos"] == pytest.approx(4.094, abs=0.05)
+        assert m["Mdx_pos"] == pytest.approx(6.161, abs=0.02)
+        assert m["Mdy_pos"] == pytest.approx(4.195, abs=0.02)
 
     def test_flecha_sanidade(self, res):
-        # Flecha de placa (Timoshenko/Carini) interpolada por lambda=ly/lx=1,29.
+        # Flecha do Musso (slide 7): f = coef*fd_ser*a^4/(Ecs*h^3), beta=1,286.
         els = res["els_flecha"]
-        # L/250 = 3500/250 = 14 mm (NBR 6118:2023 Tabela 13.3).
+        # L/250 = 3500/250 = 14 mm (NBR 6118:2023 Tabela 13.3, menor vao).
         assert els["wadm_mm"] == pytest.approx(14.0, abs=1.0)
-        # alpha interpolado entre 0,00564 (lambda 1,2) e 0,00638 (1,3).
-        assert els["alpha_flecha"] == pytest.approx(0.00627, abs=2e-4)
+        # coef_f tipo1 interpolado entre 0,0651 (beta 1,2) e 0,0736 (1,3).
+        assert els["coef_flecha"] == pytest.approx(0.07239, abs=2e-4)
         assert els["w_total_mm"] == pytest.approx(7.0, abs=1.0)
         assert els["w_total_mm"] < els["wadm_mm"]   # flecha OK
         assert els["ok"] is True

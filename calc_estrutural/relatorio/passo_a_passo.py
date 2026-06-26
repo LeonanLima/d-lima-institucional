@@ -3,7 +3,8 @@
 # Cada funcao retorna (lista de Passo, dict resultado canonico para conferencia).
 import math
 from dataclasses import dataclass, field
-from dimensionamento.laje import calcular_laje_macica, COEF_CARINI
+from dimensionamento.laje import calcular_laje_macica
+from dimensionamento.tabela_musso import coef_musso, TIPOS_MUSSO
 from dimensionamento.bares import (
     dimensionar_parede_placa, coeficientes_parede, momentos_parede,
 )
@@ -66,17 +67,19 @@ def memorial_laje(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0, caa="II", p
     res = calcular_laje_macica(lx, ly, h_cm, gk, qk, caso, fck, fyk, caa, psi2)
     passos = []
 
-    # Passo 1 - classificacao
-    lam = ly / lx
+    # Passo 1 - classificacao (Musso: a = menor vao, b = maior vao, beta = b/a)
+    a = min(lx, ly)
+    b = max(lx, ly)
+    lam = b / a
     bidir = lam <= 2.0
     tipo = "BIDIRECIONAL" if bidir else "UNIDIRECIONAL"
     passos.append(Passo(
         titulo="Passo 1 - Classificacao da laje",
-        formula=r"\lambda = \dfrac{l_y}{l_x}",
-        substituicao=[r"\lambda = \dfrac{" + _v(ly) + r"}{" + _v(lx) + r"} = " + _v(lam, 3)],
-        resultado="lambda = " + _v(lam, 3) + ("  (<= 2) -> " if bidir else "  (> 2) -> ") + tipo,
-        norma="NBR 6118:2023 sec.13.2 | Carini, Slide 2",
-        obs="" if bidir else "Para lambda > 2 o correto e laje unidirecional (casos 7-10).",
+        formula=r"\beta = \dfrac{b}{a} = \dfrac{l_{maior}}{l_{menor}}",
+        substituicao=[r"\beta = \dfrac{" + _v(b) + r"}{" + _v(a) + r"} = " + _v(lam, 3)],
+        resultado="beta = " + _v(lam, 3) + ("  (<= 2) -> " if bidir else "  (> 2) -> ") + tipo,
+        norma="NBR 6118:2023 sec.13.2 | Musso (UFES), slide 7",
+        obs="" if bidir else "Para beta > 2 o correto e laje unidirecional (casos 7-10).",
     ))
 
     # Passo 2 - cargas (lidas do resultado canonico - fonte unica)
@@ -96,42 +99,41 @@ def memorial_laje(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0, caa="II", p
         norma="NBR 6118:2023 sec.11.2, Tabela 11.2 (psi2 residencial = 0,3)",
     ))
 
-    # Passo 3 - coeficientes de Carini
-    coef = COEF_CARINI.get(caso, COEF_CARINI[1])
+    # Passo 3 - coeficientes do Musso interpolados por beta = b/a
+    coef = coef_musso(caso, lam)
 
     def cf(k):
         v = coef.get(k)
-        return _v(v, 4) if v is not None else "-"
+        return _v(v, 4) if v else "-"
 
     passos.append(Passo(
-        titulo="Passo 3 - Coeficientes de Carini (caso " + str(caso) + ")",
-        formula=r"M_d = m \cdot f_d \cdot l_x^2 \qquad R_d = r \cdot f_d \cdot l_x",
+        titulo="Passo 3 - Coeficientes do Musso (tipo " + str(caso) + ", interp. por beta)",
+        formula=r"M_d = m \cdot f_d \cdot a^2 \qquad R_d = r \cdot f_d \cdot a \quad (a = \text{menor vao})",
         substituicao=[
-            r"m_x = " + cf("mx") + r",\quad m_y = " + cf("my") + r",\quad m_{xe} = " + cf("mxe") + r",\quad m_{ye} = " + cf("mye"),
-            r"r_x = " + cf("rx") + r",\quad r_y = " + cf("ry") + r",\quad r_{xe} = " + cf("rxe") + r",\quad r_{ye} = " + cf("rye"),
+            r"m_a = " + cf("ma") + r",\quad m_b = " + cf("mb") + r",\quad m_{ae} = " + cf("mae") + r",\quad m_{be} = " + cf("mbe"),
+            r"v_a = " + cf("va") + r",\quad v_b = " + cf("vb") + r",\quad v_{ae} = " + cf("vae") + r",\quad v_{be} = " + cf("vbe"),
         ],
-        resultado="Coeficientes tabelados do caso " + str(caso) + " (lambda = 1,0)",
-        norma="Carini (MSc, UFSC), Slide 2 - Tabela de coeficientes",
-        obs="LIMITACAO: a tabela atual usa lambda = ly/lx = 1,0. Carini interpola os coeficientes para lambda diferente de 1,0 (ver docs/consideracoes-carini.md). Em lajes retangulares o valor real difere.",
+        resultado="Tipo " + str(caso) + " (" + TIPOS_MUSSO.get(caso, TIPOS_MUSSO[1]) + ") — coef. interpolados em beta = " + _v(lam, 3),
+        norma="Musso (UFES), slide 7 — momentos/flechas com Poisson=0,2; reacoes [SAP2000]",
     ))
 
-    # Passo 4 - momentos
+    # Passo 4 - momentos (M = coef * fd * a^2, a = menor vao)
     mts = res["momentos"]
     sub_m = []
-    if coef.get("mx"):
-        sub_m.append(r"M_{dx} = " + cf("mx") + r" \cdot " + _v(fd) + r" \cdot " + _v(lx) + r"^2 = " + _v(mts["Mdx_pos"], 3) + r"\ \mathrm{kNm/m}")
-    if coef.get("my"):
-        sub_m.append(r"M_{dy} = " + cf("my") + r" \cdot " + _v(fd) + r" \cdot " + _v(lx) + r"^2 = " + _v(mts["Mdy_pos"], 3) + r"\ \mathrm{kNm/m}")
-    if coef.get("mxe"):
-        sub_m.append(r"M_{dxe} = " + cf("mxe") + r" \cdot " + _v(fd) + r" \cdot " + _v(lx) + r"^2 = " + _v(mts["Mdxe_neg"], 3) + r"\ \mathrm{kNm/m}")
-    if coef.get("mye"):
-        sub_m.append(r"M_{dye} = " + cf("mye") + r" \cdot " + _v(fd) + r" \cdot " + _v(lx) + r"^2 = " + _v(mts["Mdye_neg"], 3) + r"\ \mathrm{kNm/m}")
+    if coef.get("ma"):
+        sub_m.append(r"M_{dx} = " + cf("ma") + r" \cdot " + _v(fd) + r" \cdot " + _v(a) + r"^2 = " + _v(mts["Mdx_pos"], 3) + r"\ \mathrm{kNm/m}")
+    if coef.get("mb"):
+        sub_m.append(r"M_{dy} = " + cf("mb") + r" \cdot " + _v(fd) + r" \cdot " + _v(a) + r"^2 = " + _v(mts["Mdy_pos"], 3) + r"\ \mathrm{kNm/m}")
+    if coef.get("mae"):
+        sub_m.append(r"M_{dxe} = " + cf("mae") + r" \cdot " + _v(fd) + r" \cdot " + _v(a) + r"^2 = " + _v(mts["Mdxe_neg"], 3) + r"\ \mathrm{kNm/m}")
+    if coef.get("mbe"):
+        sub_m.append(r"M_{dye} = " + cf("mbe") + r" \cdot " + _v(fd) + r" \cdot " + _v(a) + r"^2 = " + _v(mts["Mdye_neg"], 3) + r"\ \mathrm{kNm/m}")
     passos.append(Passo(
         titulo="Passo 4 - Momentos fletores de calculo",
-        formula=r"M_d = m \cdot f_d \cdot l_x^2",
+        formula=r"M_d = m \cdot f_d \cdot a^2 \quad (a = \text{menor vao})",
         substituicao=sub_m,
         resultado="Mdx=" + _v(mts["Mdx_pos"]) + " Mdy=" + _v(mts["Mdy_pos"]) + " Mdxe=" + _v(mts["Mdxe_neg"]) + " Mdye=" + _v(mts["Mdye_neg"]) + " kNm/m",
-        norma="Carini, Slide 2 | NBR 6118:2023 sec.14.7.6",
+        norma="Musso, slide 7 | NBR 6118:2023 sec.14.7.6",
     ))
 
     # Passo 5 - geometria e resistencias
@@ -216,16 +218,16 @@ def memorial_laje(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0, caa="II", p
     Ecs = ai * 5600 * math.sqrt(fck)
     passos.append(Passo(
         titulo="Passo 8 - Verificacao de flecha (ELS)",
-        formula=r"w_\infty = (1 + \varphi)\,w_0 \qquad w_{adm} = \dfrac{l_x}{250}",
+        formula=r"w_0 = c_f\,f_{d,ser}\,\dfrac{a^4}{E_{cs}\,h^3} \qquad w_\infty = (1+\varphi)\,w_0 \qquad w_{adm} = \dfrac{a}{250}",
         substituicao=[
             r"E_{cs} = " + _v(ai, 3) + r" \cdot 5600 \sqrt{" + _v(fck, 0) + r"} = " + _v(Ecs, 0) + r"\ \mathrm{MPa}",
-            r"\lambda = l_y/l_x = " + _v(els["lambda_flecha"], 3) + r" \Rightarrow \alpha = " + _v(els["alpha_flecha"], 5) + r"\quad(w_0 = \alpha\,f_{d,ser}\,l_x^4/D)",
+            r"\beta = b/a = " + _v(els["lambda_flecha"], 3) + r" \Rightarrow c_f = " + _v(els["coef_flecha"], 5) + r"\quad(a = \text{menor vao} = " + _v(a) + r"\,\mathrm{m})",
             r"w_0 = " + _v(els["w0_mm"]) + r"\ \mathrm{mm} \quad w_\infty = (1 + 2{,}5)\,w_0 = " + _v(els["w_total_mm"]) + r"\ \mathrm{mm}",
-            r"w_{adm} = \dfrac{l_x}{250} = \dfrac{" + _v(lx * 1000, 0) + r"\,\mathrm{mm}}{250} = " + _v(els["wadm_mm"]) + r"\ \mathrm{mm}",
+            r"w_{adm} = \dfrac{a}{250} = \dfrac{" + _v(a * 1000, 0) + r"\,\mathrm{mm}}{250} = " + _v(els["wadm_mm"]) + r"\ \mathrm{mm}",
         ],
         resultado="w_inf = " + _v(els["w_total_mm"]) + " mm " + ("<=" if els["ok"] else ">") + " w_adm = " + _v(els["wadm_mm"]) + " mm -> " + ("OK" if els["ok"] else "AUMENTAR h"),
         norma="NBR 6118:2023 sec.17.3.2, Tabela 13.3 | fluencia phi = 2,5",
-        obs="Flecha de placa: alpha(lambda) de Timoshenko/Carini (placa apoiada 4 bordos) interpolado por lambda=ly/lx. Casos com engaste usam o mesmo alpha (conservador).",
+        obs="Flecha de placa: coef. c_f do Musso (slide 7, Poisson=0,2) por tipo de apoio, interpolado por beta=b/a. Tipos com engaste tem flecha menor (tabelado).",
     ))
 
     # Passo 9 - Detalhamento: tabela de barras avulsas (Leonan escolhe a bitola).

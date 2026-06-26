@@ -9,43 +9,15 @@
 #       (coef. de flecha de placa retangular apoiada nos 4 bordos, carga uniforme)
 import math
 
-from core.tabelas import interp_linear
+from dimensionamento.tabela_musso import coef_musso, TIPOS_MUSSO
 
 BIBLIOGRAFIA_LAJE = (
     "LAJE - Referencias:\n"
-    "  [1] CARINI, M.R. (MSc, UFSC) Lajes - Estrutural na Real, 2023\n"
+    "  [1'] MUSSO Jr., F. (UFES) CAP3-LAJE, slide 7 - momentos/flechas/reacoes\n"
     "  [2] ARAUJO, J.M. (Dr., FURG) Curso de Concreto Armado. v.2. 2014\n"
     "  [3] BASTOS, P.S.S. (Dr., UNESP) Apostilas CA - Lajes. 2017\n"
     "  [4] NBR 6118:2023, sec.13.2.4, 14.7, 19.3, 19.4\n"
 )
-
-# Tabela de coeficientes de Carini para lajes macicas bidirecionais
-# Casos 1-9 para lambda = ly/lx = 1.0
-# Formato: {caso: {mx, my, mxe, mye, rx, ry, rxe, rye}}
-# Ref: Carini [1], extraido das planilhas P01_Lajes.xlsx
-COEF_CARINI = {
-    1:  {"mx":0.1075,"my":0.0434,"mxe":None, "mye":None, "rx":0.1103,"ry":0.4299,"rxe":None, "rye":None},
-    2:  {"mx":0.0660,"my":0.0190,"mxe":None, "mye":-0.1173,"rx":0.0482,"ry":0.3520,"rxe":None, "rye":0.5867},
-    "2A":{"mx":0.0749,"my":0.0505,"mxe":-0.0896,"mye":None,"rx":0.1709,"ry":0.2988,"rxe":0.2849,"rye":None},
-    3:  {"mx":0.0404,"my":0.0098,"mxe":None, "mye":-0.0807,"rx":None, "ry":0.2485,"rxe":None, "rye":0.4842},
-    "3A":{"mx":0.0689,"my":0.0463,"mxe":-0.0927,"mye":None,"rx":None, "ry":0.2754,"rxe":0.3534,"rye":None},
-    4:  {"mx":0.0605,"my":0.0244,"mxe":-0.1075,"mye":-0.0434,"rx":0.0827,"ry":0.3224,"rxe":0.1379,"rye":0.5374},
-    5:  {"mx":0.0385,"my":0.0131,"mxe":-0.0771,"mye":-0.0233,"rx":0.0445,"ry":None, "rxe":0.0742,"rye":0.4623},
-    "5A":{"mx":0.0531,"my":0.0254,"mxe":-0.0943,"mye":-0.0508,"rx":None, "ry":0.2828,"rxe":0.1935,"rye":0.4713},
-    6:  {"mx":0.0359,"my":0.0143,"mxe":-0.0716,"mye":-0.0289,"rx":None, "ry":None, "rxe":0.1103,"rye":0.4299},
-}
-
-# Coeficiente de flecha de placa retangular APOIADA nos 4 bordos sob carga
-# uniforme (Timoshenko [5], Tab.35; mesma familia dos wc do Carini):
-#   w0 = alpha * fd_ser * lx^4 / D , com D = Ecs*h^3 / [12*(1-nu^2)] , nu=0,2.
-# Indexado por lambda = ly/lx in [1,0 ; 2,0]; fora do intervalo o interp clampa.
-# Para casos com engaste (2-6) a placa e mais rigida -> usar este alpha (caso 1)
-# e CONSERVADOR (superestima a flecha, a favor da seguranca).
-ALPHA_FLECHA_4APOIOS = [
-    [1.0, 0.00406], [1.1, 0.00485], [1.2, 0.00564], [1.3, 0.00638],
-    [1.4, 0.00705], [1.5, 0.00772], [1.6, 0.00830], [1.7, 0.00883],
-    [1.8, 0.00931], [1.9, 0.00974], [2.0, 0.01013],
-]
 
 
 def calcular_laje_macica(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0,
@@ -57,7 +29,10 @@ def calcular_laje_macica(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0,
     psi2: fator de combinacao quase-permanente (NBR 6118:2023, Tabela 11.2):
           residencial 0,3 | comercial/escritorio 0,4 | garagem/biblioteca 0,6.
     """
-    relacao = round(ly / lx, 3)
+    # Convencao Musso: a = MENOR vao, b = MAIOR vao, beta = b/a (>= 1).
+    a = min(lx, ly)
+    b = max(lx, ly)
+    relacao = round(b / a, 3)
     bidirecional = relacao <= 2.0
 
     # Cargas de calculo - NBR 6118:2023, sec.11.2
@@ -66,16 +41,17 @@ def calcular_laje_macica(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0,
     fd = 1.4 * g_total + 1.4 * qk  # ELU
     fd_ser = g_total + psi2 * qk    # ELS
 
-    # Momentos e reacoes (Carini [1], Tabela coeficientes)
-    coef = COEF_CARINI.get(caso, COEF_CARINI[1])
-    Mdx  = coef["mx"]  * fd * lx**2 if coef["mx"]  else 0
-    Mdy  = coef["my"]  * fd * lx**2 if coef["my"]  else 0
-    Mdxe = coef["mxe"] * fd * lx**2 if coef["mxe"] else 0
-    Mdye = coef["mye"] * fd * lx**2 if coef["mye"] else 0
-    Rdx  = coef["rx"]  * fd * lx    if coef["rx"]   else 0
-    Rdy  = coef["ry"]  * fd * lx    if coef["ry"]   else 0
-    Rdxe = coef["rxe"] * fd * lx    if coef["rxe"]  else 0
-    Rdye = coef["rye"] * fd * lx    if coef["rye"]  else 0
+    # Momentos e reacoes (tabela do Musso [1'], interpolada por beta = b/a).
+    # M = coef * fd * a^2 ; R = coef * fd * a   (a = menor vao). Eixo x = menor vao.
+    cf = coef_musso(caso, relacao)
+    Mdx  = cf["ma"]  * fd * a**2   # positivo, vao menor (armadura principal)
+    Mdy  = cf["mb"]  * fd * a**2   # positivo, vao maior
+    Mdxe = -cf["mae"] * fd * a**2  # negativo, engaste que restringe o vao menor
+    Mdye = -cf["mbe"] * fd * a**2  # negativo, engaste que restringe o vao maior
+    Rdx  = cf["va"]  * fd * a
+    Rdy  = cf["vb"]  * fd * a
+    Rdxe = cf["vae"] * fd * a
+    Rdye = cf["vbe"] * fd * a
 
     # ELU: dimensionamento da armadura (Carini [1], Araujo [2])
     # Cobrimento nominal de LAJE - NBR 6118:2023 Tabela 7.2 (Dc=10mm padrao).
@@ -99,20 +75,16 @@ def calcular_laje_macica(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0,
                 "x_cm": round(x, 2),
                 "ok_ductil": x <= 0.45*d}
 
-    # ELS: flecha de placa (NBR 6118:2023 sec.17.3.2 + Timoshenko [5] / Carini [1])
-    #   w0 = alpha(lambda) * fd_ser * lx^4 / D   (placa retangular, carga uniforme)
-    #   D  = Ecs * h^3 / [12*(1-nu^2)] , nu=0,2 (NBR 6118:2023 sec.8.2.9)
+    # ELS: flecha de placa (Musso [1'], slide 7 — Poisson=0,2 ja embutido no coef):
+    #   f0 = coef_f(beta) * fd_ser * a^4 / (Ecs * h^3)   [m]  (a = menor vao)
     ai = min(0.8 + 0.2*fck/80, 1.0)              # NBR 6118:2023 sec.8.2.8
     Ecs_MPa = ai * 5600 * math.sqrt(fck)         # MPa (granito alpha_E=1.0)
     Ecs = Ecs_MPa * 1000.0                        # kN/m2 (1 MPa = 1000 kN/m2)
     h_m = h_cm / 100.0
-    nu = 0.20
-    D = Ecs * h_m**3 / (12 * (1 - nu**2))         # kNm (rigidez de placa)
-    lam_fl = min(max(ly / lx, 1.0), 2.0)          # tabela vale em [1,0 ; 2,0]
-    alpha_fl = interp_linear(ALPHA_FLECHA_4APOIOS, lam_fl)[0]
-    w0_m = alpha_fl * fd_ser * lx**4 / D          # flecha imediata [m]
+    coef_fl = cf["f"]                             # coef. de flecha do tipo, interp. por beta
+    w0_m = coef_fl * fd_ser * a**4 / (Ecs * h_m**3)  # flecha imediata [m]
     w_total_m = w0_m * (1 + 2.5)                  # fluencia phi=2,5 (NBR 6118 simplif.)
-    wadm_m = lx / 250.0                            # NBR 6118:2023 Tabela 13.3
+    wadm_m = a / 250.0                             # NBR 6118:2023 Tabela 13.3 (menor vao)
     w0_aprox, w_total, wadm = w0_m, w_total_m, wadm_m
 
     return dict(
@@ -140,11 +112,13 @@ def calcular_laje_macica(lx, ly, h_cm, gk, qk, caso=1, fck=25.0, fyk=500.0,
             "w0_mm": round(w0_aprox*1000, 2),
             "w_total_mm": round(w_total*1000, 2),
             "wadm_mm": round(wadm*1000, 2),
-            "lambda_flecha": round(lam_fl, 3),
-            "alpha_flecha": round(alpha_fl, 5),
+            "lambda_flecha": round(relacao, 3),
+            "coef_flecha": round(coef_fl, 5),
             "ok": (w_total <= wadm),
         },
-        ref="[1] Carini(2023) + [2] Araujo(Dr.,FURG) 2014 + [4] NBR 6118:2023"
+        a_menor=a, b_maior=b, beta=relacao,
+        tipo_descr=TIPOS_MUSSO.get(caso, TIPOS_MUSSO[1]),
+        ref="[1'] Musso (UFES) slide 7 (interp. por beta) + [4] NBR 6118:2023"
     )
 
 
