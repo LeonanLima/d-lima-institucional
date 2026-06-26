@@ -8,6 +8,7 @@ from dimensionamento.bares import (
     dimensionar_parede_placa, coeficientes_parede, momentos_parede,
 )
 from dimensionamento.flexo_tracao import as_min_flexo_tracao
+from detalhamento.armaduras import tabela_espacamento
 
 # Cobrimento nominal de LAJE - NBR 6118:2023 Tabela 7.2 (Dc=10mm padrao).
 COBR_CAA = {"I": 2.0, "II": 2.5, "III": 3.5, "IV": 4.5}
@@ -695,6 +696,43 @@ def _passos_parede_bares(r, p_base, H_m, L_m, h_par_cm, fck, caa):
         resultado="As governante = " + _v(r["As_cm2m"], 2) + " cm2/m | Vd = " + _v(r["Vd_kN"], 2) + " kN/m | wk = " + _v(wk, 3) + " <= " + wlim + " mm (" + veredito + ")",
         norma="NBR 6118:2023 sec.17.3.3.2, 17.4, 21.3.3, Tabela 13.4 | Carini, flexo-tracao slide 31",
         obs="wk verificado nas 4 faces no Estadio II: vertical (flexao pura) e horizontal (flexo-tracao: placa + anel). Governa a face mais critica.",
+    ))
+
+    # Passo 7 - Detalhamento: tabela de aco editavel (Leonan escolhe a bitola).
+    faces_det = (
+        ("Horiz. vao (Mx)", r["As_vao_x"]),
+        ("Horiz. engaste (Mxe)", r["As_eng_x"]),
+        ("Vert. vao (My)", r["As_vao_y"]),
+        ("Vert. engaste (Mye)", r["As_eng_y"]),
+    )
+    tab_aco = []
+    for face, as_face in faces_det:
+        if as_face <= 0:
+            continue
+        for opt in tabela_espacamento(as_face):
+            tab_aco.append({
+                "Face": face,
+                "As exig (cm²/m)": _v(as_face, 2),
+                "Ø (mm)": _v(opt["phi_mm"], 1),
+                "Espac. (cm)": _v(opt["s_cm"], 1),
+                "As prov (cm²/m)": _v(opt["As_prov_cm2m"], 2),
+                "Barras/m": opt["n"],
+                "Rec.": "★" if opt.get("recomendada") else "",
+            })
+    passos.append(Passo(
+        titulo="Passo 7 - Detalhamento: tabela de aco (escolha a bitola da obra)",
+        formula=r"A_{s,prov} = \dfrac{a_\phi \cdot 100}{s}\quad(\text{armadura distribuida: } \phi\ \text{c/ espacamento } s)",
+        resultado="Cada face tem varias bitolas que atendem o As; ★ = a recomendada (mais fina). Edite conforme a obra.",
+        norma="NBR 6118:2023 sec.18, 20.1 | NBR 7480:2022 (bitolas comerciais)",
+        legenda=[
+            r"$A_{s,exig}$ — armadura calculada que a face precisa (cm²/m)",
+            r"$\phi$ — bitola comercial; $s$ — espacamento entre barras (cm)",
+            r"$A_{s,prov}$ — armadura que a bitola@espacamento fornece (≥ exigida)",
+            r"Barras/m — n de barras por metro de parede naquele espacamento",
+            r"★ — opcao recomendada (bitola mais fina que cabe, espacamento mais justo)",
+        ],
+        tabela=tab_aco,
+        obs="Faixas entre S_min (7,5 cm) e S_max (20 cm). Bitolas mais grossas que a ultima so repetiriam o espacamento maximo. Escolha a que melhor padroniza com o aco da sua obra.",
     ))
 
     return passos

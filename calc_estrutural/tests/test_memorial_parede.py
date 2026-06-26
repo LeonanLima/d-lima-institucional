@@ -16,9 +16,15 @@ def test_reservatorio_cheio_bate_com_motor_canonico():
     for k in ("Mx", "Mxe", "My", "Mye", "As_vao_x", "As_eng_x",
               "As_vao_y", "As_eng_y", "As_cm2m", "Nd_anel_kNm"):
         assert r[k] == esperado[k]
-    # 6 passos: modelo + pressao/coef + 4 momentos + flexo-tracao + flexao + min/ELS
-    assert len(passos) == 6
+    # 7 passos: modelo + 4 momentos + flexo-tracao + flexao + min/ELS + detalhamento
+    assert len(passos) == 7
     assert r["carga"].startswith("agua")
+    # Passo 7 traz a tabela de aco editavel (varias bitolas por face)
+    det = passos[-1]
+    assert "Detalhamento" in det.titulo
+    assert det.tabela, "detalhamento deve listar opcoes de bitola"
+    assert {"Face", "Ø (mm)", "Espac. (cm)", "As prov (cm²/m)"} <= set(det.tabela[0])
+    assert any(linha["Rec."] == "★" for linha in det.tabela)
 
 
 def test_memorial_tem_os_quatro_momentos_e_flexotracao():
