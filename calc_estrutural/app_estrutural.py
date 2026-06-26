@@ -58,6 +58,17 @@ with st.sidebar:
         "🏊  Piscina",
     ])
 
+# ── registry de páginas ───────────────────────────────────────
+# Cada página é uma função registrada por nome no dict PAGINAS.
+# O despacho no fim do arquivo substitui o antigo if/elif gigante.
+PAGINAS = {}
+
+def pagina_handler(nome):
+    def _deco(fn):
+        PAGINAS[nome] = fn
+        return fn
+    return _deco
+
 # ── helpers gráficos ──────────────────────────────────────────
 def _dark_fig(w=5, h=4):
     fig, ax = plt.subplots(figsize=(w, h))
@@ -213,7 +224,8 @@ PAREDES = {
 }
 
 # ═══════════════════════════════════════════════════════════════
-if pagina == "🏠  Início":
+@pagina_handler("🏠  Início")
+def _pg_inicio():
     st.title("Sistema de Cálculo Estrutural")
     st.subheader("NBR 6118:2023 + NBR 6120:2019 — Uso local")
     c1, c2, c3 = st.columns(3)
@@ -236,7 +248,8 @@ if pagina == "🏠  Início":
 | Fusco, P.B. (Dr., USP) | Estruturas especiais |
 """)
 
-elif pagina == "⚖️  Levantamento de Cargas":
+@pagina_handler("⚖️  Levantamento de Cargas")
+def _pg_cargas():
     st.title("⚖️ Levantamento de Cargas")
     st.caption("NBR 6120:2019 · NBR 16868-1:2020 · gf = 1,4 (combinação normal ELU)")
     tab1, tab2, tab3 = st.tabs(["📋 Cargas na Laje","📏 Cargas na Viga","📊 Tabela NBR 6120"])
@@ -311,7 +324,8 @@ elif pagina == "⚖️  Levantamento de Cargas":
         st.subheader("Cargas variáveis mínimas — NBR 6120:2019, Tabela 2")
         render_tabela([{"Uso / Ambiente": k, "qk (kN/m2)": v} for k, v in CARGAS_NBR6120.items()])
 
-elif pagina == "📐  Pré-dimensionamento":
+@pagina_handler("📐  Pré-dimensionamento")
+def _pg_predim():
     st.title("📐 Pré-dimensionamento")
     st.caption("NBR 6118:2023 §13.2 | Carini 2023")
     tipo = st.selectbox("Elemento", ["Laje","Viga","Pilar"])
@@ -341,7 +355,8 @@ elif pagina == "📐  Pré-dimensionamento":
                 with c2:
                     st.metric("Ac mínima", f"{r.get('Ac_min_cm2','?')} cm²"); st.caption(r.get("ref",""))
 
-elif pagina == "🏛️  Pilar":
+@pagina_handler("🏛️  Pilar")
+def _pg_pilar():
     st.title("🏛️ Pilar — Flexo-compressão")
     st.caption("Método Pilar-Padrão | NBR 6118:2023 §11, §17, §18 | Carini · Bastos · Araujo")
     with st.form("pilar"):
@@ -411,7 +426,8 @@ elif pagina == "🏛️  Pilar":
             st.error(f"Erro: {e}")
             import traceback; st.code(traceback.format_exc())
 
-elif pagina == "🔧  Viga":
+@pagina_handler("🔧  Viga")
+def _pg_viga():
     st.title("🔧 Viga — Cisalhamento + Flexão + Flecha")
     st.caption("Modelo I (cortante) | Armadura simples | Branson ELS | NBR 6118:2023 §17, §18")
     with st.form("viga"):
@@ -507,7 +523,8 @@ elif pagina == "🔧  Viga":
             st.error(f"Erro: {e}")
             import traceback; st.code(traceback.format_exc())
 
-elif pagina == "🟦  Laje Maciça":
+@pagina_handler("🟦  Laje Maciça")
+def _pg_laje():
     st.title("🟦 Laje Maciça Bidirecional")
     st.caption("Coeficientes Carini — Casos 1-6 | NBR 6118:2023 §19")
     CASOS = {1:"Caso 1 — 4 bordas apoiadas",2:"Caso 2 — 3 ap.+1 eng.(ly)",
@@ -580,7 +597,8 @@ elif pagina == "🟦  Laje Maciça":
             st.error(f"Erro: {e}")
             import traceback; st.code(traceback.format_exc())
 
-elif pagina == "🧱  Muro de Arrimo":
+@pagina_handler("🧱  Muro de Arrimo")
+def _pg_muro():
     st.title("🧱 Muro de Arrimo")
     st.caption("Rankine | FST >= 1,5 | FSD >= 1,5 | Caputo · Bastos · NBR 6118:2023")
     with st.form("muro"):
@@ -643,7 +661,8 @@ elif pagina == "🧱  Muro de Arrimo":
             st.error(f"Erro: {e}")
             import traceback; st.code(traceback.format_exc())
 
-elif pagina == "🛢️  Reservatório":
+@pagina_handler("🛢️  Reservatório")
+def _pg_reservatorio():
     st.title("🛢️ Reservatório")
     st.caption("Paredes: placa de Bares + flexo-tração (Carini) · Fundo: laje · NBR 6118:2023 sec.21 (CAA IV)")
     with st.form("reserv_dim"):
@@ -712,7 +731,8 @@ elif pagina == "🛢️  Reservatório":
             st.error(f"Erro: {e}")
             import traceback; st.code(traceback.format_exc())
 
-elif pagina == "🏊  Piscina":
+@pagina_handler("🏊  Piscina")
+def _pg_piscina():
     st.title("🏊 Piscina")
     st.caption("Paredes: placa de Bares + flexo-tração (Carini) · 3 combinações · NBR 6118:2023 sec.21")
     with st.form("pisc_dim"):
@@ -784,7 +804,8 @@ elif pagina == "🏊  Piscina":
             st.error(f"Erro: {e}")
             import traceback; st.code(traceback.format_exc())
 
-elif pagina == "📋  Memorial de Cálculo":
+@pagina_handler("📋  Memorial de Cálculo")
+def _pg_memorial():
     st.title("📋 Memorial de Cálculo — passo a passo")
     st.caption("Metodologia Prof. M.R. Carini (MSc, UFSC) — fórmula, substituição e norma em cada passo")
     elem_m = st.selectbox("Elemento", [
@@ -939,3 +960,6 @@ elif pagina == "📋  Memorial de Cálculo":
                 st.code(traceback.format_exc())
     else:
         st.info("Falta apenas a Viga-parede (proxima fatia).")
+
+# ── despacho ──────────────────────────────────────────────────
+PAGINAS.get(pagina, _pg_inicio)()
