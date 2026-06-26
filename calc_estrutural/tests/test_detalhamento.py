@@ -9,6 +9,7 @@ from detalhamento.armaduras import (
     detalhar_por_quantidade,
     detalhar_por_espacamento,
     tabela_espacamento,
+    tabela_telas,
     texto_para_obra,
     S_MIN_CM,
     S_MAX_CM,
@@ -43,6 +44,24 @@ def test_tabela_espacamento_lista_opcoes_que_cabem():
 def test_tabela_espacamento_as_invalido():
     with pytest.raises(ValueError):
         tabela_espacamento(0.0)
+
+
+def test_tabela_telas_pop_cobre_as():
+    # As=1,5 cm2/m: a tela mais leve que cobre e a Q-159 (1,59).
+    tab = tabela_telas(1.5)
+    assert tab[0]["tela"] == "Q-159"
+    assert tab[0]["recomendada"] is True
+    for linha in tab:
+        assert linha["As_cm2m"] >= 1.5 - 1e-9
+    # opcoes em ordem crescente de As
+    assert [l["As_cm2m"] for l in tab] == sorted(l["As_cm2m"] for l in tab)
+
+
+def test_tabela_telas_as_alto_sem_tela():
+    # Acima da maior tela (Q-785 = 7,85): nenhuma tela atende -> usar barras.
+    assert tabela_telas(9.0) == []
+    with pytest.raises(ValueError):
+        tabela_telas(0.0)
 
 
 def test_por_quantidade_provê_area():

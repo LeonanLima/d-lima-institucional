@@ -160,6 +160,36 @@ def tabela_espacamento(As_cm2_m: float, largura_cm: float = 100.0,
     return linhas
 
 
+# Telas soldadas nervuradas (malha POP) - NBR 7481:2020, serie Q (malha quadrada).
+# (designacao, As [cm2/m em cada direcao], espacamento [cm], bitola do fio [mm]).
+# O numero da designacao ~ As em mm2/m (Q-196 -> 1,96 cm2/m).
+TELAS_Q = [
+    ("Q-61", 0.61, 15, 3.4), ("Q-75", 0.75, 15, 3.8), ("Q-92", 0.92, 15, 4.2),
+    ("Q-113", 1.13, 10, 3.8), ("Q-138", 1.38, 10, 4.2), ("Q-159", 1.59, 10, 4.5),
+    ("Q-196", 1.96, 10, 5.0), ("Q-246", 2.46, 10, 5.6), ("Q-283", 2.83, 10, 6.0),
+    ("Q-335", 3.35, 10, 6.5), ("Q-396", 3.96, 10, 7.1), ("Q-503", 5.03, 10, 8.0),
+    ("Q-636", 6.36, 10, 9.0), ("Q-785", 7.85, 10, 10.0),
+]
+
+
+def tabela_telas(As_cm2_m: float, n_opcoes: int = 3) -> list:
+    """Opcoes de tela soldada (malha POP, serie Q) que atendem o As [cm2/m].
+
+    Alternativa industrializada as barras avulsas em lajes. Devolve as ate
+    n_opcoes telas mais leves cujo As cobre o exigido, marcando a primeira
+    (mais leve) como recomendada. Lista vazia se nenhuma tela alcanca o As
+    (nesse caso usar barras avulsas).
+    """
+    if As_cm2_m <= 0:
+        raise ValueError("As/m deve ser positivo.")
+    cobrem = [t for t in TELAS_Q if t[1] >= As_cm2_m - 1e-9]
+    linhas = []
+    for i, (desig, As, esp, phi) in enumerate(cobrem[:n_opcoes]):
+        linhas.append({"tela": desig, "As_cm2m": As, "malha_cm": esp,
+                       "phi_mm": phi, "recomendada": i == 0})
+    return linhas
+
+
 def texto_para_obra(barras: list) -> str:
     # Lista de barras formatada para a planta de ferragem (uma por linha).
     return "\n".join(b.descricao() for b in barras)
