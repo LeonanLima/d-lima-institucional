@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
 from relatorio.passo_a_passo import memorial_laje, memorial_viga, memorial_pilar, memorial_muro, memorial_reservatorio, memorial_piscina
+from relatorio.memorial_trelicada import memorial_laje_trelicada
 
 from dimensionamento.predim import predimensionar_laje, predimensionar_viga, predimensionar_pilar
 from dimensionamento.pilar import (
@@ -18,6 +19,7 @@ from dimensionamento.viga import (
     armadura_simples, calcular_flecha_branson, as_minima_viga, BIBLIOGRAFIA_VIGA,
 )
 from dimensionamento.laje import calcular_laje_macica, BIBLIOGRAFIA_LAJE
+from dimensionamento.laje_trelicada import calcular_laje_trelicada, VINCULACOES
 from dimensionamento.muro_arrimo import (
     predimensionar_muro, calcular_empuxo, verificar_estabilidade,
     dimensionar_fuste, BIBLIOGRAFIA_MURO,
@@ -53,6 +55,7 @@ with st.sidebar:
         "🏛️  Pilar",
         "🔧  Viga",
         "🟦  Laje Maciça",
+        "🟨  Laje Treliçada",
         "🧱  Muro de Arrimo",
         "🛢️  Reservatório",
         "🏊  Piscina",
@@ -608,6 +611,90 @@ def _pg_laje():
                 seq += 1
             with st.expander("Referências"):
                 st.text(BIBLIOGRAFIA_LAJE)
+        except Exception as e:
+            st.error(f"Erro: {e}")
+            import traceback; st.code(traceback.format_exc())
+
+@pagina_handler("🟨  Laje Treliçada")
+def _pg_laje_trel():
+    st.title("🟨 Laje Treliçada (vigotas + tavelas)")
+    st.caption("Nervura = viga T · considerações do Prof. Musso §13.4.2 · NBR 6118:2023")
+    VINC = {k: v["descr"] for k, v in VINCULACOES.items()}
+    with st.form("laje_trel"):
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            lx_t = st.number_input("lx — vão da vigota (m)", 1.5, 10.0, 3.5, 0.1,
+                help="Vão na direção das vigotas (a treliçada é unidirecional).")
+            vinc_t = st.selectbox("Vinculação", list(VINC.keys()),
+                format_func=lambda k: VINC[k])
+            e_t = st.number_input("e — intereixo das nervuras (cm)", 30.0, 130.0, 40.0, 1.0,
+                help="Distância entre eixos das vigotas. Define o critério de cisalhamento (Musso §13.4.2).")
+        with c2:
+            hcapa_t = st.number_input("capa — mesa (cm)", 3.0, 12.0, 4.0, 0.5,
+                help="Espessura da capa de concreto. Musso: ≥ l0/15 e ≥ 4 cm.")
+            htot_t = st.number_input("h — altura total (cm)", 8.0, 40.0, 16.0, 1.0,
+                help="Altura total da laje (capa + tavela/vigota).")
+            bw_t = st.number_input("bw — largura da nervura (cm)", 4.0, 20.0, 9.0, 0.5,
+                help="Largura da vigota. NBR: bw ≥ 5 cm; < 8 cm não admite armadura de compressão.")
+        with c3:
+            gk_t = st.number_input("gk — sem peso próprio (kN/m²)", 0.0, 20.0, 1.5, 0.1,
+                help="Revestimentos + contrapiso + forro. O peso próprio do concreto é calculado pela geometria.")
+            qk_t = st.number_input("qk (kN/m²)", 0.5, 20.0, 2.0, 0.1)
+            ppench_t = st.number_input("peso enchimento (kN/m²)", 0.0, 5.0, 0.0, 0.1,
+                help="Peso das tavelas (cerâmica/EPS), se quiser somar.")
+        with st.expander("Materiais e ELS"):
+            m1, m2, m3, m4 = st.columns(4)
+            with m1: fck_t = st.number_input("fck (MPa)", 20, 50, 25, key="fckt")
+            with m2: fyk_t = st.number_input("fyk (MPa)", 250, 600, 500, key="fykt")
+            with m3: caa_t = st.selectbox("CAA", ["I", "II", "III", "IV"], index=1, key="caat")
+            with m4: psi2_t = st.selectbox("ψ₂ (ELS)", [0.3, 0.4, 0.6], key="psit",
+                format_func=lambda v: {0.3: "0,3 residencial", 0.4: "0,4 comercial",
+                                       0.6: "0,6 garagem"}[v])
+        ok_t = st.form_submit_button("Calcular", use_container_width=True)
+    if ok_t:
+        try:
+            r = calcular_laje_trelicada(lx_t, e_t, hcapa_t, htot_t, bw_t, gk_t, qk_t,
+                                        vinc_t, fck_t, fyk_t, caa_t, psi2_t, ppench_t)
+            tab_dim, tab_mem = st.tabs(["📊 Dimensionamento", "📋 Memorial passo a passo"])
+            with tab_dim:
+                m = r["momentos"]; ap = r["armaduras"]["As_pos"]
+                an = r["armaduras"]["As_neg"]; c = r["cisalhamento"]; fl = r["els_flecha"]
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.subheader("Esforços por nervura")
+                    st.metric("Md⁺", f"{m['Md_pos_nerv']:.2f} kNm")
+                    if m["Md_neg_nerv"]:
+                        st.metric("Md⁻ (engaste)", f"{m['Md_neg_nerv']:.2f} kNm")
+                    st.metric("Vd", f"{m['Vd_nerv']:.2f} kN")
+                    st.caption(f"PP={r['PP_kNm2']:.2f} · fd={r['fd_kNm2']:.2f} kN/m² · "
+                               f"bf={r['bf_cm']:.0f} · d={r['d_cm']:.1f} cm")
+                with col2:
+                    st.subheader("Armadura da vigota")
+                    st.metric("As⁺ (por nervura)", f"{ap.get('As_adot_cm2',0):.2f} cm²",
+                              help=ap.get("secao", ""))
+                    if an.get("As_adot_cm2"):
+                        st.metric("As⁻ (negativa)", f"{an.get('As_adot_cm2',0):.2f} cm²")
+                d_t = r["d_cm"]
+                xd = (ap.get("x_cm", 0) / d_t) if d_t else 0
+                render_verificacoes([
+                    verif_max("Flecha total (ELS)", fl["w_total_mm"], fl["wadm_mm"],
+                              "mm", "NBR 6118 §13.3 (L/250)"),
+                    verif_max("Cortante (sem estribo)", c["VSd_nerv_kN"], c["VRd1_nerv_kN"],
+                              "kN", "Musso §13.4.2 · NBR 6118 §19.4.1"),
+                    verif_max("Ductilidade x/d", xd, 0.45, "", "NBR 6118 §14.6.4.3"),
+                ])
+                st.info(f"🔎 Cisalhamento — {c['criterio_txt']}"
+                        + ("" if c["ok"] else
+                           ("  →  precisa estribo (verificar como viga)" if c["precisa_estribo"]
+                            else "  →  aumentar h ou bw")))
+                st.subheader("🔩 Tabela de aço da vigota (escolha o arranjo)")
+                _p, _ = memorial_laje_trelicada(lx_t, e_t, hcapa_t, htot_t, bw_t, gk_t,
+                                                qk_t, vinc_t, fck_t, fyk_t, caa_t, psi2_t, ppench_t)
+                render_tabela(_p[3].tabela)
+            with tab_mem:
+                passos, _ = memorial_laje_trelicada(lx_t, e_t, hcapa_t, htot_t, bw_t, gk_t,
+                                                    qk_t, vinc_t, fck_t, fyk_t, caa_t, psi2_t, ppench_t)
+                render_passos(passos)
         except Exception as e:
             st.error(f"Erro: {e}")
             import traceback; st.code(traceback.format_exc())
