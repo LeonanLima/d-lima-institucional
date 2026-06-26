@@ -32,6 +32,11 @@ def v2():
     return render_template("v2.html")
 
 
+@app.route("/v3")
+def v3():
+    return render_template("v3.html")
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)

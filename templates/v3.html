@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D'LIMA Engenharia | Casa Própria pelo MCMV em São Mateus ES</title>
+    <meta name="description" content="Engenheiro civil em São Mateus/ES especialista em Minha Casa Minha Vida. Subsídio do governo, uso do FGTS, acompanhamento em tempo real e responsabilidade técnica CREA do início ao fim.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://dlimaengenharia.org/">
+    <meta name="theme-color" content="#0F120F">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="pt_BR">
+    <meta property="og:site_name" content="D'LIMA Engenharia">
+    <meta property="og:title" content="Construa sua casa com o Minha Casa Minha Vida | D'LIMA Engenharia">
+    <meta property="og:description" content="Subsídio do governo, uso do FGTS e projeto moderno com engenheiro civil responsável. Saia do aluguel com a D'LIMA Engenharia em São Mateus/ES.">
+    <meta property="og:image" content="https://dlimaengenharia.org/static/og-image.jpg">
+    <meta property="og:url" content="https://dlimaengenharia.org/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Construa sua casa com o Minha Casa Minha Vida | D'LIMA Engenharia">
+    <meta name="twitter:description" content="Subsídio do governo, uso do FGTS e projeto moderno com engenheiro civil responsável.">
+    <meta name="twitter:image" content="https://dlimaengenharia.org/static/og-image.jpg">
+
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DPCLJ7WS4R"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-DPCLJ7WS4R');
+    </script>
+    <script>
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+      n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+      document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '1513592793641793');
+      fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=1513592793641793&ev=PageView&noscript=1"/></noscript>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "GeneralContractor",
+      "name": "D'LIMA Engenharia",
+      "image": "https://dlimaengenharia.org/static/logo-dlima.jpg",
+      "url": "https://dlimaengenharia.org/",
+      "telephone": "+5528999646592",
+      "email": "contato@dlimaengenharia.org",
+      "areaServed": { "@type": "City", "name": "São Mateus", "addressRegion": "ES" },
+      "address": { "@type": "PostalAddress", "addressLocality": "São Mateus", "addressRegion": "ES", "addressCountry": "BR" },
+      "sameAs": [
+        "https://www.instagram.com/leonan.dlima",
+        "https://www.facebook.com/profile.php?id=61577458711721"
+      ]
+    }
+    </script>
+
+    <style>
+    /* Outfit como body font */
+    :root { --font-body: "Outfit", "Segoe UI", system-ui, sans-serif; }
+
+    /* BENTO (Diferenciais) */
+    .bento {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+    .bento__cell {
+        border-radius: 22px;
+        padding: 36px 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .bento__cell:hover { transform: translateY(-3px); box-shadow: 0 18px 40px rgba(15,18,15,.12); }
+    .bento__cell--wide { grid-column: span 2; }
+    .bento__cell--dark { background: var(--dark); color: var(--cream); }
+    .bento__cell--dark .bento__icon { background: rgba(184,155,94,.15); }
+    .bento__cell--dark h3 { color: var(--cream); }
+    .bento__cell--dark p { color: rgba(249,248,246,.68); }
+    .bento__cell--light { background: var(--white); border: 1px solid rgba(184,155,94,.2); color: var(--text); }
+    .bento__cell--light .bento__icon { background: var(--sand); }
+    .bento__cell--light p { color: var(--muted); }
+    .bento__cell--accent {
+        background: linear-gradient(135deg, rgba(184,155,94,.16) 0%, rgba(184,155,94,.05) 100%);
+        border: 1px solid rgba(184,155,94,.28);
+        color: var(--text);
+    }
+    .bento__cell--accent .bento__icon { background: rgba(184,155,94,.22); }
+    .bento__cell--accent p { color: var(--muted); }
+    .bento__icon {
+        width: 52px; height: 52px;
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .bento__icon svg { width: 26px; height: 26px; color: var(--gold); }
+    .bento__cell h3 { font-size: 1.2rem; font-weight: 700; margin: 0; line-height: 1.3; }
+    .bento__cell p { font-size: .93rem; line-height: 1.65; margin: 0; }
+
+    /* TIMELINE (Como Funciona) */
+    .timeline {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+    .timeline__step { padding-right: 8px; }
+    .timeline__step:last-child { padding-right: 0; }
+    .timeline__connector { display: flex; align-items: center; margin-bottom: 22px; }
+    .timeline__num {
+        width: 50px; height: 50px; flex-shrink: 0;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--gold), var(--gold-hover));
+        color: var(--dark);
+        font-family: var(--font-head); font-weight: 800; font-size: 1.2rem;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 6px 18px rgba(184,155,94,.35);
+        position: relative; z-index: 1;
+    }
+    .timeline__line {
+        flex: 1; height: 2px; margin-left: 2px;
+        background: linear-gradient(90deg, rgba(184,155,94,.55), rgba(184,155,94,.08));
+    }
+    .timeline__step:last-child .timeline__line { display: none; }
+    .timeline__step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+    .timeline__step p { color: var(--muted); font-size: .88rem; line-height: 1.6; }
+
+    /* FAIXAS (linhas horizontais) */
+    .faixas-list { display: flex; flex-direction: column; gap: 4px; }
+    .faixa-row {
+        display: grid;
+        grid-template-columns: 150px 210px 1fr;
+        gap: 24px;
+        align-items: center;
+        padding: 20px 26px;
+        border-radius: 14px;
+        background: rgba(255,255,255,.04);
+        border: 1px solid rgba(184,155,94,.14);
+        transition: background .25s, border-color .25s;
+    }
+    .faixa-row:hover { background: rgba(255,255,255,.07); border-color: rgba(184,155,94,.38); }
+    .faixa-row__badge { display: flex; align-items: center; }
+    .faixa-row__badge .faixa__tag { margin-bottom: 0; }
+    .faixa-row__valor { font-family: var(--font-head); font-size: 1rem; font-weight: 700; color: var(--cream); }
+    .faixa-row__desc { color: rgba(249,248,246,.65); font-size: .88rem; line-height: 1.5; }
+    .faixa-row__desc strong { color: var(--gold); font-weight: 600; }
+
+    /* INVESTIMENTO (editorial numérico) */
+    .invest-list { max-width: 860px; margin: 0 auto; }
+    .invest-item {
+        display: grid;
+        grid-template-columns: 72px 1fr;
+        gap: 28px;
+        align-items: start;
+        padding: 32px 0;
+        border-bottom: 1px solid var(--sand);
+    }
+    .invest-item:last-child { border-bottom: none; }
+    .invest-item__num {
+        font-family: var(--font-head); font-size: 3rem; font-weight: 800;
+        color: var(--gold); line-height: 1; opacity: .22; padding-top: 4px;
+    }
+    .invest-item__body h3 { font-size: 1.3rem; margin-bottom: 10px; }
+    .invest-item__body p { color: var(--muted); font-size: .97rem; line-height: 1.65; }
+
+    /* RESPONSIVO */
+    @media (max-width: 900px) {
+        .bento { grid-template-columns: repeat(2, 1fr); }
+        .bento__cell--wide { grid-column: span 2; }
+        .timeline { grid-template-columns: repeat(2, 1fr); row-gap: 28px; }
+        .timeline__line { display: none; }
+        .faixa-row { grid-template-columns: 120px 1fr; }
+        .faixa-row__desc { grid-column: 1 / -1; }
+        .invest-item { grid-template-columns: 56px 1fr; gap: 20px; }
+        .invest-item__num { font-size: 2.4rem; }
+    }
+    @media (max-width: 560px) {
+        .bento { grid-template-columns: 1fr; }
+        .bento__cell--wide { grid-column: span 1; }
+        .timeline { grid-template-columns: 1fr; gap: 24px; }
+        .faixa-row { grid-template-columns: 1fr; gap: 8px; padding: 18px 20px; }
+        .faixa-row__valor { font-size: .95rem; }
+        .invest-item { grid-template-columns: 1fr; gap: 4px; padding: 24px 0; }
+        .invest-item__num { font-size: 2rem; }
+    }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container header__inner">
+            <a href="#" class="brand" aria-label="D'LIMA Engenharia">
+                <span class="brand__name">D'LIMA <span class="brand__eng">Engenharia</span></span>
+                <span class="brand__tag">Transformando sonhos em projetos reais, sem dor de cabeça</span>
+            </a>
+            <a href="#simulacao" class="btn btn--gold nav-cta">
+                Fazer Simulação
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
+        </div>
+    </header>
+
+    <!-- HERO: badge + h1 + lead + form (sem lista de bullets, sem emojis, sem scarcity text) -->
+    <section class="hero">
+        <div class="container hero__inner">
+            <div>
+                <span class="badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+                    Programa Minha Casa Minha Vida
+                </span>
+                <h1>Pare de pagar a casa <span class="gold">dos outros</span></h1>
+                <p class="hero__lead">
+                    O dinheiro que você paga de aluguel pode construir a sua casa com subsídio de até R$ 55.000 do governo. Sem pedreiro sumindo. Sem atraso.
+                </p>
+            </div>
+
+            <div id="simulacao" class="form-card">
+                <span class="form-card__flag">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+                    Resposta rápida no WhatsApp
+                </span>
+                <h2>Descubra quanto o governo paga da sua casa</h2>
+                <p class="form-card__hint">Simulação <strong>gratuita</strong> e sem compromisso. Leva 1 minuto.</p>
+
+                <form id="leadForm">
+                    <div class="field">
+                        <label for="nomeCliente">Nome completo</label>
+                        <input id="nomeCliente" type="text" required placeholder="Digite seu nome">
+                    </div>
+                    <div class="field">
+                        <label for="telefoneCliente">WhatsApp</label>
+                        <input id="telefoneCliente" type="tel" required placeholder="(28) 90000-0000">
+                    </div>
+                    <div class="field">
+                        <label for="rendaCliente">Faixa de renda familiar bruta</label>
+                        <select id="rendaCliente" required>
+                            <option value="" disabled selected>Selecione sua renda</option>
+                            <option value="Até R$ 3.200,00 (Faixa 1)">Até R$ 3.200,00 (Faixa 1)</option>
+                            <option value="De R$ 3.200,01 a R$ 5.000,00 (Faixa 2)">De R$ 3.200,01 a R$ 5.000,00 (Faixa 2)</option>
+                            <option value="De R$ 5.000,01 a R$ 9.600,00 (Faixa 3)">De R$ 5.000,01 a R$ 9.600,00 (Faixa 3)</option>
+                            <option value="De R$ 9.600,01 a R$ 13.000,00 (Faixa 4)">De R$ 9.600,01 a R$ 13.000,00 (Faixa 4)</option>
+                            <option value="Acima de R$ 13.000,00 (Alto Padrão)">Acima de R$ 13.000,00 (Alto Padrão)</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="terrenoCliente">Você já tem o terreno?</label>
+                        <select id="terrenoCliente" required>
+                            <option value="" disabled selected>Selecione uma opção</option>
+                            <option value="Já tenho o terreno">Já tenho o terreno</option>
+                            <option value="Ainda estou procurando">Ainda estou procurando</option>
+                            <option value="Não sei como funciona">Não sei como funciona</option>
+                        </select>
+                    </div>
+                    <p style="font-size:.75rem;text-align:center;color:#9b4a2a;font-weight:600;margin:8px 0 6px;letter-spacing:.01em;">Subsídio do governo em vigor agora — condições mudam a cada revisão do programa.</p>
+                    <button type="submit" class="btn btn--gold btn--block btn--lg">
+                        DESCOBRIR MEU SUBSÍDIO AGORA
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                    </button>
+                    <p class="form-card__hint" style="margin-top:12px;margin-bottom:0;font-size:.8rem;">Seus dados estão seguros. Sem spam, sem ligação chata.</p>
+                </form>
+                <div id="successMessage" class="success is-hidden">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+                    Tudo certo! Abrimos seu WhatsApp — é só enviar a mensagem que já preparamos.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DIFERENCIAIS: bento assimétrico (4 células, 1+4 largas, 2+3 estreitas) -->
+    <section class="section section--cream">
+        <div class="container">
+            <div class="section__head">
+                <h2 class="section__title">Já ouviu histórias de obra que viraram <span class="gold">pesadelo</span>?</h2>
+                <p class="section__sub">Com a gente é o contrário. Do crédito à chave, cuidamos de tudo para você.</p>
+            </div>
+            <div class="bento">
+                <div class="bento__cell bento__cell--dark bento__cell--wide reveal">
+                    <div class="bento__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="m3 15 2 2 4-4"/></svg>
+                    </div>
+                    <h3>Burocracia Zero</h3>
+                    <p>Esquece fila e pilha de documento. A gente cuida de toda a papelada e da aprovação na Caixa Econômica. Você não precisa entender de burocracia — nós entendemos por você.</p>
+                </div>
+                <div class="bento__cell bento__cell--light reveal">
+                    <div class="bento__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4Z"/><path d="m13.5 4.5 2 2"/><path d="m10.5 7.5 2 2"/><path d="m7.5 10.5 2 2"/><path d="m4.5 13.5 2 2"/></svg>
+                    </div>
+                    <h3>Projeto Personalizado</h3>
+                    <p>Nada de casa igual à do vizinho. Desenhamos a planta dos seus sonhos, do jeito da sua família.</p>
+                </div>
+                <div class="bento__cell bento__cell--accent reveal">
+                    <div class="bento__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+                    </div>
+                    <h3>Engenheiro Responsável</h3>
+                    <p>ART assinada em todas as obras. Segurança técnica do início ao fim, registrada no CREA.</p>
+                </div>
+                <div class="bento__cell bento__cell--dark bento__cell--wide reveal">
+                    <div class="bento__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>
+                    </div>
+                    <h3>Chave na Mão</h3>
+                    <p>Você não gerencia nada. Recebe a casa pronta para morar — é só pegar a chave, abrir a porta e entrar.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMO FUNCIONA: timeline horizontal com números dourados -->
+    <section id="como-funciona" class="section section--sand">
+        <div class="container">
+            <div class="section__head">
+                <h2 class="section__title">Mais simples do que <span class="gold">você imagina</span></h2>
+                <p class="section__sub">Quatro passos da simulação até a chave na mão. Você acompanha tudo. O trabalho pesado fica com a gente.</p>
+            </div>
+            <div class="timeline">
+                <div class="timeline__step reveal d1">
+                    <div class="timeline__connector">
+                        <div class="timeline__num">1</div>
+                        <div class="timeline__line"></div>
+                    </div>
+                    <h3>Simulação gratuita</h3>
+                    <p>Preenche o formulário. Em até 24h você descobre o valor do subsídio que tem direito, sem sair de casa.</p>
+                </div>
+                <div class="timeline__step reveal d2">
+                    <div class="timeline__connector">
+                        <div class="timeline__num">2</div>
+                        <div class="timeline__line"></div>
+                    </div>
+                    <h3>A Caixa aprova</h3>
+                    <p>Cuidamos de toda a papelada e aprovação junto à Caixa Econômica, do início ao fim.</p>
+                </div>
+                <div class="timeline__step reveal d3">
+                    <div class="timeline__connector">
+                        <div class="timeline__num">3</div>
+                        <div class="timeline__line"></div>
+                    </div>
+                    <h3>Obra acompanhada</h3>
+                    <p>Você vê cada etapa da sua obra pelo celular, em tempo real. Sem surpresa, sem susto.</p>
+                </div>
+                <div class="timeline__step reveal d4">
+                    <div class="timeline__connector">
+                        <div class="timeline__num">4</div>
+                        <div class="timeline__line"></div>
+                    </div>
+                    <h3>O dia que muda tudo</h3>
+                    <p>Chave na mão. Casa pronta para morar. Sem mais um mês de aluguel enriquecendo o dono do imóvel.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ENTREGA (seção split idêntica ao original) -->
+    <section class="section section--cream">
+        <div class="container entrega">
+            <div class="entrega__media">
+                <img src="/static/entrega-chaves.png" alt="Engenheiro da D'LIMA entregando a chave da casa para a família" loading="lazy">
+            </div>
+            <div class="entrega__text">
+                <h2>O momento que <span class="gold">muda tudo</span></h2>
+                <p>Da planta à chave na mão: acompanhamos cada etapa para entregar não só uma casa, mas a realização de um sonho da sua família, com segurança, qualidade e sem dor de cabeça.</p>
+                <blockquote style="border-left:3px solid #B89B5E;padding-left:1rem;margin:1.2rem 0 1.5rem;font-style:italic;opacity:.85;font-size:.95rem;">"Essa foto resume tudo. A família que entrou pela primeira vez numa casa que é <em>delas</em> — sem mais um mês de aluguel pela frente."</blockquote>
+                <a href="#simulacao" class="btn btn--gold btn--lg">Quero minha simulação grátis</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SUBSÍDIOS: faixas em linha (sem grade de cards iguais) -->
+    <section class="section section--dark">
+        <div class="container">
+            <div class="section__head">
+                <h2 class="section__title">Acha que casa própria não <span class="gold">cabe no seu bolso?</span></h2>
+                <p class="section__sub">O que você paga de aluguel pode virar a parcela da sua casa. Veja o que muda pela sua faixa de renda:</p>
+            </div>
+            <div class="faixas-list">
+                <div class="faixa-row reveal">
+                    <div class="faixa-row__badge"><span class="faixa__tag">Faixa 1</span></div>
+                    <div class="faixa-row__valor">Até R$ 3.200</div>
+                    <div class="faixa-row__desc">Maior subsídio do programa: pode chegar a <strong>R$ 55.000</strong> pagos pelo governo. Imóvel até R$ 275 mil.</div>
+                </div>
+                <div class="faixa-row reveal">
+                    <div class="faixa-row__badge"><span class="faixa__tag">Faixa 2</span></div>
+                    <div class="faixa-row__valor">R$ 3.200 a R$ 5.000</div>
+                    <div class="faixa-row__desc">Subsídio + FGTS na entrada. Imóvel até R$ 275 mil. Parcela <strong>fixa</strong> enquanto o aluguel sobe todo ano.</div>
+                </div>
+                <div class="faixa-row reveal">
+                    <div class="faixa-row__badge"><span class="faixa__tag">Faixa 3</span></div>
+                    <div class="faixa-row__valor">R$ 5.000 a R$ 9.600</div>
+                    <div class="faixa-row__desc">Juros abaixo do mercado + FGTS. Imóvel até <strong>R$ 400 mil</strong>. Casa própria que cabe no orçamento.</div>
+                </div>
+                <div class="faixa-row reveal">
+                    <div class="faixa-row__badge"><span class="faixa__tag">Faixa 4</span></div>
+                    <div class="faixa-row__valor">R$ 9.600 a R$ 13.000</div>
+                    <div class="faixa-row__desc">Financiamento Caixa com boas condições. Imóvel até <strong>R$ 600 mil</strong>. Engenharia de qualidade.</div>
+                </div>
+                <div class="faixa-row reveal">
+                    <div class="faixa-row__badge"><span class="faixa__tag faixa__tag--premium">Alto Padrão</span></div>
+                    <div class="faixa-row__valor">Acima de R$ 13.000</div>
+                    <div class="faixa-row__desc">Melhores taxas do mercado. <strong>Engenharia dedicada</strong> do projeto à entrega, com acompanhamento exclusivo.</div>
+                </div>
+            </div>
+            <div class="center mt-40">
+                <a href="#simulacao" class="btn btn--gold btn--lg">
+                    Descobrir quanto o governo paga
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- INVESTIMENTO: lista editorial numerada 01/02/03 -->
+    <section class="section section--cream">
+        <div class="container">
+            <div class="section__head">
+                <h2 class="section__title">Imóvel não é gasto. <span class="gold">É o seu dinheiro trabalhando por você.</span></h2>
+                <p class="section__sub">Os mais ricos do mundo guardam a maior parte da fortuna em imóveis. Não é coincidência.</p>
+            </div>
+            <div class="invest-list">
+                <div class="invest-item reveal">
+                    <div class="invest-item__num">01</div>
+                    <div class="invest-item__body">
+                        <h3>A inflação come o seu dinheiro parado</h3>
+                        <p>R$ 100.000 guardados hoje valem cada vez menos com o tempo. O imóvel protege o seu patrimônio: sobe com a inflação em vez de ser destruído por ela.</p>
+                    </div>
+                </div>
+                <div class="invest-item reveal">
+                    <div class="invest-item__num">02</div>
+                    <div class="invest-item__body">
+                        <h3>A parcela é fixa. O aluguel não.</h3>
+                        <p>Quem paga aluguel vê o valor subir todo ano, sem parar. Quem tem financiamento paga uma parcela corrigida. Daqui a 10 anos, o imóvel é seu. O aluguel nunca será.</p>
+                    </div>
+                </div>
+                <div class="invest-item reveal">
+                    <div class="invest-item__num">03</div>
+                    <div class="invest-item__body">
+                        <h3>Patrimônio que rende sem trabalhar mais</h3>
+                        <p>Uma casa própria pode virar renda passiva: morando, alugando um cômodo, ou vendendo com valorização. É a forma mais antiga e comprovada de fazer o dinheiro trabalhar por você.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="center mt-40">
+                <p style="max-width:560px;margin:0 auto 1.5rem;font-size:1rem;opacity:.85;">Quem não coloca isso na ponta do lápis hoje vai se arrepender amanhã. <strong>Quanto você já pagou de aluguel nos últimos 5 anos?</strong></p>
+                <a href="#simulacao" class="btn btn--gold btn--lg">
+                    Quero sair do aluguel
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROVA SOCIAL (idêntica ao original) -->
+    <section class="section section--sand">
+        <div class="container">
+            <div class="section__head">
+                <h2 class="section__title">Se você ainda não saiu do aluguel, <span class="gold">a culpa não é sua</span></h2>
+                <p class="section__sub">É que faltava quem fizesse do jeito certo: sem enrolação, sem promessa vazia, com responsabilidade técnica de verdade.</p>
+            </div>
+            <div class="entrega" style="margin-bottom:32px;">
+                <div class="entrega__media" style="background:#10111A;">
+                    <img src="/static/leonan-de-lima.png" alt="Leonan de Lima, engenheiro civil responsável pela D'LIMA Engenharia, CREA 060640/D" loading="lazy" style="object-fit:contain; object-position:center bottom;">
+                </div>
+                <div class="entrega__text">
+                    <h2>Leonan de Lima</h2>
+                    <p class="form-card__hint" style="margin-bottom:10px;">Engenheiro Civil | CREA-ES 060640/D | Especialista em MCMV no Norte do ES</p>
+                    <p>Toda obra da D'LIMA é acompanhada por mim, com ART assinada e responsabilidade técnica registrada. Não é achismo de pedreiro, é engenharia de verdade do início ao fim. <strong>Você sabe com quem está fechando negócio.</strong></p>
+                </div>
+            </div>
+            <div class="entrega" style="margin-bottom:32px;">
+                <div class="entrega__text">
+                    <h2>Você acompanha sua obra <span class="gold">em tempo real</span></h2>
+                    <p>Desenvolvemos um sistema exclusivo de gestão de obras. Você acessa pelo celular e vê cada etapa concluída, com percentual de avanço e registro fotográfico. Enquanto você trabalha, sua casa está sendo construída. E você sabe disso, em tempo real.</p>
+                </div>
+                <div class="entrega__media">
+                    <img src="/static/sistema-cronograma.png" alt="Sistema D'LIMA mostrando o cronograma de obra acompanhado pelo cliente" loading="lazy">
+                </div>
+            </div>
+            <div class="trust">
+                <span class="trust__item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+                    ART assinada em todas as obras
+                </span>
+                <span class="trust__item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+                    Especialista Minha Casa Minha Vida
+                </span>
+                <span class="trust__item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.4-5.4 9.2-7.3 10.7a1 1 0 0 1-1.4 0C9.4 19.2 4 14.4 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Atendemos São Mateus e região
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ (idêntico ao original) -->
+    <section id="faq" class="section section--cream">
+        <div class="container">
+            <div class="section__head">
+                <h2 class="section__title">Perguntas <span class="gold">frequentes</span></h2>
+                <p class="section__sub">As dúvidas mais comuns de quem vai realizar o sonho da casa própria.</p>
+            </div>
+            <div class="faq">
+                <details class="faq__item">
+                    <summary>Quanto custa para construir minha casa?</summary>
+                    <div class="faq__a">O valor depende do tamanho do projeto, do acabamento escolhido e do seu enquadramento no Minha Casa Minha Vida. Faça a simulação que preparamos um orçamento personalizado e sem compromisso para você.</div>
+                </details>
+                <details class="faq__item">
+                    <summary>Vocês ajudam com o financiamento da Caixa?</summary>
+                    <div class="faq__a">Sim, e esse é um dos nossos diferenciais. Somos especialistas no Minha Casa Minha Vida e cuidamos de toda a documentação, aprovação do crédito e trâmites junto à Caixa Econômica. Você não precisa entender de burocracia. Nós fazemos isso.</div>
+                </details>
+                <details class="faq__item">
+                    <summary>Quanto tempo leva a obra?</summary>
+                    <div class="faq__a">O prazo é definido em contrato antes do início da obra. Acompanhamos cada etapa com engenharia para entregar dentro do combinado. Pelo nosso sistema, você acompanha o avanço em tempo real pelo celular, sem surpresa.</div>
+                </details>
+                <details class="faq__item">
+                    <summary>A obra tem garantia?</summary>
+                    <div class="faq__a">Sim. Toda obra da D'LIMA é executada com ART (Anotação de Responsabilidade Técnica) assinada pelo engenheiro responsável, e entregue com garantia conforme as normas técnicas NBR vigentes. Isso é obrigação legal, e aqui é cumprida.</div>
+                </details>
+                <details class="faq__item">
+                    <summary>Vocês atendem fora de São Mateus?</summary>
+                    <div class="faq__a">Atendemos São Mateus e região. Fale com a gente pelo WhatsApp que confirmamos a cobertura para a sua cidade.</div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA FINAL (idêntico ao original) -->
+    <section class="section section--dark">
+        <div class="container cta-final">
+            <h2>Cada mês de aluguel é dinheiro que <span class="gold">não volta</span></h2>
+            <p>Enquanto você adia, está pagando a casa do seu locador. As condições do Minha Casa Minha Vida nunca estiveram tão boas. A hora de virar esse jogo é agora.</p>
+
+            <div style="background:rgba(184,155,94,.1);border:1px solid rgba(184,155,94,.3);border-radius:12px;padding:1.5rem 2rem;margin:2rem auto;max-width:480px;text-align:left;">
+                <p style="font-size:.85rem;text-transform:uppercase;letter-spacing:.08em;color:#B89B5E;margin-bottom:.8rem;font-weight:600;">Se você paga R$ 800/mês de aluguel:</p>
+                <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.5rem;">
+                    <li style="display:flex;justify-content:space-between;font-size:.95rem;">
+                        <span>Em 1 ano</span>
+                        <strong style="color:#B89B5E;">R$ 9.600 entregues ao dono do imóvel</strong>
+                    </li>
+                    <li style="display:flex;justify-content:space-between;font-size:.95rem;">
+                        <span>Em 3 anos</span>
+                        <strong style="color:#B89B5E;">R$ 28.800 que não voltam</strong>
+                    </li>
+                    <li style="display:flex;justify-content:space-between;font-size:.95rem;border-top:1px solid rgba(184,155,94,.3);padding-top:.5rem;margin-top:.3rem;">
+                        <span>Em 5 anos</span>
+                        <strong style="color:#B89B5E;font-size:1.05rem;">R$ 48.000: a entrada da sua casa</strong>
+                    </li>
+                </ul>
+            </div>
+
+            <a href="https://wa.me/5528999646592?text=Ol%C3%A1!%20Quero%20falar%20com%20um%20especialista%20da%20D'LIMA%20Engenharia%20sobre%20minha%20casa%20pr%C3%B3pria." target="_blank" rel="noopener" class="btn btn--gold btn--lg">
+                Falar agora no WhatsApp
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+            </a>
+            <p style="margin-top:1rem;font-size:.85rem;opacity:.6;">Resposta rápida. Sem compromisso.</p>
+        </div>
+    </section>
+
+    <!-- FOOTER (idêntico ao original) -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__grid">
+                <div>
+                    <img src="/static/logo-completa.jpg" alt="D'LIMA Engenharia" class="footer__logo" loading="lazy">
+                    <p>Construindo sonhos, entregando lares. Especialistas no Minha Casa Minha Vida em São Mateus/ES.</p>
+                </div>
+                <div>
+                    <h4>Contato</h4>
+                    <div class="footer__links">
+                        <a href="https://wa.me/5528999646592" target="_blank" rel="noopener">WhatsApp: (28) 99964-6592</a>
+                        <a href="mailto:contato@dlimaengenharia.org">contato@dlimaengenharia.org</a>
+                        <span>São Mateus, ES</span>
+                    </div>
+                </div>
+                <div>
+                    <h4>Redes</h4>
+                    <div class="social">
+                        <a href="https://www.instagram.com/leonan.dlima" target="_blank" rel="noopener" aria-label="Instagram">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                        </a>
+                        <a href="https://www.facebook.com/profile.php?id=61577458711721" target="_blank" rel="noopener" aria-label="Facebook">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                        </a>
+                        <a href="https://wa.me/5528999646592" target="_blank" rel="noopener" aria-label="WhatsApp">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <p>© 2026 D'LIMA Engenharia. Todos os direitos reservados. ·
+                    <a href="/politica-privacidade">Política de Privacidade</a>
+                </p>
+                <p class="tagline">Excelência em engenharia</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- WHATSAPP FLUTUANTE -->
+    <a id="whatsapp-float" class="wa-float"
+       href="https://wa.me/5528999646592?text=Ol%C3%A1!%20Gostaria%20de%20saber%20mais%20sobre%20os%20projetos%20da%20D'LIMA%20Engenharia."
+       target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+    </a>
+
+    <!-- SCRIPTS (idênticos ao original) -->
+    <script>
+      (function () {
+        var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var sel = '.section__head, .bento__cell, .timeline__step, .faixa-row, .invest-item, .trust__item, .faq__item, .entrega__media, .entrega__text, .cta-final';
+        var els = document.querySelectorAll(sel);
+        if (reduce || !('IntersectionObserver' in window)) { return; }
+        els.forEach(function(el) { el.classList.add('reveal'); });
+        var io = new IntersectionObserver(function(entries) {
+          entries.forEach(function(e) {
+            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+          });
+        }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+        els.forEach(function(el) { io.observe(el); });
+        setTimeout(function() { els.forEach(function(el) { el.classList.add('in'); }); }, 9000);
+      })();
+
+      var NUM_WHATSAPP = "5528999646592";
+
+      (function () {
+        var faq = document.getElementById('faq');
+        if (!faq || !('IntersectionObserver' in window)) { return; }
+        var io = new IntersectionObserver(function(entries) {
+          entries.forEach(function(e) {
+            if (e.isIntersecting) {
+              if (typeof gtag === 'function') { gtag('event', 'view_content', { content_name: 'faq' }); }
+              if (typeof fbq === 'function') { fbq('track', 'ViewContent'); }
+              io.unobserve(e.target);
+            }
+          });
+        }, { threshold: 0.3 });
+        io.observe(faq);
+      })();
+
+      (function () {
+        var leadForm = document.getElementById('leadForm');
+        if (!leadForm) { return; }
+        var fired = false;
+        leadForm.addEventListener('focusin', function () {
+          if (fired) { return; }
+          fired = true;
+          if (typeof gtag === 'function') { gtag('event', 'begin_checkout', { method: 'whatsapp_form' }); }
+          if (typeof fbq === 'function') { fbq('track', 'InitiateCheckout'); }
+        });
+      })();
+
+      var leadForm = document.getElementById('leadForm');
+      if (leadForm) {
+        leadForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var btn = this.querySelector('button[type="submit"]');
+          var nome = document.getElementById('nomeCliente').value;
+          var renda = document.getElementById('rendaCliente').value;
+          var terreno = document.getElementById('terrenoCliente').value;
+
+          btn.textContent = 'Abrindo WhatsApp...';
+          btn.disabled = true;
+
+          var msg = "Olá! Meu nome é *" + nome + "*. Vim pelo site da D'LIMA Engenharia e quero fazer uma simulação do Minha Casa Minha Vida. Minha renda familiar é: *" + renda + "*. Sobre o terreno: *" + terreno + "*.";
+          var url = "https://wa.me/" + NUM_WHATSAPP + "?text=" + encodeURIComponent(msg);
+
+          if (typeof gtag === 'function') { gtag('event', 'generate_lead', { method: 'whatsapp_form' }); }
+          if (typeof fbq === 'function') { fbq('track', 'Lead'); }
+
+          window.location.href = url;
+          var self = this;
+          setTimeout(function() {
+            self.style.display = 'none';
+            document.getElementById('successMessage').classList.remove('is-hidden');
+          }, 800);
+        });
+      }
+    </script>
+</body>
+</html>
