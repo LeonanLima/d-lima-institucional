@@ -88,6 +88,91 @@ def tensao_aco_estadio2(m_serv_kncm: float, as_cm2: float, b_cm: float,
     )
 
 
+@dataclass(frozen=True)
+class TensaoFlexoTracao:
+    """Estado da secao fissurada (Estadio II) sob N (tracao) + M de servico."""
+    sigma_s_mpa: float    # tensao na armadura mais tracionada [MPa]
+    x_ii_cm: float        # linha neutra no Estadio II [cm] (0 = secao toda tracionada)
+    caso: str             # "flexao" | "grande" | "pequena"
+    e0_cm: float          # excentricidade M/N [cm] (None quando N ~ 0)
+    alpha_e: float        # relacao modular Es/Ecs
+
+
+def tensao_aco_flexotracao(m_serv_kncm: float, n_serv_kn: float, as1_cm2: float,
+                           b_cm: float, d_cm: float, h_cm: float, fck_mpa: float,
+                           d_linha_cm: float | None = None,
+                           alpha_e_agreg: float = 1.0) -> TensaoFlexoTracao:
+    """Tensao no aco no Estadio II para FLEXO-TRACAO normal (secao retangular).
+
+    Generaliza tensao_aco_estadio2 para um esforco normal de TRACAO N combinado
+    com o momento de servico M. Classifica pela excentricidade e0 = M/N frente a
+    z/2 (mesmo criterio do dimensionamento, dimensionar_flexo_tracao):
+
+      * N ~ 0          -> flexao simples pura (delega a tensao_aco_estadio2).
+      * e0 <= z/2      -> PEQUENA excentricidade: secao toda tracionada, concreto
+                          desprezado. As duas armaduras tracionam; a face mais
+                          solicitada tem sigma_s = N*(z/2 + e0) / (z * As1).
+      * e0 > z/2       -> GRANDE excentricidade: existe banzo comprimido. Resolve
+                          o equilibrio elastico da secao fissurada (concreto
+                          triangular + As tracionada) com a normal:
+                              Cc*(d - x/3) = Ms,  Ms = M - N*(d - h/2)
+                              Ts = Cc + N,        sigma_s = Ts / As1
+                          A linha neutra x sai da compatibilidade elastica
+                          (sigma_s = 2*alpha_e*Cc*(d-x)/(b*x^2)), resolvida por
+                          bisseccao em (0, d). No limite N->0 recai exatamente na
+                          flexao pura (b*x^2/2 = alpha_e*As*(d-x)).
+
+    m_serv_kncm: momento de servico [kN.cm] (sem gamma_f). n_serv_kn: tracao de
+    servico [kN] (positiva). d_linha_cm: d' da face oposta (padrao h - d).
+    """
+    if as1_cm2 <= 0 or b_cm <= 0 or d_cm <= 0:
+        raise ValueError("As1, b e d devem ser positivos")
+    e_cs = ecs(fck_mpa, alpha_e_agreg)
+    alpha_e = ES_MPA / e_cs
+    m_cm = abs(m_serv_kncm)
+    n = abs(n_serv_kn)
+
+    if n < 1e-9:
+        t2 = tensao_aco_estadio2(m_serv_kncm, as1_cm2, b_cm, d_cm, fck_mpa, alpha_e_agreg)
+        return TensaoFlexoTracao(sigma_s_mpa=t2.sigma_s_mpa, x_ii_cm=t2.x_ii_cm,
+                                 caso="flexao", e0_cm=None, alpha_e=t2.alpha_e)
+
+    d_linha = (h_cm - d_cm) if d_linha_cm is None else d_linha_cm
+    z = d_cm - d_linha
+    e0 = m_cm / n
+
+    if e0 <= z / 2.0:
+        # PEQUENA excentricidade: secao integralmente tracionada (sem concreto).
+        e2 = z / 2.0 + e0          # braco da face mais tracionada (As1)
+        sigma_s_kncm2 = n * e2 / (z * as1_cm2)
+        return TensaoFlexoTracao(sigma_s_mpa=round(sigma_s_kncm2 * 10.0, 2),
+                                 x_ii_cm=0.0, caso="pequena",
+                                 e0_cm=round(e0, 2), alpha_e=round(alpha_e, 3))
+
+    # GRANDE excentricidade: banzo comprimido + As tracionada.
+    ms = n * (e0 - z / 2.0)        # momento reduzido em torno da armadura tracionada
+    coef = 2.0 * alpha_e * as1_cm2
+
+    def f(x: float) -> float:
+        cc = ms / (d_cm - x / 3.0)            # resultante de compressao [kN]
+        a = coef * (d_cm - x) / (b_cm * x ** 2)
+        return cc * (a - 1.0) - n             # zero no equilibrio
+
+    lo, hi = 1e-4, d_cm - 1e-4
+    for _ in range(100):
+        mid = 0.5 * (lo + hi)
+        if f(lo) * f(mid) <= 0:
+            hi = mid
+        else:
+            lo = mid
+    x = 0.5 * (lo + hi)
+    cc = ms / (d_cm - x / 3.0)
+    sigma_s_kncm2 = (cc + n) / as1_cm2
+    return TensaoFlexoTracao(sigma_s_mpa=round(sigma_s_kncm2 * 10.0, 2),
+                             x_ii_cm=round(x, 3), caso="grande",
+                             e0_cm=round(e0, 2), alpha_e=round(alpha_e, 3))
+
+
 def area_envolvente_por_metro(h_cm: float, d_cm: float, phi_mm: float) -> float:
     """Area de concreto de envolvimento Acri p/ faixa de 1 m (NBR 6118, 17.3.3.2).
 
@@ -147,3 +232,23 @@ def verificar_fissuracao(m_serv_kncm: float, as_cm2: float, b_cm: float,
     rho_r = as_cm2 / acri
     abertura = abertura_wk(phi_mm, t2.sigma_s_mpa, fctm(fck_mpa), rho_r)
     return abertura, t2
+
+
+def verificar_fissuracao_flexotracao(m_serv_kncm: float, n_serv_kn: float,
+                                     as1_cm2: float, b_cm: float, d_cm: float,
+                                     h_cm: float, fck_mpa: float, phi_mm: float,
+                                     d_linha_cm: float | None = None,
+                                     w_lim_mm: float = WLIM_LIQUIDO,
+                                     alpha_e_agreg: float = 1.0):
+    """Encadeia Estadio II (N+M) -> Acri -> wk e devolve (AberturaFissura, TensaoFlexoTracao).
+
+    Versao de flexo-tracao do verificar_fissuracao: usada na direcao horizontal
+    das paredes (momento da placa + tracao do anel). rho_r usa a armadura da face
+    mais tracionada (As1), consistente com a tensao sigma_s calculada.
+    """
+    ft = tensao_aco_flexotracao(m_serv_kncm, n_serv_kn, as1_cm2, b_cm, d_cm, h_cm,
+                                fck_mpa, d_linha_cm, alpha_e_agreg)
+    acri = area_envolvente_por_metro(h_cm, d_cm, phi_mm)
+    rho_r = as1_cm2 / acri
+    abertura = abertura_wk(phi_mm, ft.sigma_s_mpa, fctm(fck_mpa), rho_r)
+    return abertura, ft
