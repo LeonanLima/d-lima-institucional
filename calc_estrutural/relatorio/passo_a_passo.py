@@ -570,8 +570,10 @@ def memorial_pilar(H, hx, hy, beta, Nd, Md_kNcm, fck=25.0, fyk=500.0, caa="II"):
             r"\text{Longitudinal: " + bar_txt + r"}",
             r"\phi_t = " + _v(est["phi_est_mm"], 0) + r"\,\mathrm{mm}\quad s_{max} = " + _v(est["s_max_cm"]) + r"\,\mathrm{cm}\quad s_{red} = " + _v(est["s_red_cm"]) + r"\,\mathrm{cm}",
         ],
-        resultado="Barras: " + bar_txt + " | Estribo Phi" + _v(est["phi_est_mm"], 0) + " c/" + _v(est["s_max_cm"]) + "cm (s_red " + _v(est["s_red_cm"]) + " cm em emendas/base)",
+        resultado="Escolha o arranjo na tabela (★ = recomendado) | Estribo Phi" + _v(est["phi_est_mm"], 0) + " c/" + _v(est["s_max_cm"]) + "cm (s_red " + _v(est["s_red_cm"]) + " cm em emendas/base)",
         norma="NBR 6118:2023 sec.18.4.2.1, 18.4.3 | Carini Slide 4",
+        tabela=_tabela_barras(escolha, As_exig=dim["As_adot"]),
+        obs="Longitudinal: arranjos que atendem o As (★ = recomendado). Min. 4 barras (1 por canto). Escolha o que padroniza com a obra.",
     ))
 
     return passos, dim
@@ -658,6 +660,25 @@ def memorial_muro(H_m, phi, gs, qs=0.0, fck=25.0, fyk=500.0, caa="III"):
             norma="Bastos (Dr., UNESP) eq.4.12 | NBR 6118:2023 sec.17",
             obs="O fuste e uma laje em balanco engastada na sapata; momento na base pela carga triangular do empuxo.",
         ))
+        # Passo 6 - detalhamento do fuste (tabela de aco editavel)
+        as_fuste = fus["As_cm2m"]
+        if as_fuste > 0:
+            tab_fuste = [{
+                "As exig (cm²/m)": _v(as_fuste, 2),
+                "Ø (mm)": _v(opt["phi_mm"], 1),
+                "Espac. (cm)": _v(opt["s_cm"], 1),
+                "As prov (cm²/m)": _v(opt["As_prov_cm2m"], 2),
+                "Barras/m": opt["n"],
+                "Rec.": "★" if opt.get("recomendada") else "",
+            } for opt in tabela_espacamento(as_fuste)]
+            passos.append(Passo(
+                titulo="Passo 6 - Detalhamento do fuste: tabela de aco (escolha a bitola)",
+                formula=r"A_{s,prov} = \dfrac{a_\phi \cdot 100}{s}\quad(\text{armadura vertical do fuste, face do terra})",
+                resultado="Bitolas que atendem o As vertical do fuste; ★ = recomendada. Edite conforme a obra.",
+                norma="NBR 6118:2023 sec.18, 20.1 | NBR 7480:2022 (bitolas comerciais)",
+                tabela=tab_fuste,
+                obs="Armadura principal na face em contato com o terra. Complementar com armadura de distribuicao horizontal (>= 1/5 da principal).",
+            ))
 
     return passos, {"Ka": Ka, "FST": est["FST"], "FSD": est["FSD"], "fuste": fus}
 
