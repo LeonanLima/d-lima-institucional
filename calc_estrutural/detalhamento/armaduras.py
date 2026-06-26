@@ -127,6 +127,39 @@ def detalhar_por_espacamento(As_cm2_m: float, largura_cm: float = 100.0,
                  s, comprimento_cm)
 
 
+def tabela_espacamento(As_cm2_m: float, largura_cm: float = 100.0,
+                       s_max_cm: float = S_MAX_CM) -> list:
+    """Tabela de opcoes de armadura DISTRIBUIDA (laje/parede) p/ As exigido [cm2/m].
+
+    Para cada bitola comercial cujo espacamento pratico fique entre S_MIN e
+    s_max, devolve {phi_mm, s_cm, As_prov_cm2m, n, recomendada}. A bitola
+    recomendada e a mais fina que atende (barras finas, espacamento mais justo);
+    o projetista escolhe na lista a que melhor se enquadra na obra.
+
+    As linhas vao da bitola mais fina viavel (espacamento mais justo) ate a
+    primeira cujo espacamento bate no maximo (s_max); bitolas mais grossas so
+    repetiriam o espacamento maximo e sao omitidas.
+    """
+    if As_cm2_m <= 0:
+        raise ValueError("As/m deve ser positivo.")
+    linhas = []
+    for phi in BITOLAS:
+        a = area_barra(phi)
+        s_nec = a * 100.0 / As_cm2_m                       # s que iguala o As
+        s = math.floor(min(s_nec, s_max_cm) / 0.5) * 0.5   # arredonda p/ baixo
+        if s < S_MIN_CM:
+            continue                                        # bitola fina demais
+        As_prov = round(a * 100.0 / s, 2)
+        n = math.floor(largura_cm / s) + 1
+        linhas.append({"phi_mm": phi, "s_cm": s,
+                       "As_prov_cm2m": As_prov, "n": n})
+        if s_nec >= s_max_cm:
+            break                                           # ja bateu no s_max
+    if linhas:
+        linhas[0]["recomendada"] = True
+    return linhas
+
+
 def texto_para_obra(barras: list) -> str:
     # Lista de barras formatada para a planta de ferragem (uma por linha).
     return "\n".join(b.descricao() for b in barras)

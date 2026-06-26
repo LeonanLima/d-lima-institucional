@@ -8,6 +8,7 @@ from detalhamento.armaduras import (
     area_barra,
     detalhar_por_quantidade,
     detalhar_por_espacamento,
+    tabela_espacamento,
     texto_para_obra,
     S_MIN_CM,
     S_MAX_CM,
@@ -19,6 +20,29 @@ def test_area_barra_nbr7480():
     assert area_barra(12.5) == 1.227
     with pytest.raises(ValueError):
         area_barra(11.0)
+
+
+def test_tabela_espacamento_lista_opcoes_que_cabem():
+    # Para As=5 cm2/m, a tabela deve oferecer varias bitolas, cada uma com
+    # espacamento >= S_MIN e As provida cobrindo o As exigido. O projetista
+    # escolhe a que melhor se enquadra na obra.
+    tab = tabela_espacamento(5.0)
+    assert len(tab) >= 2                                  # mais de uma opcao
+    for linha in tab:
+        assert linha["s_cm"] >= S_MIN_CM
+        assert linha["s_cm"] <= S_MAX_CM
+        assert linha["As_prov_cm2m"] >= 5.0 - 1e-6        # cobre o exigido
+        assert linha["n"] >= 1
+    # bitolas em ordem crescente; uma (a mais fina) marcada como recomendada
+    phis = [linha["phi_mm"] for linha in tab]
+    assert phis == sorted(phis)
+    assert sum(1 for linha in tab if linha.get("recomendada")) == 1
+    assert tab[0]["recomendada"] is True
+
+
+def test_tabela_espacamento_as_invalido():
+    with pytest.raises(ValueError):
+        tabela_espacamento(0.0)
 
 
 def test_por_quantidade_provê_area():
