@@ -39,7 +39,23 @@ as considerações do Musso — par com [tabela maciça do Musso](../calc_estrut
   h≥19→γn=1,00 | 18→1,05 | 17→1,10 | 16→1,15 | 15→1,20 | 14→1,25 | 13→1,30 |
   12→1,35 | 11→1,40 | 10→1,45 (γn = 1,95 − 0,05·h).
 
-## Plano de implementação (laje treliçada, método do Musso) — A FAZER
+## Status da implementação (2026-06-26)
+- [x] **Fatia trel-1** `dimensionamento/laje_trelicada.py` — `calcular_laje_trelicada`
+  (nervura=viga T; PP pela geometria real; M+/M-/V por coef. de vinculação;
+  ELU seção T com LN mesa/alma; cisalhamento pelo critério `e` do Musso; flecha
+  seção T bruta c/ fluência φ=2,5). Commit feat(laje) trel-1.
+- [x] **Fatia trel-2** `tests/test_laje_trelicada.py` — golden (PP geométrico,
+  Md, seção T, 3 ramos do critério de cisalhamento). 13 testes; suíte 108 passed.
+- [x] **Fatia trel-3** `relatorio/memorial_trelicada.py` — `memorial_laje_trelicada`
+  (6 passos, lê do canônico, tabela de aço editável da vigota). Em arquivo próprio
+  porque passo_a_passo.py já passou de 800 linhas.
+- [ ] **Fatia trel-4** UI Streamlit: novo elemento/página "Laje Treliçada" em
+  app_estrutural.py (inputs: lx, e, capa, h, bw, vinculação, gk, qk, enchimento;
+  abas Dimensionamento + Memorial + tabela da vigota).
+- [ ] **Fatia trel-5** (opcional) golden com EXEMPLO numérico real dos slides 23-25
+  do Musso, se Leonan fornecer (hoje o golden usa caso verificável por 1os princípios).
+
+## Plano de implementação (laje treliçada, método do Musso) — referência
 
 Modelo: cada nervura = **viga T** (alma bw da vigota, mesa = capa + tavela
 adjacente até e/2 de cada lado). Faixa de cálculo = 1 nervura, depois As por metro.
