@@ -4,6 +4,7 @@
 import math
 from dataclasses import dataclass, field
 from dimensionamento.laje import calcular_laje_macica
+from dimensionamento.laje_trelicada import calcular_laje_trelicada, VINCULACOES
 from dimensionamento.tabela_musso import coef_musso, TIPOS_MUSSO
 from dimensionamento.bares import (
     dimensionar_parede_placa, coeficientes_parede, momentos_parede,
