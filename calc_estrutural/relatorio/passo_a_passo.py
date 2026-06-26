@@ -693,17 +693,32 @@ def memorial_reservatorio(tipo, estado, H_m, L_m, h_par_cm, phi=30.0, gs=18.0,
             p = p_solo
             carga = "solo externo (reservatorio enterrado vazio)"
 
+    # Pressao na base p [kN/m2] com o algebrismo de resmat (para leigo):
+    #   agua  -> p = gamma_a * H           (empuxo hidrostatico)
+    #   solo  -> Ka = tan^2(45 - phi/2);   p = Ka * gamma_s * H (empuxo ativo)
+    usa_solo = enterrado and not cheio
+    linhas_p = []
+    if p <= 0:
+        linhas_p.append(r"\text{Parede vazia, sem empuxo lateral} \Rightarrow p = 0 \Rightarrow \text{detalhar } A_{s,min}")
+    elif usa_solo:
+        linhas_p.append(r"K_a = \tan^2\!\left(45^\circ - \tfrac{\varphi}{2}\right) = \tan^2\!\left(45 - \tfrac{" + _v(phi) + r"}{2}\right) = " + _v(Ka, 3) + r"\quad(\text{coef. de empuxo ativo do solo})")
+        linhas_p.append(r"p = K_a\,\gamma_s\,H = " + _v(Ka, 3) + r"\cdot" + _v(gs) + r"\cdot" + _v(H_m) + r" = " + _v(p) + r"\ \mathrm{kN/m^2}\quad(\text{pico na base})")
+    else:
+        linhas_p.append(r"p = \gamma_a\,H = 10\cdot" + _v(H_m) + r" = " + _v(p) + r"\ \mathrm{kN/m^2}\quad(\gamma_a=10\ \mathrm{kN/m^3},\ \text{pico na base})")
+
     contorno = "laterais apoiadas + base engastada + topo apoiado (tampa)"
     passos = [Passo(
-        titulo="Passo 1 - Modelo: parede como placa de Bares (carga triangular)",
-        formula=r"\text{Contorno: " + contorno + r"; carga hidrostatica triangular (pico na base)}",
+        titulo="Passo 1 - Modelo, dimensoes e carga (pressao na base)",
+        formula=r"d = h - c - \tfrac{\phi_b}{2} \qquad p_{base}=\gamma\,H\ \ \text{(agua)}\ \ \text{ou}\ \ p=K_a\,\gamma_s\,H\ \ \text{(solo)}",
         substituicao=[
             r"\text{Tipo: " + tipo + r" | Estado: " + estado + r" | carga = " + carga + r"}",
-            r"\text{H = " + _v(H_m) + r"\ m (l_y, altura) | L = " + _v(L_m) + r"\ m (l_x, vao horizontal) | h = " + _v(h_par_cm) + r"\ cm | d = " + _v(d) + r"\ cm}",
-        ],
-        resultado="CAA " + caa + " (cob. " + _v(cobr) + " cm) | fck >= 40 MPa | placa bidirecional de Bares",
+            r"\text{Legenda: } l_x=L\ (\text{vao horizontal}),\ l_y=H\ (\text{altura}),\ h=\text{espessura},\ d=\text{altura util},\ c=\text{cobrimento}",
+            r"H = l_y = " + _v(H_m) + r"\ \mathrm{m}\quad L = l_x = " + _v(L_m) + r"\ \mathrm{m}\quad h = " + _v(h_par_cm) + r"\ \mathrm{cm}",
+            r"d = h - c - \tfrac{\phi_b}{2} = " + _v(h_par_cm) + r" - " + _v(cobr) + r" - \tfrac{1{,}25}{2} = " + _v(d) + r"\ \mathrm{cm}\quad(\phi_b=12{,}5\ \mathrm{mm})",
+        ] + linhas_p,
+        resultado="CAA " + caa + " (cob. " + _v(cobr) + " cm) | d = " + _v(d) + " cm | p = " + _v(p) + " kN/m2 | placa de Bares",
         norma="Carini, Reservatorios Elevados, slides 14-15 | NBR 6118:2023 sec.21",
-        obs="Horizontal = flexo-tracao (placa + anel); vertical = flexao simples. Com tampa o topo apoia; sem tampa fica livre.",
+        obs="lx = L (horizontal, direcao do anel); ly = H (altura). Horizontal = flexo-tracao (placa + anel); vertical = flexao. Com tampa o topo apoia.",
     )]
 
     r = dimensionar_parede_placa(H_m, L_m, h_par_cm / 100.0, p, fck, fyk, caa)
@@ -735,18 +750,30 @@ def memorial_piscina(estado, H_m, L_m, h_par_cm, phi=30.0, gs=18.0, qs=0.0,
         p = p_solo
         carga = "solo externo (piscina vazia)"
 
+    # Pressao na base p [kN/m2] com algebrismo de resmat (para leigo):
+    #   agua  -> p = gamma_a * H
+    #   solo  -> Ka = tan^2(45 - phi/2);  p = Ka*(gamma_s*H + qs)
+    linhas_p = []
+    if cheia:
+        linhas_p.append(r"p = \gamma_a\,H = 10\cdot" + _v(H_m) + r" = " + _v(p) + r"\ \mathrm{kN/m^2}\quad(\gamma_a=10\ \mathrm{kN/m^3},\ \text{pico na base})")
+    else:
+        linhas_p.append(r"K_a = \tan^2\!\left(45^\circ - \tfrac{\varphi}{2}\right) = \tan^2\!\left(45 - \tfrac{" + _v(phi) + r"}{2}\right) = " + _v(Ka, 3) + r"\quad(\text{coef. de empuxo ativo})")
+        linhas_p.append(r"p = K_a\,(\gamma_s\,H + q_s) = " + _v(Ka, 3) + r"\cdot(" + _v(gs) + r"\cdot" + _v(H_m) + r" + " + _v(qs) + r") = " + _v(p) + r"\ \mathrm{kN/m^2}")
+
     contorno = "laterais apoiadas + base engastada (topo livre: piscina aberta)"
     passos = [Passo(
-        titulo="Passo 1 - Modelo: parede como placa de Bares (carga triangular)",
-        formula=r"\text{Contorno: " + contorno + r"; carga triangular (pico na base)}",
+        titulo="Passo 1 - Modelo, dimensoes e carga (pressao na base)",
+        formula=r"\lambda=\tfrac{l_y}{l_x}\qquad d = h - c - \tfrac{\phi_b}{2}\qquad p=\gamma\,H\ \text{ou}\ K_a\,(\gamma_s H+q_s)",
         substituicao=[
             r"\text{Estado: " + estado + r" | carga = " + carga + r"}",
-            r"\text{H = " + _v(H_m) + r"\ m (l_y) | L = " + _v(L_m) + r"\ m (l_x) | h = " + _v(h_par_cm) + r"\ cm | d = " + _v(d) + r"\ cm}",
+            r"\text{Legenda: } l_x=L\ (\text{vao horizontal}),\ l_y=H\ (\text{altura}),\ h=\text{espessura},\ d=\text{altura util},\ c=\text{cobrimento}",
+            r"H = l_y = " + _v(H_m) + r"\ \mathrm{m}\quad L = l_x = " + _v(L_m) + r"\ \mathrm{m}\quad h = " + _v(h_par_cm) + r"\ \mathrm{cm}",
+            r"d = h - c - \tfrac{\phi_b}{2} = " + _v(h_par_cm) + r" - " + _v(cobr) + r" - \tfrac{1{,}25}{2} = " + _v(d) + r"\ \mathrm{cm}\quad(\phi_b=12{,}5\ \mathrm{mm})",
             r"\lambda = \dfrac{l_y}{l_x} = \dfrac{" + _v(H_m) + r"}{" + _v(L_m) + r"} = " + _v(razao, 3) + (r"\ < 2\ \Rightarrow\ \text{placa bidirecional}" if razao < 2 else r"\ \ge 2\ \Rightarrow\ \text{unidirecional}"),
-        ],
-        resultado="Placa " + ("bidirecional" if razao < 2 else "unidirecional") + " de Bares | CAA " + caa + " (cob. " + _v(cobr) + " cm)",
+        ] + linhas_p,
+        resultado="Placa " + ("bidirecional" if razao < 2 else "unidirecional") + " | d = " + _v(d) + " cm | p = " + _v(p) + " kN/m2 | CAA " + caa + " (cob. " + _v(cobr) + " cm)",
         norma="BARES, R. - Tabelas para placas | Carini, Piscinas e Reservatorios",
-        obs="Horizontal = flexo-tracao (placa + anel); vertical = flexao. Com sobrecarga no solo a carga vira trapezoidal - adota-se o pico (a favor da seguranca).",
+        obs="lx = L (horizontal); ly = H (altura). Horizontal = flexo-tracao (placa + anel); vertical = flexao. Com sobrecarga no solo a carga vira trapezoidal - adota-se o pico.",
     )]
 
     r = dimensionar_parede_placa(H_m, L_m, h_par_cm / 100.0, p, fck, fyk, caa)
