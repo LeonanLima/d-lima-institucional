@@ -22,3 +22,14 @@ _site/
 
 # Local Netlify folder
 .netlify
+
+# Screenshots e capturas soltas na raiz (não afeta static/, que tem os assets do site)
+/*.png
+/*.jpg
+/*.jpeg
+
+# Artefatos de deploy (regeneráveis)
+*.zip
+
+# Documento sensível (CNPJ) — não versionar
+cnpj-dlima.pdf
