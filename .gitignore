@@ -33,3 +33,6 @@ _site/
 
 # Documento sensível (CNPJ) — não versionar
 cnpj-dlima.pdf
+
+# Config local do Claude Code (settings.local.json, skills de plugin copiados)
+.claude/
