@@ -1,0 +1,43 @@
+ SAP2000 v20.0.0 Ultimate 64-bit (Analysis Build 9601/64)                       
+ File: C:\Users\Jonathan\Deskt...LISSADA BIAPOIADA\ESCADA PLISSADA BIAPOIADA.OUT
+                                                                     
+                                                                       
+
+ D I S P L A C E M E N T   D E G R E E S   O F   F R E E D O M
+
+         (A) = Active DOF, equilibrium equation
+         (-) = Restrained DOF, reaction computed
+         (+) = Constrained DOF
+         (>) = External substructure DOF
+         ( ) = Null DOF
+
+  JOINTS              UX  UY  UZ  RX  RY  RZ
+       1               A   A   A   A   A   A
+       2 TO       3    A   A   -   A   A   A
+       4 TO       5    A   A   A   A   A   A
+       6               A   A   -   A   A   A
+       7 TO       8    -   -   -   A   A   A
+       9 TO      70    A   A   A   A   A   A
+      71               A   A   -   A   A   A
+      72 TO      73    A   A   A   A   A   A
+      74               A   A   -   A   A   A
+      79 TO     106    A   A   A   A   A   A
+     107 TO     110    A   A   -   A   A   A
+     111 TO     134    A   A   A   A   A   A
+     135 TO     138    A   A   -   A   A   A
+     139               -   -   -   A   A   A
+     140               A   A   A   A   A   A
+     141               -   -   -   A   A   A
+     142               A   A   A   A   A   A
+     143               -   -   -   A   A   A
+     144               A   A   A   A   A   A
+     145               -   -   -   A   A   A
+     146 TO     358    A   A   A   A   A   A
+     359               A   A   -   A   A   A
+     360               A   A   A   A   A   A
+     361               A   A   -   A   A   A
+     362               A   A   A   A   A   A
+     363               A   A   -   A   A   A
+     364               A   A   A   A   A   A
+     365               A   A   -   A   A   A
+     366               A   A   A   A   A   A

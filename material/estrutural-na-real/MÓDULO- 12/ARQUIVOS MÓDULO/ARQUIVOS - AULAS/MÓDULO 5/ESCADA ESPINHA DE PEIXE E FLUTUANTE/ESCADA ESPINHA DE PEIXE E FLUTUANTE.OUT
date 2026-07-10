@@ -1,0 +1,18 @@
+ SAP2000 v20.0.0 Ultimate 64-bit (Analysis Build 9601/64)                       
+ File: C:\Users\Jonathan\Deskt...DO AULA\ESCADA ESPINHA DE PEIXE E FLUTUANTE.OUT
+                                                                     
+                                                                       
+
+ D I S P L A C E M E N T   D E G R E E S   O F   F R E E D O M
+
+         (A) = Active DOF, equilibrium equation
+         (-) = Restrained DOF, reaction computed
+         (+) = Constrained DOF
+         (>) = External substructure DOF
+         ( ) = Null DOF
+
+  JOINTS              UX  UY  UZ  RX  RY  RZ
+       1 TO       6    -   -   -   -   -   -
+       7 TO      42    A   A   A   A   A   A
+      45               A   A   -   A   A   A
+      46 TO     167    A   A   A   A   A   A

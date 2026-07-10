@@ -1,0 +1,27 @@
+{
+    "bscollab" : {
+        "asset" : {
+            "version" : 1
+        },
+        "modified_date" : "2024-10-30T19:09:02+00:00",
+        "collaboration_global_id" : "05fCZtDwb4nhs5zTFYG5dR",
+        "collaboration_description" : "RESIDÊNCIA UNIFAMILIAR - 255M2 - CARUARU",
+        "application" : {
+            "name" : "CYPECAD",
+            "identifier" : "72:68AB1CF7-53AA-411D-AFF0-3006719A2CB3",
+            "developer_name" : "CYPE Ingenieros S.A.",
+            "developer_identifier" : "7"
+        },
+        "documents" : [
+            {
+                "name" : "ARQUIVO BASE - MÓDULO 6.ifc",
+                "identification_tag" : "ifc"
+            },
+            {
+                "name" : "ARQUIVO BASE - MÓDULO 6.bsplcmnt",
+                "identification_tag" : "BIMserver_placement",
+                "hidden" : true
+            }
+        ]
+    }
+}

@@ -1,0 +1,26 @@
+ SAP2000 v20.0.0 Ultimate 64-bit (Analysis Build 9601/64)                       
+ File: C:\Users\Jonathan\Deskt...SCADA AUTOPORTANTE\ESCADA RETA AUTOPORTANTE.OUT
+                                                                     
+                                                                       
+
+ D I S P L A C E M E N T   D E G R E E S   O F   F R E E D O M
+
+         (A) = Active DOF, equilibrium equation
+         (-) = Restrained DOF, reaction computed
+         (+) = Constrained DOF
+         (>) = External substructure DOF
+         ( ) = Null DOF
+
+  JOINTS              UX  UY  UZ  RX  RY  RZ
+      19 TO      24    A   A   A   A   A   A
+      25 TO      28    -   -   -   A   A   A
+      29 TO      88    A   A   A   A   A   A
+      89               -   -   -   A   A   A
+      90 TO     115    A   A   A   A   A   A
+     116               -   -   -   A   A   A
+     117 TO     129    A   A   A   A   A   A
+     130               -   -   -   A   A   A
+     131 TO     143    A   A   A   A   A   A
+     144               -   -   -   A   A   A
+     145 TO     248    A   A   A   A   A   A
+     249 TO     252    -   -   -   A   A   A
