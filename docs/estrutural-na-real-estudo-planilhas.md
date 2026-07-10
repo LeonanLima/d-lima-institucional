@@ -94,7 +94,15 @@ Por região (Tampa x/y, Fundo x/y, Paredes, ligações parede-parede e fundo-par
 - **Escadas NR12**: geometria (inclinação = atan(Z/X); degrau t≥?; h ≤ 0,25; projeção r ≥ 0,015; **verificação 0,60 ≤ g+2h ≤ 0,66**); distância entre degraus na longarina = √(t²+h²); cargas: chapa xadrez 0,27 kN/m², SC pessoas 2,5 kN/m² → carga por nó/viga.
 - **Mezanino**: painel wall 0,32 + contrapiso 19·e + porcelanato 0,16 kN/m²; SC 2,0; carga linear na viga secundária = q·d_vigas.
 - **Platibanda**: F = Ae·C·q com C_barlavento = 1,3, C_sotavento = 0,8 (força no beiral por montante).
-- **Reações de Base / Placas de base engastada** (aula ligações): planilhas grandes (25k/18k) — placa de base com chumbadores: N, M, V → pressão no concreto (flexão composta na placa), dimensionamento de espessura por flexão de consolo em balanço, chumbadores por tração+cisalhamento, solda. [Estudo detalhado pendente — dumps disponíveis em scratchpad p/ aprofundar sob demanda.]
+- **Reações de Base**: organizador das envoltórias de reações por placa (máx. compressão / máx. tração por combinação, "concreto em fundações" e "tensões sobre o terreno", estilo saída CYPE3D) p/ pilares treliçados e de mezanino — alimenta o dimensionamento da placa de base. Convenção: compressão + nas reações, − nas barras.
+- **Placa de base engastada (método AISC-ASD, perfis H/W, mín. 4 chumbadores)**:
+  - Regras construtivas: furo = φ_chumb + 3,2 mm; assentar sobre grout; chumbador engastado 300–500 mm; nunca concreto simples; enrijecedores reduzem espessura.
+  - Chumbadores: d_furo-furo ≥ 6,5·φ; d_borda ≥ 2·φ; braço de alavanca d_alav = C − 2·d_borda; **tração nos chumbadores N_t = MSd/d_alav** (kN, com MSd em kNm); por barra = N_t/n_t; **resistência N_Rd,t/barra = 0,33·fu·A_barra** (ASD); cisalhamento análogo com fração de fu.
+  - Geometria da placa (B×C): m = (C − 0,95·d_perfil)/2; n = (B − 0,8·bf)/2; n' = √(d·bf)/4.
+  - **Espessura**: por flexão da aba tracionada: M_chapa = N_t,chapa·d_furo-perfil → **t = √(6·M_chapa/(fb·C))** com fb = 0,75·fy; e pelo lado comprimido: t = 2·m·√(fc/fy); adotar comercial (tabela de chapas).
+  - Concreto: **fc = N/(B·C) ≤ 0,35·fck** (kN/cm², sem confinamento).
+  - Solda (filete 45°): verificação metal-solda vs metal-base: (bw·0,3·fu_solda)/(tf·0,4·fy) ≤ 1; resistência do cordão R_w = n·L·(0,7·bw)·0,3·fu_solda; aba: L = bf; alma: L = d − 6·tf, 2 cordões.
+- **Coberturas 2 águas / vento**: planilha completa de **NBR 6123** — V0, S1 (topográfico, com interpolação talude/morro), S2 (rugosidade por categoria + classe por dimensões + fator de rajada por altura), S3 (estatístico) → Vk = V0·S1·S2·S3, **q = 0,613·Vk² (N/m²)**; sobrecarga mínima de cobertura metálica 0,25 kN/m² (NBR 8800 anexo B.5.1); geometria da tesoura (inclinação %→graus, banzo superior, montantes por terça, segmentos) e decomposição de cargas por nó p/ resolver a treliça.
 
 ## 7. Gestão / negócio (Waltner)
 
@@ -102,6 +110,17 @@ Por região (Tampa x/y, Fundo x/y, Paredes, ligações parede-parede e fundo-par
 - **Estimativa de custo de estrutura** (sem fundação): parâmetros base — aço 10 kg/m² (×1,15 alto padrão, ×0,9 baixo), concreto 0,15 m³/m², fôrmas 1,2 m²/m² (vigas+pilares) × coef. reaproveitamento 0,6; preços de referência (2020): armador 1,8 R$/kg, carpinteiro 25 R$/m² vigas/pilares + 11 R$/m² laje, concreto bombeado 19 R$/m³ MO + 320 R$/m³ material, aço 4,8 R$/kg, fôrma 60 R$/m², laje treliçada TR8 26 R$/m² (TR12+ 36).
 - **Quantitativo de aço**: por bitola, comprimento total × peso linear (πφ²/4·7850/10⁴ kg/m) × 1,10 (perda 10%); vigotas por laje com kg/m do catálogo × 1,10.
 - **Checklists** (inicial de projeto, pré-pilares, inicial de prédio, finalização): listas de conferência de dados de entrada, compatibilização e entregáveis. [Conteúdo nas planilhas; não são cálculo.]
+
+## 7b. Série da pós (TRILHA 1/Módulo 1 — planilhas 01–10 e P01–P04)
+
+Série acadêmica (estilo Carini) em kN/cm; confirma e refina o que o dlima-estrutural já implementa via MUSSO:
+
+- **01_Lajes_Maciças**: casos 1–10 de vinculação com **repartição de rigidez kx = λ⁴/(1+λ⁴)** (λ = ly/lx, variantes por caso: 5λ⁴/(2+5λ⁴) etc.) → coeficientes wc, mx, my, mxe, mye, rx, ry, rxe, rye derivados dos casos unidirecionais (8; 14,22; 24; 384/5...); flecha W0 = wc·q·lx⁴/D·1000 com **D = Ecs·h³/12(1−ν²)**, ν=0,2; W∞ = W0·(1+φ), φ=2,5; Wadm = mín(lx,ly)/250 (balanço: lx/125); majoração de carga em balanço 1,4·máx(1,95−0,05·h·100; 1); reações pelas áreas de influência (45°/60°).
+- **05_Corte_Retangulares**: modelos I e II idênticos ao estudo Musso (VRd2 = 0,27·αv2·fcd·b·d no I; 0,54·αv2·fcd·b·d·sen²θ·(cotα+cotθ) no II; **Vc1 interpolado = Vc0·(1 − (Vsd−Vc0)/(VRd2−Vc0))**), Asw mín = 0,2·fctm·b/fywk; tabela Asw/s por φ×s.
+- **07_Vigas_ELS**: Branson com **Mr = 0,25·fctm·b·h²** (rigidez; α=1,5 p/ retangular → 0,25 = 1,5/6) e **Mr com fctk,inf** na fissuração; x2 por equação quadrática homogeneizada (A = b/2; B = ΣαAs; C = −Σα·As·d); I2; σs = αe·Ma·(d−x)/I2; Acr; **wk = mín(w1;w2)** idêntico ao Musso; h_eq = (12·Ieq/b)^⅓.
+- **10_Flexo-Compressão (xlsm)**: pilar retangular — equilíbrio por domínios (1 a 5) com x iterado (Solver/macro), tensões por barra (ε1..ε4 conforme camadas ny=2/3/4), **αc·ηc com ηc = (4/fck)^⅓ p/ fck>40**; As,mín = máx(0,4%·Ac; 0,15·Nd/fyd); flexo-oblíqua com Mrdxx/Mrdyy e **envoltória (ex/exd)^1,2 + (ey/eyd)^1,2 ≤ 1**; caso "dispensa armar" verificado.
+- **P01–P04**: aplicação em projeto (todas as lajes de um pavimento, cargas de vigas por quinhões, momentos em pilares por rigidez, projeto de pilar completo). P01 tem 144k chars de fórmulas (uma linha por laje) — consultar dump sob demanda.
+- **02_Lajes_Armaduras/03_Flexão_T/04_Flexão_Retangulares/06/08/09**: tabelas de detalhamento e casos já cobertos pelo estudo Musso (seção T com bf colaborante, KMD/KX, cargas por área de influência).
 
 ## 8. Divergências e cuidados p/ implementação no dlima-estrutural
 
