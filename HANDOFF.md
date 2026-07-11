@@ -8,13 +8,20 @@ Motor da agência 100% implementado + 1º ciclo real rodado. Tudo commitado.
 - **Artes** (Claude Design, fonte Montserrat subsetada ~47KB) em `docs/design/pecas/`: sair-do-aluguel, obra-estoura-orcamento (Reel), quanto-custa-m2, erros-fundacao, casa-pronta-ou-construir.
 - **Metricool**: marca DLIMA Engenharia, **blogId 6413932**, tz America/Sao_Paulo, IG @leonan.dlima.
 
-## Próximo passo — CAMINHO 1 do Metricool (retomar aqui, sessão limpa)
-Objetivo: agendar as 5 no Metricool. IG exige mídia como arquivo (PNG/MP4) em URL pública.
+## Próximo passo — CAMINHO 1 do Metricool
 
-1. **Exportar PNG 1080**: cada slide `.frame` das artes vira PNG 1080x1080 (carrossel = 1 PNG por slide). Opção barata: gerar páginas export standalone 1080px via builder e screenshot com Playwright (ou headless). Frames por peça: sair-do-aluguel=6, quanto-custa-m2=5, erros-fundacao=1, casa-pronta=5. obra-estoura = Reel, precisa de MP4 (adiar).
-2. **Hospedar**: subir PNGs no Google Drive do Leonan (MCP Google Drive). Metricool importa de Drive SE o Leonan tiver o Drive linkado na conta Metricool (verificar antes).
-3. **Agendar**: `createScheduledPost` blogId 6413932, instagramData type POST (carrossel/feed), media=[urls do Drive], draft:true, autoPublish:false. Datas sugeridas nos cards (15/17/21/24/28-07 às 19:00 -03:00).
-4. Ao publicar depois: analista puxa métricas Metricool → `agencia.core.memoria.registrar`.
+### FEITO
+1. **PNG 1080 exportados** ✅ 18 imagens em `docs/design/pecas/png/` (commitadas). Fonte Montserrat OK.
+   - Pipeline: `scratchpad/build_artes.py` + `build_carrossel.py` emitem export pages em `docs/design/pecas/export/`; `scratchpad/build_shots.py` roda Edge headless (`--headless=new --force-device-scale-factor=2 --window-size=540,540 --virtual-time-budget`, `subprocess.run` sequencial, `--user-data-dir` único por run) → PNG 1080.
+   - Gotcha resolvido: export page precisa de `font-family:'Mont'` em body/.frame (só existia em .wrap) senão cai pra serif. Chrome faz handoff p/ instância aberta → usar Edge.
+   - Por peça: sair-do-aluguel=6, quanto-custa-m2=5, erros-fundacao=1, casa-pronta=5, obra-estoura(Reel)=1 capa.
+
+### PENDENTE (bloqueio que só o Leonan resolve)
+2. **Confirmar Google Drive linkado no Metricool** (Config → Conexões). SEM isso o Metricool não importa as imagens.
+3. **Hospedar**: subir os PNG no Google Drive do Leonan (MCP Google Drive) e pegar as URLs.
+4. **Agendar**: `createScheduledPost` blogId **6413932**, instagramData type POST, media=[urls Drive na ordem dos slides], draft:true, autoPublish:false. Datas nos cards (15/21/24/28-07 às 19:00 -03:00). Carrossel = várias imagens no media[] em ordem.
+5. Reel (obra-estoura): precisa de MP4, adiar.
+6. Depois de publicar: analista puxa métricas → `agencia.core.memoria.registrar`.
 
 ## Armadilhas
 - Metricool NÃO cria post IG sem mídia, nem como draft (`INSTAGRAM:MISSING_MEDIA`).
