@@ -13,6 +13,9 @@ Thumbs.db
 # Env
 .env
 
+# Agencia — memoria local de aprendizado
+agencia/.memoria.json
+
 # Playwright / previews
 .playwright-mcp/
 preview-*.jpeg
