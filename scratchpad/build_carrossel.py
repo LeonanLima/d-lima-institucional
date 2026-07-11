@@ -2,8 +2,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-logo = (ROOT / "docs/design/logo-dlima.html").read_text(encoding="utf-8")
-fonts = "\n".join(re.findall(r"@font-face\s*\{.*?\}", logo, re.S))
+fonts = (ROOT / "agencia/config/fonts-mont.css").read_text(encoding="utf-8")
 
 SLIDES = [
     {
@@ -173,3 +172,16 @@ out = ROOT / "docs/design/pecas/sair-do-aluguel.html"
 out.parent.mkdir(parents=True, exist_ok=True)
 out.write_text(html, encoding="utf-8")
 print("written", out, len(html), "bytes")
+
+# Export: uma pagina 540px por slide p/ screenshot em 1080 (scale 2).
+css = html.split("</style>")[0] + "</style>"
+over = ("<style>html,body{margin:0;padding:0;background:#161616;"
+        "font-family:'Mont','Helvetica Neue',Arial,sans-serif;}"
+        ".slide{width:540px!important;height:540px;aspect-ratio:auto;box-shadow:none!important;}"
+        "</style>")
+exp_dir = ROOT / "docs/design/pecas/export"
+exp_dir.mkdir(parents=True, exist_ok=True)
+for i, s in enumerate(SLIDES, 1):
+    (exp_dir / f"sair-do-aluguel-{i:02d}.html").write_text(
+        css + over + slide_html(s), encoding="utf-8")
+print("export sair-do-aluguel", len(SLIDES), "frames")
