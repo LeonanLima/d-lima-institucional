@@ -1,0 +1,26 @@
+{
+  "nome": "D'LIMA",
+  "paleta": {
+    "primaria": "#161616",
+    "secundaria": "#C9A84C",
+    "clara": "#F7F5EF",
+    "texto": "#161616",
+    "alternativa": "#2D5016"
+  },
+  "arquetipo": "Irmão Mais Velho + Professor",
+  "voz_do": [
+    "Explicar com clareza, como quem ensina",
+    "Falar de obra real, bastidor, engenharia de custos",
+    "Tom firme e acolhedor"
+  ],
+  "voz_dont": [
+    "Jargão vazio e promessa milagrosa",
+    "Tom corporativo distante",
+    "Emoji em excesso",
+    "Travessão, aspas e tom de IA"
+  ],
+  "handles": {
+    "instagram": "leonan.dlima",
+    "site": "dlimaengenharia.org"
+  }
+}
