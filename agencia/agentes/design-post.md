@@ -19,7 +19,9 @@ Gera a arte de cada peça como **Artifact HTML+SVG (Claude Design)** — nunca C
 ## Regras técnicas
 - Paleta oficial: carvão `#161616`, dourado `#C9A84C`, claro `#F7F5EF`, verde `#2D5016`.
 - **Fonte embutida em base64** (Montserrat). CDN é bloqueado no Artifact → sem embutir,
-  cai pra Arial e fica amador.
+  cai pra Arial e fica amador. Use o asset **subsetado** `agencia/config/fonts-mont.css`
+  (300/500/600, ~10KB por peso), nunca a fonte cheia — peça leve (~47KB) em vez de ~980KB.
+  Regenerar o asset: `scratchpad/build_fonts.py` (fontTools subset, sem hinting/features).
 - Carrossel: 1 arte por slide, hierarquia clara, logo com área de proteção.
 - Story/Feed: respeitar proporção (9:16 story, 4:5 ou 1:1 feed).
 - Passa pelo brand-guardian antes de virar card no Notion.

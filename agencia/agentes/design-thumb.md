@@ -18,6 +18,7 @@ Gera a capa de Reel/YouTube como **Artifact HTML+SVG (Claude Design)**.
 
 ## Regras
 - Mesmo padrão técnico do design-post (paleta oficial, Montserrat base64, sem CDN).
+  Sempre a fonte subsetada `agencia/config/fonts-mont.css`, nunca a cheia.
 - Texto grande e legível em miniatura; contraste alto; 1 ideia só na capa.
 - Rosto do Leonan quando fizer sentido (fotos reais mapeadas na skill `dlima-brand`).
 - Passa pelo brand-guardian antes do Notion.
