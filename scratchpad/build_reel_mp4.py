@@ -17,7 +17,7 @@ OUTDIR.mkdir(parents=True, exist_ok=True)
 TMP.mkdir(parents=True, exist_ok=True)
 
 frames = sorted(EXP.glob("reel-*.html"))
-DUR = 3  # segundos por cena
+DUR = 2.5  # segundos por cena
 
 # 1) screenshot 1080x1920
 pngs = []
@@ -42,7 +42,7 @@ for i, f in enumerate(frames):
 clips = []
 for i, p in enumerate(pngs):
     clip = TMP / f"c{i:02d}.mp4"
-    vf = (f"scale=1080:1920,zoompan=z='min(zoom+0.0009,1.10)':d={DUR*30}:"
+    vf = (f"scale=1080:1920,zoompan=z='min(zoom+0.0009,1.10)':d={int(DUR*30)}:"
           f"s=1080x1920:fps=30,format=yuv420p")
     subprocess.run([FFMPEG, "-y", "-loop", "1", "-i", str(p), "-t", str(DUR),
                     "-r", "30", "-vf", vf, "-c:v", "libx264", "-pix_fmt", "yuv420p",
@@ -53,8 +53,30 @@ for i, p in enumerate(pngs):
 # 3) concat
 lst = TMP / "list.txt"
 lst.write_text("".join(f"file '{c.as_posix()}'\n" for c in clips), encoding="utf-8")
-out_mp4 = OUTDIR / "obra-estoura-orcamento-reel.mp4"
+silent = TMP / "silent.mp4"
 subprocess.run([FFMPEG, "-y", "-f", "concat", "-safe", "0", "-i", str(lst),
                 "-c:v", "libx264", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-                str(out_mp4)], capture_output=True, timeout=180)
+                str(silent)], capture_output=True, timeout=180)
+
+# 4) trilha original gerada do zero (acorde Dm ambiente) — sem direitos de terceiros
+total = len(clips) * DUR
+music = TMP / "music.m4a"
+fc = (
+    "[0:a][1:a][2:a]amix=inputs=3:normalize=1,"
+    "tremolo=f=0.4:d=0.25,lowpass=f=650,highpass=f=60,"
+    f"volume=0.16,afade=t=in:d=1.2,afade=t=out:st={total-1.8:.2f}:d=1.8[a]"
+)
+subprocess.run([
+    FFMPEG, "-y",
+    "-f", "lavfi", "-t", str(total), "-i", "sine=frequency=146.83",  # D3
+    "-f", "lavfi", "-t", str(total), "-i", "sine=frequency=174.61",  # F3
+    "-f", "lavfi", "-t", str(total), "-i", "sine=frequency=220.00",  # A3
+    "-filter_complex", fc, "-map", "[a]", "-c:a", "aac", "-b:a", "128k", str(music),
+], capture_output=True, timeout=120)
+
+# 5) muxa video + trilha
+out_mp4 = OUTDIR / "obra-estoura-orcamento-reel.mp4"
+subprocess.run([FFMPEG, "-y", "-i", str(silent), "-i", str(music),
+                "-c:v", "copy", "-c:a", "aac", "-shortest",
+                "-movflags", "+faststart", str(out_mp4)], capture_output=True, timeout=180)
 print("MP4:", out_mp4, out_mp4.stat().st_size // 1024, "KB" if out_mp4.exists() else "FAIL")
