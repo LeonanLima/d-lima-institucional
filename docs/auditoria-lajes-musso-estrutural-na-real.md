@@ -27,16 +27,31 @@
 >   NBR 14859, especificamente a parte -1, item 4.1.3). A fórmula numérica
 >   exata (As,dist ≥ 0,60 cm²/m) **segue sem confirmação** — NBR14859-3.pdf
 >   (a parte que provavelmente traria os requisitos de cálculo) é uma
->   digitalização sem OCR, ilegível neste ambiente. **Deixado pendente**
->   por decisão do usuário (não inventar fórmula sem fonte confirmada);
->   mantém severidade MEDIUM.
+>   digitalização sem OCR, ilegível neste ambiente.
+>   **RESOLVIDO 2026-07-12 (3ª passada)**: reconfirmado que NBR14859-3 não
+>   tem camada de texto e NBR14859-1/-2 são specs de produto (sem fórmula
+>   de cálculo); Bastos §5.2.3 (p. 80) descreve a função da armadura de
+>   distribuição mas não dá fórmula numérica. Implementado com fonte
+>   primária alternativa confirmada: **NBR 6118:2023, 19.3.3.2, Tab. 19.1**
+>   (armadura positiva secundária de laje armada em uma direção), aplicável
+>   porque a treliçada unidirecional é laje armada em 1 direção:
+>   `As,dist ≥ max(0,20·As,princ/m; 0,9 cm²/m; 0,5·ρmín·b·hf)` — piso de
+>   0,9 cm²/m, mais conservador que o 0,60 cm²/m (não confirmado) do curso.
+>   Novo campo `distribuicao_capa` em `ResultadoEluTrelicada`
+>   (`trelicada/elu.py`), TDD, commit c49216f.
 > - **#12 (VRd1, k=1 quando armadura não chega ao apoio)**: base normativa
 >   confirmada — NBR 6118:2023, item **19.4.1**, mesmo item de `k=(1,6-d)`.
 >   O texto da norma não usa o limiar "<50%" citado antes (é condição
 >   binária: "armadura não chega ao apoio" → k=1). Implementar exigiria
 >   parâmetro novo no modelo (se a armadura chega ancorada ao apoio), que o
->   app não tem hoje — não implementado nesta rodada (fora do escopo de
->   correção pontual). Mantém severidade LOW, pendente.
+>   app não tem hoje — não implementado naquela rodada.
+>   **RESOLVIDO 2026-07-12 (3ª passada)**: texto da norma reconfirmado
+>   ("para elementos onde 50 % da armadura inferior não chega até o apoio:
+>   k = |1|"). Implementado parâmetro `armadura_ancorada_no_apoio: bool =
+>   True` em `EntradaEluLaje` e `EntradaEluTrelicada`; quando `False`,
+>   `k = 1,0` no VRd1 (`lajes/elu.py` e `trelicada/elu.py`). Default
+>   preserva o comportamento anterior (nenhum teste existente mudou).
+>   TDD, commit c49216f.
 
 ## 1. Divergências e gaps técnicos
 
@@ -54,6 +69,7 @@
 | 10 | Todo o pacote `lajes/**` — reconferido: `calcular_esforcos_laje` (`esforcos.py`, linhas 162-220) recebe uma única `LajeMacica` e devolve `mdxe_knm`/`mdye_knm` (momentos negativos) calculados só a partir do próprio `tipo`/`beta` daquela laje via `coef_musso`. Não existe, em nenhum arquivo de `lajes/**`, uma função que receba duas lajes vizinhas e compare/ajuste o momento negativo da borda comum. Confirmado: não é lógica implementada em outro módulo — é ausente. | O momento negativo de cada laje no engaste é calculado **isoladamente por painel**. Não há nenhuma etapa que compare o momento negativo de duas lajes vizinhas na borda comum e o ajuste. | **Isto não é um item numerado da NBR 6118:2023** — é um procedimento clássico de projeto ensinado na literatura (citado pelo agente de pesquisa como constando da apostila do Prof. Márcio Bastos, UNESP): em bordas comuns a duas lajes adjacentes, adotar `X ≥ max(0,8·X1; (X1+X2)/2)` (X1 ≥ X2) para o momento negativo de projeto, corrigindo o momento positivo correspondente por acréscimo. Não confirmei o número exato do capítulo/equação na apostila nem se há uma cláusula NBR que trate disso explicitamente — trato como "boa prática de projeto amplamente adotada", não como não conformidade normativa. | **HIGH mantido, mas reclassificado quanto à natureza**: é um gap funcional real e relevante para segurança (pavimentos com lajes adjacentes são o caso normal de uso do produto, e sem essa etapa os momentos negativos de borda comum podem ficar inconsistentes entre painéis vizinhos) — porém é uma lacuna de **prática de projeto/engenharia**, não de conformidade com um item numerado da NBR 6118:2023. |
 | 11 | `lajes/trelicada/elu.py` e `lajes/trelicada/detalhamento.py` — reli os dois arquivos inteiros nesta revisão: `_armadura_positiva`/`_armadura_negativa`/`_montar_armadura` (elu.py) só tratam armadura longitudinal (As+/As-) e `gerar_tabela_barras_nervura` (detalhamento.py) só monta a tabela de bitolas dessa armadura longitudinal. Não existe nenhuma função de armadura transversal à nervura (distribuição sobre a capa) em nenhum dos dois arquivos, nem em `trelicada/els.py` ou `modelo.py`. Confirmado: ausente. | A nervura treliçada recebe armadura positiva/negativa (flexão longitudinal) e tabela de bitolas, mas **não há cálculo de armadura de distribuição (transversal, sobre a capa)**. | O agente de pesquisa relatou essa exigência como constando de um exemplo do PDF do Prof. Waltner Wagner, atribuída à NBR 14860-1 (`As,dist ≥ 0,60 cm²/m` e `As,dist ≤ 5·ℓb/fyd`, resultando em φ4,2 c/23 ou φ5 c/32 no exemplo do curso). **Não verifiquei o texto da NBR 14860-1 diretamente** (não está no repositório nem foi lida por mim nesta auditoria) — o número do item exato dentro dessa norma não foi confirmado; a citação vem do resumo do agente de pesquisa sobre o PDF do curso, não de leitura direta da norma. A laje maciça do app já tem lógica equivalente para a capa maciça (`ROTULO_DISTRIBUICAO`/`_armadura_distribuicao`, `lajes/elu.py` linhas 175-202), o que reforça que a ausência na treliçada é uma assimetria real de cobertura dentro do próprio código. | **MEDIUM** — gap de cobertura confirmado no código; a base normativa (NBR 14860-1) é citada de segunda mão (resumo do agente sobre o PDF do curso) e não foi conferida por mim na norma — tratar o número do item como "não verificado" até checar a NBR 14860-1 diretamente. |
 | 12 | `lajes/elu.py`, função `_cortante` (linhas 205-244) e `lajes/trelicada/elu.py`, função `_cortante` (linhas 269-325) — reconferido: em ambos, `k = max(1.6 - d_x/100.0, 1.0)` (laje maciça, linha 211) e `k = max(1.6 - d_cm/100.0, 1.0)` (treliçada, linha 278) dependem só de `d`; não há parâmetro nem lógica sobre continuidade/ancoragem da armadura de tração até o apoio em nenhum dos dois arquivos. Confirmado: ausente. | O fator `k` é calculado só a partir de `d`; não há verificação de quanto da armadura de tração realmente **chega ancorada ao apoio**. | O agente de pesquisa relatou, a partir da apostila Bastos, que a formulação de VRd1 prevê `k = 1` (em vez do valor calculado por `d`) quando menos de 50% da armadura de tração chega ao apoio. **Não confirmei o número exato do item/tabela da NBR 6118:2023 onde essa condição está escrita** — não está em `nbr6118_2023.py` nem em nenhum outro arquivo lido diretamente por mim nesta auditoria; a citação vem do resumo do agente de pesquisa sobre a apostila, não de leitura direta da norma impressa. Tratar como "não verificado — conferir item exato na norma impressa" antes de citar formalmente. | **LOW** — simplificação plausível e provavelmente a favor da segurança no fluxo atual do produto (que não modela decalagem/interrupção de barras), mas a base normativa exata não foi confirmada nesta auditoria. |
+| 13 | `lajes/elu.py`, `dimensionar_elu_laje` + `_cortante` (achado novo da revisão adversarial 2026-07-12) | O VRd1 usa sempre `d_x` e `rho1 = As,x(+)/(100·d_x)` (armaduras[0]), mas `vsd = max(rx, ry, rxe, rye)` — a reação governante pode ser da borda associada à direção y, cuja armadura tem `d_y < d_x` e As próprio. | NBR 6118:2023, 19.4.1: `ρ1 = As1/(bw·d)` da armadura de tração que atravessa a seção considerada — o par (As, d) deveria ser o da direção da borda onde atua o Vsd governante, não fixo em x. Como `d_x > d_y` e As,x tende a ser ≥ As,y, o VRd1 calculado pode ficar levemente otimista quando a borda y governa. | **LOW** — divergência pequena (diferença de d é meia/uma bitola) e frequentemente mascarada pelo fato de o menor vão (x) concentrar a maior reação; registrado para correção futura (calcular VRd1 por direção e tomar o pior caso). |
 
 ### Itens verificados e **sem divergência** (para registro, não incluídos como achados de risco)
 - ELU de flexão da faixa de 1 m (`dimensionar_flexao_simples` reaproveitado de vigas): KMD/KX/KZ, ξlim, domínios — usa os limites de **NBR 6118:2023** (não os de 2003/ξlim=0,50 citados na planilha do Musso, que é antiga); o app está correto em usar 2023.

@@ -28,6 +28,28 @@
 >   pelos eixos das armaduras (não implementado, fora de escopo desta
 >   correção). Corrigido em `torcao.py`: `he = min(A/u; bw-2c1)`. Golden E3/E4
 >   de torção recalculados. Suíte: 980 passed, 2 failed (pré-existentes).
+> **Atualização 2026-07-12 (3ª passada — fechamento dos LOW + revisão
+> adversarial)**:
+> - **#7 (None silencioso em `continuas.py`)**: **RESOLVIDO** — novo campo
+>   `avisos: tuple[str, ...] = ()` em `DimensionamentoVao`, preenchido com
+>   aviso explícito quando `m_max_kncm <= 0` deixa `flexao_vao=None`.
+>   Mudança não-invasiva (default vazio, interface preservada). Commit
+>   987d17a.
+> - **#8 (referência genérica em `torcao.py`)**: **RESOLVIDO** — itens
+>   conferidos diretamente na NBR 6118:2023 e separados por passo:
+>   geometria da seção vazada equivalente (c1, he, Ae/ue) = **17.5.1.4.1**;
+>   compressão diagonal TRd2 = **17.5.1.5**; armaduras (A_sl, A_90/s) =
+>   **17.5.1.6**. Commit c76d92d.
+> - **Achado novo (revisão adversarial)**: a verificação de interação
+>   `Vd/VRd2 + Td/TRd2 ≤ 1` citava **17.7.1.2** (armadura longitudinal na
+>   zona tracionada por flexão) — o item correto é **17.7.2.2** (torção e
+>   força cortante). Citação corrigida (LOW, só rastreabilidade; nenhum
+>   número muda). Commit a1b7c75.
+> - Varredura adversarial complementar: nenhum `TODO`/`FIXME`/
+>   `NotImplementedError` em `vigas/**`/`lajes/**`; tolerâncias de
+>   `pytest.approx` máximas rel=0,02 (1 teste) e rel=0,01 (demais) — nada
+>   largo o bastante para esconder erro de segurança. Suíte após todas as
+>   correções: 993 passed, 2 failed (pré-existentes E5a/E5b).
 
 ## 1. Divergências e gaps técnicos
 
