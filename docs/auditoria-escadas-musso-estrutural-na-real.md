@@ -71,6 +71,54 @@ coeficiente já testado.
 - **Critério do intereixo da nervura da escada treliçada**: reaproveita o mesmo critério ≤65 cm ⇒ "laje" (do módulo `lajes/trelicada/`, já auditado na auditoria de lajes) sem alteração — reconferido no golden E-T1 (`e=42 ≤ 65 → critério "laje"`).
 - **Peso dos degraus de concreto sobre a capa da treliçada** (`escada_trelicada.py`): `pp_degraus = 25·(espelho/2)/100` — mesmo termo `espelho/2` (volume médio do prisma triangular do degrau) usado na `esp_real` da reta maciça, reconferido como consistente entre os dois pipelines (decisão 5 da spec 07b, explicitamente a favor da segurança ao assumir degrau de concreto moldado em vez de enchimento leve).
 
+## 1.1 Reconferência contra as aulas em vídeo (Trilha 12, Estrutural na Real)
+
+Após a redação da seção 1, foram transcritos (faster-whisper local) os 24
+vídeos dos módulos 85-88 da Trilha 12 (dimensionamento/análise/cálculo de
+armaduras/detalhamento das escadas reta, plissada e espinha de
+peixe/flutuante, mais as aulas teóricas de cisalhamento/flexão/vinculações/
+ancoragem/traspasse do módulo 85), a pedido do Leonan, para checar se o
+professor ensina algo que mude os achados. Resultado: **nenhum dos 5
+achados foi contraditado**; um achado novo foi identificado.
+
+- **Achado #1 (HIGH, fissuração ausente)** — confirmado como lacuna também
+  do material didático: a aula "3.6 - Introdução ao dimensionamento e
+  verificações ELU/ELS" lista fissuração como verificação de ELS existente,
+  mas o professor declara textualmente que o curso "vai se ater a flexão e
+  flecha" — não muda a severidade (a norma exige, independente do que o
+  curso ensina), só confirma a origem do gap.
+- **Achado #2 (MEDIUM, cobrimento livre)** — confirmado: cobrimento é
+  digitado (2,5 cm) em todas as aulas de cálculo de armadura, sem nenhuma
+  menção a classe de agressividade ou Tabela 7.2.
+- **Achado #3 (LOW, torque mt·L/2 nas 3 vinculações assimétricas)** — sem
+  menção direta nas aulas; nuance: o curso modela a viga central em pórtico
+  espacial (SAP2000), que captura a assimetria de reação naturalmente, em
+  vez de uma fórmula fechada — não invalida o achado (é outro caminho pra
+  chegar num resultado mais preciso), só mostra que a fonte didática evita o
+  problema por outra via.
+- **Achado #4 (MEDIUM, cortante no degrau em balanço não verificado)** —
+  confirmado, com uma correção de premissa: o curso arma o degrau com
+  estribo mínimo construtivo (Ø6,3 c/20), não como resultado de uma
+  verificação formal de VRd1 — ou seja, a prática de mercado ensinada
+  também pula essa verificação; o achado permanece válido como gap de
+  conformidade normativa.
+- **Achado #5 (LOW, sem compatibilização lance/patamar em L/U)** — sem
+  menção ao caso específico de escada em L/U nas aulas; não contradiz.
+- **Ancoragem e traspasse** (aulas "3.7 - Ancoragem de barras" e "3.8 -
+  Traspasse de barras"): fórmulas completas da NBR 6118:2023 ensinadas —
+  `fbd = η1·η2·η3·fctd`, `lb = (φ/4)·(fyd/fbd)` com teto `lb ≤ 25φ`,
+  `lb,nec = α·lb·(As,calc/As,ef) ≥ lb,mín`, e para traspasse
+  `L0t = α0t·lb,nec ≥ L0t,mín` com `α0t = 2` quando 100% das barras
+  emendam na mesma seção — consistente com os módulos de ancoragem já
+  usados/auditados em laje/viga (não reauditado aqui em detalhe, apenas
+  confirmado que a referência normativa bate).
+
+### Achado novo #6 — carga horizontal de guarda-corpo não modelada
+
+| # | Onde no código | O que o app faz | O que a norma/curso ensina | Severidade |
+|---|---|---|---|---|
+| 6 | Todo o pacote `escadas/**` — confirmado por busca textual (`grep -i "guarda\|corrimao"`) nos 4 arquivos (`cargas.py`, `degrau.py`, `laje_escada.py`, `viga_escada.py`): **zero ocorrências**. | Nenhuma carga de guarda-corpo/corrimão entra em nenhum dos 3 pipelines de escada (laje reta/plissada, viga central, degrau). | A aula "8 - Cálculo de carga de guarda-corpo" (módulo 84) ensina uma carga horizontal característica de 1 kN/m aplicada a 1,10 m de altura no guarda-corpo, que gera momento adicional a ser somado ao dimensionamento da peça de apoio (laje/viga de borda). Não há item específico da NBR 6118:2023 para essa carga (é ação de uso, tratada por norma de segurança predial/NBR 6120), mas o efeito estrutural (momento fletor adicional na borda) é real e ensinado no curso como parte do fluxo completo de dimensionamento. | **LOW** — a carga de guarda-corpo tipicamente rege apenas a peça de borda/parapeito (não a faixa principal da escada calculada pelos pipelines atuais), e não há indicação nas planilhas Waltner nem na spec 07/07b de que o `dlima-estrutural` pretendia cobrir esse caso — é uma lacuna de escopo, não uma regressão. Registrar para decisão de produto: se o público-alvo depende do software para o parapeito também, vale um módulo dedicado; por ora, mantém como lacuna documentada, sem correção nesta rodada (fora do escopo core dos 3 pipelines de escada auditados).
+
 ## 2. Critérios e dicas dos professores (conhecimento prático, não normativo)
 
 ### Do curso Estrutural na Real (Eng. Waltner Wagner)
