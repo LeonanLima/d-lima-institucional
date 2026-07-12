@@ -3,6 +3,20 @@
 > Escopo: `src/estrutural/core/elementos/pilares/**` (modelo.py, esbeltez.py, elu.py, detalhamento.py) — os 4 arquivos lidos por inteiro nesta revisão, mais `specs/04_pilares.md` (spec interna completa, com uma auto-auditoria já feita pelo próprio time contra o Musso — ver §0 abaixo).
 > Comparado com: `docs/musso-pilares-concreto-armado.md` (fatia 4 do MUSSO, código-fonte `dimensionar_pilar.py`/`pilar.py`/`tipo_pilar.py` e os 5 testes golden de `test_pilares.py`, resumidos nesta sessão), a **NBR 6118:2023 oficial** (PDF com camada de texto, lido diretamente via `pdftotext` — ambiente com `poppler-utils` disponível nesta sessão) e a **Apostila Bastos — Pilares Completo** (Prof. Márcio Bastos, UNESP, 9159 linhas de texto extraídas, também lida diretamente).
 > Nenhum arquivo de código foi alterado nesta auditoria.
+> **Atualização 2026-07-12**: os 3 achados (1 MEDIUM + 2 LOW) foram
+> revisados no repo `dlima-estrutural`.
+> - **MEDIUM (relação de lados)**: **corrigido** — validação
+>   `max(hx,hy)/min(hx,hy) ≤ 5` adicionada em `PilarRetangular._valida`
+>   (`modelo.py`), NBR 6118:2023, 18.4.1. TDD, 2 testes novos.
+> - **LOW (proteção contra flambagem, distância média)**: **reavaliado, não
+>   é bug** — para o arranjo uniforme já implementado no código, a fórmula
+>   `(n_face-1)//2 * espacamento_eixos` é matematicamente exata (distância
+>   do meio da face ao canto mais próximo), não uma aproximação. Sem
+>   alteração de código.
+> - **LOW (nome ambíguo `categoria_aco`)**: **corrigido** — renomeado para
+>   `categoria_aco_estribo` em `EntradaBarrasPilar` (`detalhamento.py`) e
+>   nos chamadores (`cli/pilar.py`, `ui/paginas/pilar.py`, testes).
+> Suíte: 995 passed, 2 failed (pré-existentes E5a/E5b, não relacionadas).
 
 ## 0. Particularidade desta auditoria: a spec já contém uma auto-auditoria contra o Musso
 
