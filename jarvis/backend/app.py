@@ -33,6 +33,42 @@ MAX_TURNS = 6
 _history = deque(maxlen=MAX_TURNS)
 
 CLAUDE_TIMEOUT_S = 60
+TASK_TIMEOUT_S = 300  # tarefas em projeto podem demorar mais
+
+# Tarefa aguardando confirmacao falada (v3). So executa apos "confirma".
+_pending_task = None
+
+
+def _run_task_in_project(project_dir, task_text):
+    """Executa a tarefa dentro da pasta do projeto com poder total (o usuario
+    escolheu esse nivel e ja confirmou por voz). Guardrails: so roda apos
+    confirmacao E so em pasta da lista branca. Devolve resumo falado."""
+    claude_bin = shutil.which("claude")
+    if not claude_bin:
+        return "O cerebro nao esta disponivel."
+    prompt = (
+        task_text
+        + "\n\nAo terminar, responda em 1 ou 2 frases faladas (sem markdown, "
+          "sem simbolos) o que voce fez."
+    )
+    try:
+        resultado = subprocess.run(
+            [claude_bin, "-p", "--dangerously-skip-permissions"],
+            input=prompt,
+            capture_output=True,
+            text=True,
+            timeout=TASK_TIMEOUT_S,
+            encoding="utf-8",
+            cwd=project_dir,
+        )
+    except subprocess.TimeoutExpired:
+        return "A tarefa demorou demais e eu interrompi. Talvez seja grande demais para uma vez."
+    except Exception:
+        return "Tive um problema ao executar a tarefa."
+    if resultado.returncode != 0:
+        return "Tentei executar, mas deu erro. Melhor conferir no computador."
+    reply = (resultado.stdout or "").strip()
+    return reply or "Feito."
 
 
 def _build_prompt(user_text):
@@ -107,17 +143,45 @@ def jarvis():
     if not user_text:
         return jsonify({"reply": "Nao entendi. Pode falar de novo?"})
 
+    global _pending_task
+    n = skills._norm(user_text)
+
+    # 0) Ha uma tarefa aguardando confirmacao? So "confirma"/"cancela" contam.
+    if _pending_task is not None:
+        if skills.is_confirm(n):
+            tarefa = _pending_task
+            _pending_task = None
+            reply = _run_task_in_project(tarefa["dir"], tarefa["task"])
+            _history.append({"user": user_text, "reply": reply})
+            return jsonify({"reply": reply})
+        if skills.is_cancel(n):
+            _pending_task = None
+            return jsonify({"reply": "Tarefa cancelada."})
+        # Qualquer outra coisa mantem a tarefa pendente e reforca o pedido.
+        return jsonify({"reply": "Tenho uma tarefa aguardando. Diga confirma para executar, ou cancela."})
+
     # 1) Habilidade direta e segura (abrir, anotar, hora/data/calculo).
     direct = skills.handle(user_text)
     if direct is not None:
         _history.append({"user": user_text, "reply": direct})
         return jsonify({"reply": direct})
 
-    # 2) Pergunta sobre projetos: fundamenta o cerebro com a memoria.
-    contexto = skills.project_context(user_text, skills._norm(user_text))
+    # 2) Pergunta sobre STATUS de projetos (read-only): fundamenta o cerebro.
+    contexto = skills.project_context(user_text, n)
+    if contexto is not None:
+        reply = _ask_claude(user_text, extra_context=contexto)
+        _history.append({"user": user_text, "reply": reply})
+        return jsonify({"reply": reply})
 
-    # 3) Conversa/pergunta geral: cerebro (claude).
-    reply = _ask_claude(user_text, extra_context=contexto)
+    # 3) Comando de EXECUCAO em projeto: exige confirmacao falada antes de rodar.
+    alvo = skills.match_project(n)
+    if alvo is not None:
+        nome, pasta = alvo
+        _pending_task = {"project": nome, "dir": pasta, "task": user_text}
+        return jsonify({"reply": f"Entendi. Vou executar isso no projeto {nome}. Confirma?"})
+
+    # 4) Conversa/pergunta geral: cerebro (claude).
+    reply = _ask_claude(user_text)
     _history.append({"user": user_text, "reply": reply})
     return jsonify({"reply": reply})
 

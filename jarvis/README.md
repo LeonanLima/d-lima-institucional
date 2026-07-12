@@ -55,6 +55,27 @@ de forma direta e segura:
 
 Qualquer outra coisa vira conversa normal com o cerebro (Claude).
 
+## Executar tarefas nos projetos (v3)
+
+O JARVIS pode executar tarefas de verdade dentro dos seus projetos, com dois
+guardrails de seguranca:
+
+1. **Lista branca** (`data/projects.json`): so age em pastas cadastradas ali.
+   Fora delas, nunca toca. Edite esse arquivo para adicionar/remover projetos
+   (formato: `"nome falado": "caminho da pasta"`).
+2. **Confirmacao falada obrigatoria**: nada roda sem voce confirmar por voz.
+
+Fluxo:
+
+- Voce: "no projeto estrutural, roda os testes"
+- JARVIS: "Entendi. Vou executar isso no projeto estrutural. Confirma?"
+- Voce: "confirma"  (ou "cancela" para desistir)
+- JARVIS executa e responde falando o que fez.
+
+Depois de confirmado, ele tem **poder total** dentro daquela pasta (ler, editar,
+criar, rodar, commitar) - por isso a confirmacao e a lista branca sao a protecao.
+Projetos cadastrados apontam para os repositorios canonicos em `C:\Users\leona\`.
+
 ## Limitacoes
 
 - Push-to-talk: precisa clicar no reator pra falar (sem "Ei JARVIS" sempre ligado).

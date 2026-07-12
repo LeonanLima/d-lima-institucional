@@ -36,6 +36,7 @@ def _safe_eval(node):
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 NOTES_FILE = os.path.join(DATA_DIR, "notes.json")
+PROJECTS_FILE = os.path.join(DATA_DIR, "projects.json")
 
 MEMORY_FILE = os.path.join(
     os.path.expanduser("~"),
@@ -186,6 +187,41 @@ def project_context(texto, n):
             return f.read()
     except Exception:
         return ""
+
+
+# --------------------------------------------------- execucao em projetos (v3)
+def load_projects():
+    """Lista branca: nome falado -> pasta absoluta. Fora dela o JARVIS nao age."""
+    try:
+        with open(PROJECTS_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def match_project(n):
+    """Se o texto menciona 'projeto' + um nome da lista branca, devolve
+    (nome, pasta). Senao, None."""
+    if "projeto" not in n:
+        return None
+    projetos = load_projects()
+    for nome, pasta in projetos.items():
+        if nome in n and os.path.isdir(pasta):
+            return nome, pasta
+    return None
+
+
+CONFIRM_WORDS = ["confirma", "confirmo", "confirmado", "pode", "pode sim",
+                 "sim", "isso", "manda", "manda ver", "vai", "faz", "faca"]
+CANCEL_WORDS = ["cancela", "cancelar", "nao", "deixa", "esquece", "para"]
+
+
+def is_confirm(n):
+    return any(re.fullmatch(rf"{re.escape(w)}[.! ]*", n) or n == w for w in CONFIRM_WORDS)
+
+
+def is_cancel(n):
+    return any(re.fullmatch(rf"{re.escape(w)}[.! ]*", n) or n == w for w in CANCEL_WORDS)
 
 
 # ------------------------------------------------------------------- roteador
