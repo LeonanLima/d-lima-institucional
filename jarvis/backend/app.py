@@ -11,6 +11,8 @@ from collections import deque
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
+import skills
+
 FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
 
 app = Flask(__name__)
@@ -44,16 +46,29 @@ def _build_prompt(user_text):
     return "\n".join(linhas)
 
 
-def _ask_claude(user_text):
-    """Chama o claude CLI em modo headless e devolve a resposta em texto."""
+def _ask_claude(user_text, extra_context=None):
+    """Chama o claude CLI em modo headless e devolve a resposta em texto.
+
+    extra_context: texto opcional (ex: memoria dos projetos) que fundamenta a
+    resposta sem virar parte do historico de conversa.
+    """
     claude_bin = shutil.which("claude")
     if not claude_bin:
         return "O cerebro nao esta disponivel: o comando claude nao foi encontrado."
 
     prompt = _build_prompt(user_text)
+    if extra_context:
+        prompt = (
+            "Use estas anotacoes de projetos do Leonan para responder por voz, "
+            "em 1 ou 2 frases, dizendo em que ponto o projeto esta:\n"
+            + extra_context + "\n\n" + prompt
+        )
     try:
+        # Prompt vai pelo stdin (nao como argumento): o Windows tem limite de
+        # tamanho de linha de comando e a memoria dos projetos estoura isso.
         resultado = subprocess.run(
-            [claude_bin, "-p", prompt, "--append-system-prompt", PERSONA],
+            [claude_bin, "-p", "--append-system-prompt", PERSONA],
+            input=prompt,
             capture_output=True,
             text=True,
             timeout=CLAUDE_TIMEOUT_S,
@@ -92,7 +107,17 @@ def jarvis():
     if not user_text:
         return jsonify({"reply": "Nao entendi. Pode falar de novo?"})
 
-    reply = _ask_claude(user_text)
+    # 1) Habilidade direta e segura (abrir, anotar, hora/data/calculo).
+    direct = skills.handle(user_text)
+    if direct is not None:
+        _history.append({"user": user_text, "reply": direct})
+        return jsonify({"reply": direct})
+
+    # 2) Pergunta sobre projetos: fundamenta o cerebro com a memoria.
+    contexto = skills.project_context(user_text, skills._norm(user_text))
+
+    # 3) Conversa/pergunta geral: cerebro (claude).
+    reply = _ask_claude(user_text, extra_context=contexto)
     _history.append({"user": user_text, "reply": reply})
     return jsonify({"reply": reply})
 

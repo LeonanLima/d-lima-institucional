@@ -39,9 +39,26 @@ Voce fala -> Chrome transcreve (pt-BR) -> POST /jarvis ->
 backend chama `claude -p` -> resposta em texto -> Chrome fala de volta
 ```
 
-## Limitacoes (v1)
+## Habilidades (v2)
+
+Antes de acionar o cerebro de IA, o JARVIS tenta resolver comandos conhecidos
+de forma direta e segura:
+
+- **Abrir apps e sites**: "abre o WhatsApp", "abre o YouTube", "abre o Gmail",
+  "abre a agenda"... (lista fechada e segura de destinos).
+- **Anotacoes e lembretes**: "anota que preciso ligar pro cliente",
+  "quais sao meus lembretes", "apaga as anotacoes". Salvo em `data/notes.json`.
+- **Status dos projetos**: "onde parei no projeto X", "meus projetos" - ele le a
+  memoria dos seus projetos e responde falando em que ponto estao.
+- **Hora, data e calculo**: "que horas sao", "que dia e hoje", "quanto e 12
+  vezes 8" (entende "vezes", "mais", "menos", "dividido por").
+
+Qualquer outra coisa vira conversa normal com o cerebro (Claude).
+
+## Limitacoes
 
 - Push-to-talk: precisa clicar no reator pra falar (sem "Ei JARVIS" sempre ligado).
-- So conversa/responde. Executar tarefas de verdade fica pra v2.
+- As habilidades sao acoes especificas e limitadas (por seguranca, a voz nao
+  executa comandos arbitrarios no PC).
 - Voz nativa do navegador (nao e voz clonada realista).
 - So funciona com o servidor rodando e no seu PC.
