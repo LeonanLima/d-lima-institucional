@@ -99,7 +99,7 @@
     <div class="ring r3"></div>
     <div class="core"></div>
   </div>
-  <div class="status" id="status">Toque no reator para falar</div>
+  <div class="status" id="status">Diga: Ei JARVIS</div>
   <div class="log" id="log"></div>
   <div class="warn" id="warn"></div>
 
@@ -117,13 +117,18 @@ if (!SR) {
   warnEl.textContent = "Seu navegador nao suporta reconhecimento de voz. Use o Google Chrome.";
 }
 
-let recognizing = false;
 let ptVoice = null;
+let speaking = false;   // JARVIS falando (pausa a escuta)
+let armed = false;      // ouviu a wake word, aguardando o comando
+let wakeRec = null;
+let stopped = false;
 
-// Escolhe uma voz pt-BR quando as vozes carregarem.
+// Escolhe a melhor voz: prefere pt masculina; senao qualquer pt.
 function pickVoice() {
   const voices = window.speechSynthesis.getVoices();
-  ptVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("pt")) || null;
+  const pt = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith("pt"));
+  const masc = pt.find(v => /male|masculin|ricardo|daniel|felipe|antonio|joao/i.test(v.name));
+  ptVoice = masc || pt[0] || null;
 }
 pickVoice();
 window.speechSynthesis.onvoiceschanged = pickVoice;
@@ -149,9 +154,11 @@ function speak(text) {
   const u = new SpeechSynthesisUtterance(text);
   u.lang = "pt-BR";
   if (ptVoice) u.voice = ptVoice;
-  u.rate = 1.02;
-  u.onstart = () => setState("speaking", "Falando...");
-  u.onend = () => setState("", "Toque no reator para falar");
+  // Tom mais grave e ritmo medido, no estilo do filme.
+  u.rate = 0.97;
+  u.pitch = 0.85;
+  u.onstart = () => { speaking = true; setState("speaking", "Falando..."); };
+  u.onend = () => { speaking = false; setState("", "Diga: Ei JARVIS"); };
   window.speechSynthesis.speak(u);
 }
 
@@ -174,29 +181,62 @@ async function sendToBrain(text) {
   }
 }
 
-function startListening() {
-  if (!SR || recognizing) return;
-  window.speechSynthesis.cancel();
-  const rec = new SR();
-  rec.lang = "pt-BR";
-  rec.interimResults = false;
-  rec.maxAlternatives = 1;
-  rec.onstart = () => { recognizing = true; setState("listening", "Ouvindo..."); };
-  rec.onerror = (ev) => { recognizing = false; setState("", "Nao ouvi. Toque e fale de novo."); };
-  rec.onend = () => { recognizing = false; };
-  rec.onresult = (ev) => {
-    const text = ev.results[0][0].transcript.trim();
-    if (text) {
-      addLine("you", text);
-      sendToBrain(text);
-    } else {
-      setState("", "Nao entendi. Toque e fale de novo.");
-    }
-  };
-  rec.start();
+// Detecta a wake word e devolve o comando que vem depois dela (ou "" se so
+// chamou "Ei JARVIS" sem comando na mesma frase).
+const WAKE = /\b(e|ei|hey)\s*,?\s*(jarvis|jarves|djarvis)\b/i;
+function afterWake(text) {
+  const m = text.match(WAKE);
+  if (!m) return null;
+  return text.slice(m.index + m[0].length).replace(/^[\s,.:!?]+/, "").trim();
 }
 
-reactor.addEventListener("click", startListening);
+function processTranscript(raw) {
+  const text = (raw || "").trim();
+  if (!text) return;
+  if (armed) {                         // ja acordado: a frase inteira e o comando
+    armed = false;
+    addLine("you", text);
+    sendToBrain(text);
+    return;
+  }
+  const cmd = afterWake(text);
+  if (cmd === null) return;             // nao foi chamado; ignora ruido
+  if (cmd) {                            // "Ei JARVIS, <comando>" na mesma frase
+    addLine("you", cmd);
+    sendToBrain(cmd);
+  } else {                             // so "Ei JARVIS": responde e aguarda comando
+    armed = true;
+    setState("listening", "Pois nao, senhor?");
+    speak("Pois nao, senhor?");
+  }
+}
+
+// Escuta continua: fica sempre ouvindo a wake word e se reinicia sozinha.
+function startWake() {
+  if (!SR) return;
+  wakeRec = new SR();
+  wakeRec.lang = "pt-BR";
+  wakeRec.continuous = true;
+  wakeRec.interimResults = false;
+  wakeRec.maxAlternatives = 1;
+  wakeRec.onresult = (ev) => {
+    if (speaking) return;               // ignora a propria voz do JARVIS
+    const r = ev.results[ev.results.length - 1];
+    if (r && r.isFinal) processTranscript(r[0].transcript);
+  };
+  wakeRec.onerror = () => {};
+  wakeRec.onend = () => { if (!stopped) { try { wakeRec.start(); } catch (e) {} } };
+  try { wakeRec.start(); } catch (e) {}
+  if (!speaking) setState("", "Diga: Ei JARVIS");
+}
+
+// Clicar no reator arma manualmente (fala o comando sem dizer a wake word).
+reactor.addEventListener("click", () => {
+  armed = true;
+  setState("listening", "Ouvindo...");
+});
+
+startWake();
 </script>
 </body>
 </html>
