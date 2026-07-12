@@ -10,7 +10,24 @@
 > (reaproveitando o padrão de `Asw,mín` de `cisalhamento.py`). Fixture golden
 > `els_vigas.yaml` (E4) e `test_vigas_torcao.py` (E3) atualizados com os
 > valores corrigidos. Suíte: 980 passed, 2 failed (pré-existentes, não
-> relacionadas). Achados #3-#8 seguem em aberto.
+> relacionadas).
+> **Atualização 2026-07-12 (2ª passada, com poppler-utils disponível e
+> acesso direto às apostilas Bastos + NBR 6118:2023 oficial)**: achados #3 e
+> #4 reverificados contra as fontes primárias reais.
+> - **#3 (decalagem)**: **NÃO É BUG**. A NBR 6118:2023, 17.4.2.2(c) dá
+>   `al = d·[Vsd,máx/(2·(Vsd,máx−Vc)·(1+cotgα))−cotgα] ≤ d`, com piso
+>   `al ≥ 0,5d` para estribo vertical — exatamente o que `decalagem.py` já
+>   implementa. A fórmula alternativa do Musso (`al=0,5·z·cotθ`) é uma
+>   simplificação que ignora Vc, não a expressão normativa. Achado fechado
+>   sem alteração de código.
+> - **#4 (teto de he na torção)**: **confirmado bug, de forma diferente da
+>   suspeita original**. NBR 6118:2023, 17.5.1.4.1: `he = A/u`, capado só por
+>   `bw−2c1` (não por `b/2`/`h/2` como o Musso sugeria). O bug real era o
+>   código "promover" `he` a `2c1` quando `A/u < 2c1` — a norma nunca faz
+>   isso, só usa `he ≥ 2c1` como condição de validade para redefinir `Ae`
+>   pelos eixos das armaduras (não implementado, fora de escopo desta
+>   correção). Corrigido em `torcao.py`: `he = min(A/u; bw-2c1)`. Golden E3/E4
+>   de torção recalculados. Suíte: 980 passed, 2 failed (pré-existentes).
 
 ## 1. Divergências e gaps técnicos
 
