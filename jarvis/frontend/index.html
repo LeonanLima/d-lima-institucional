@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS</title>
+<style>
+  :root {
+    --cyan: #33e0ff;
+    --cyan-dim: #1b7f96;
+    --bg: #05080f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(circle at 50% 40%, #0a1626 0%, var(--bg) 70%);
+    color: #cfeefc;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    overflow: hidden;
+    user-select: none;
+  }
+  h1 {
+    letter-spacing: 0.4em;
+    font-weight: 300;
+    font-size: clamp(1.4rem, 4vw, 2.4rem);
+    color: var(--cyan);
+    text-shadow: 0 0 18px rgba(51, 224, 255, 0.6);
+    margin-bottom: 8vh;
+  }
+  /* Reator central */
+  .reactor {
+    position: relative;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+  }
+  .reactor:active { transform: scale(0.96); }
+  .ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 2px solid var(--cyan-dim);
+    inset: 0;
+    opacity: 0.5;
+  }
+  .ring.r2 { inset: 22px; border-color: var(--cyan); opacity: 0.35; }
+  .ring.r3 { inset: 46px; border-color: var(--cyan-dim); opacity: 0.6; }
+  .core {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #dffaff 0%, var(--cyan) 45%, var(--cyan-dim) 100%);
+    box-shadow: 0 0 40px 6px rgba(51, 224, 255, 0.55);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+  }
+  /* Estados */
+  body.listening .core { box-shadow: 0 0 70px 16px rgba(51, 224, 255, 0.9); animation: pulse 1s infinite ease-in-out; }
+  body.thinking .core { animation: spin 1.2s linear infinite; background: conic-gradient(var(--cyan), transparent 60%, var(--cyan)); }
+  body.speaking .core { box-shadow: 0 0 80px 20px rgba(51, 224, 255, 1); animation: pulse 0.5s infinite ease-in-out; }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .status {
+    margin-top: 6vh;
+    font-size: 0.95rem;
+    letter-spacing: 0.15em;
+    color: var(--cyan);
+    min-height: 1.4em;
+    text-transform: uppercase;
+  }
+  .log {
+    margin-top: 3vh;
+    width: min(90vw, 640px);
+    max-height: 26vh;
+    overflow-y: auto;
+    font-size: 0.98rem;
+    line-height: 1.5;
+  }
+  .log p { margin: 6px 0; opacity: 0.9; }
+  .log .you { color: #8fd3e8; }
+  .log .jarvis { color: #eafaff; }
+  .log .label { color: var(--cyan); letter-spacing: 0.1em; margin-right: 6px; }
+  .warn { color: #ff8080; margin-top: 4vh; max-width: 80vw; text-align: center; }
+</style>
+</head>
+<body>
+  <h1>J.A.R.V.I.S</h1>
+  <div class="reactor" id="reactor" title="Clique e fale">
+    <div class="ring r1"></div>
+    <div class="ring r2"></div>
+    <div class="ring r3"></div>
+    <div class="core"></div>
+  </div>
+  <div class="status" id="status">Toque no reator para falar</div>
+  <div class="log" id="log"></div>
+  <div class="warn" id="warn"></div>
+
+<script>
+const BACKEND = "http://127.0.0.1:8756/jarvis";
+const bodyEl = document.body;
+const statusEl = document.getElementById("status");
+const logEl = document.getElementById("log");
+const warnEl = document.getElementById("warn");
+const reactor = document.getElementById("reactor");
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (!SR) {
+  warnEl.textContent = "Seu navegador nao suporta reconhecimento de voz. Use o Google Chrome.";
+}
+
+let recognizing = false;
+let ptVoice = null;
+
+// Escolhe uma voz pt-BR quando as vozes carregarem.
+function pickVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  ptVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("pt")) || null;
+}
+pickVoice();
+window.speechSynthesis.onvoiceschanged = pickVoice;
+
+function setState(cls, text) {
+  bodyEl.classList.remove("listening", "thinking", "speaking");
+  if (cls) bodyEl.classList.add(cls);
+  if (text !== undefined) statusEl.textContent = text;
+}
+
+function addLine(who, text) {
+  const p = document.createElement("p");
+  p.className = who === "you" ? "you" : "jarvis";
+  const label = who === "you" ? "VOCE" : "JARVIS";
+  p.innerHTML = '<span class="label">' + label + ':</span>';
+  p.appendChild(document.createTextNode(text));
+  logEl.appendChild(p);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "pt-BR";
+  if (ptVoice) u.voice = ptVoice;
+  u.rate = 1.02;
+  u.onstart = () => setState("speaking", "Falando...");
+  u.onend = () => setState("", "Toque no reator para falar");
+  window.speechSynthesis.speak(u);
+}
+
+async function sendToBrain(text) {
+  setState("thinking", "Pensando...");
+  try {
+    const res = await fetch(BACKEND, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+    const data = await res.json();
+    const reply = (data && data.reply) ? data.reply : "Desculpe, nao recebi resposta.";
+    addLine("jarvis", reply);
+    speak(reply);
+  } catch (e) {
+    const msg = "Nao consegui falar com o meu cerebro. O servidor esta rodando?";
+    addLine("jarvis", msg);
+    speak(msg);
+  }
+}
+
+function startListening() {
+  if (!SR || recognizing) return;
+  window.speechSynthesis.cancel();
+  const rec = new SR();
+  rec.lang = "pt-BR";
+  rec.interimResults = false;
+  rec.maxAlternatives = 1;
+  rec.onstart = () => { recognizing = true; setState("listening", "Ouvindo..."); };
+  rec.onerror = (ev) => { recognizing = false; setState("", "Nao ouvi. Toque e fale de novo."); };
+  rec.onend = () => { recognizing = false; };
+  rec.onresult = (ev) => {
+    const text = ev.results[0][0].transcript.trim();
+    if (text) {
+      addLine("you", text);
+      sendToBrain(text);
+    } else {
+      setState("", "Nao entendi. Toque e fale de novo.");
+    }
+  };
+  rec.start();
+}
+
+reactor.addEventListener("click", startListening);
+</script>
+</body>
+</html>
