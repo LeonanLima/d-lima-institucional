@@ -1,0 +1,63 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ping",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "eadfc594-5f57-45e2-8d83-fc01cdf1e418",
+      "name": "Webhook",
+      "webhookId": "4f3c07e4-7d2a-4d7e-927b-253445631922"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"reply\": \"pong\" }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        208,
+        0
+      ],
+      "id": "faeb224b-cdb2-4323-bc0d-d02711cc13cc",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6c2bb092-8756-4f85-86be-783af1bf10b8",
+  "meta": {
+    "instanceId": "acd0b3f45b5e9f80348c45bb30117f52898b9ad2ea722f73195fd68c16a63cef"
+  },
+  "nodeGroups": [],
+  "id": "Zc9LotRbNJTz1f4v",
+  "tags": []
+}
