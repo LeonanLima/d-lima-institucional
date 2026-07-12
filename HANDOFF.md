@@ -1,40 +1,111 @@
-# HANDOFF — 2026-07-11 — Agência Automática D'LIMA — branch feat/agencia-automatica-dlima
+# HANDOFF — 2026-07-12 (fim de sessão) — d-lima-institucional (branch feat/agencia-automatica-dlima) + dlima-estrutural (branch master)
 
-## Objetivo da sessão
-Implementar o motor da agência de marketing automática D'LIMA, rodar o 1º ciclo real
-(pautas → copy → cards no Notion → aprovação → artes) e agendar as peças no Metricool.
+## Resumo ultra-curto
+Auditoria técnica de cálculo estrutural do `dlima-estrutural` (Lajes →
+Vigas → Pilares → Escadas), contra NBR 6118:2023, apostilas Bastos e
+curso Estrutural na Real (planilhas Waltner Wagner + 24 vídeos da Trilha
+12 transcritos): **100% CONCLUÍDA e corrigida**. Suíte `dlima-estrutural`:
+**1012 passed, 2 failed** (pré-existentes, `test_lajes_detalhamento_golden.py`
+E5a/E5b, não relacionadas — não mexer).
 
 ## Estado atual
-- **Feito e commitado:**
-  - Núcleo Python `agencia/core/` (modelos, marca, fila_notion, memoria, ciclo) — 13 testes pytest passando.
-  - Prompts dos 11 subagentes em `agencia/agentes/` + `agencia/README.md` (runbook).
-  - Notion: database "Conteúdo D'LIMA" (`data_source_id` `26403ca7-6f18-4db9-b805-86acd08ddcdd`), 5 cards **Aprovados** com link da arte + status de mídia.
-  - 5 artes (Claude Design, Montserrat subsetada ~47KB) publicadas como Artifact + arquivos em `docs/design/pecas/`.
-  - **18 PNGs 1080** exportados em `docs/design/pecas/png/` (Montserrat OK, print-ready).
-- **Em andamento:** nada aberto. Parada limpa após exportar os PNGs.
-- **Não commitado:** nada relevante (só a pasta `docs/mestrado-*` intocada, de outra tarefa).
 
-## Próximos passos (em ordem)
-1. **Leonan confirma** se o Google Drive está linkado no Metricool (Config → Conexões). Bloqueio duro.
-2. Subir os PNGs de `docs/design/pecas/png/` no Google Drive (MCP) e pegar as URLs.
-3. Agendar via `createScheduledPost` blogId **6413932**, instagramData type POST, media=[urls na ordem dos slides], draft:true, autoPublish:false. Datas: 15/21/24/28-07 às 19:00 -03:00. Carrossel = várias imagens no media[].
-4. Reel (obra-estoura): precisa de MP4 → adiar.
-5. Pós-publicação: analista puxa métricas Metricool → `agencia.core.memoria.registrar`.
+### Lajes, Vigas, Pilares — fechados em sessão anterior
+- **Vigas**: 2 HIGH corrigidos (fissuração `COEF_ACR`, torção sem mínimo) +
+  1 MEDIUM corrigido (teto `he` na torção) + 2 LOW corrigidos + 1 achado de
+  rastreabilidade corrigido. Doc: `docs/auditoria-vigas-musso-estrutural-na-real.md`.
+- **Lajes**: 2 HIGH corrigidos + 1 MEDIUM implementado do zero (laje maciça
+  em balanço, fator γn) + 2 pendentes fechados + 1 achado novo registrado
+  não-corrigido (#13, VRd1 sempre usa d_x). Doc:
+  `docs/auditoria-lajes-musso-estrutural-na-real.md`.
+- **Pilares**: auditoria limpa (0 HIGH). 1 MEDIUM corrigido + 1 LOW
+  corrigido + 1 LOW reavaliado como não-bug. Doc:
+  `docs/auditoria-pilares-musso-estrutural-na-real.md`.
+
+### Escadas — auditoria CONCLUÍDA e corrigida nesta sessão
+Doc: `docs/auditoria-escadas-musso-estrutural-na-real.md` (commits
+`c903848`, `d0585a8` em `d-lima-institucional`). 5 achados originais + 1
+achado novo (guarda-corpo, surgido ao reconferir contra as aulas).
+
+Reconferência contra 24 vídeos transcritos da Trilha 12 (módulos 85-88,
+dimensionamento/análise/cálculo de armaduras/detalhamento/ancoragem —
+`faster-whisper` local): **nenhum dos 5 achados foi contraditado**; achado
+novo #6 identificado (carga de guarda-corpo não modelada).
+
+Correções aplicadas em `dlima-estrutural` (branch `master`):
+- **HIGH corrigido** (`75f4e40`): nenhum dos 3 pipelines de escada (laje
+  reta/plissada, viga central espinha/flutuante, degrau em balanço)
+  verificava abertura de fissuras (ELS-W) — só flecha. Reaproveitado
+  `lajes/els.py`/`vigas/els.py` já validados; adicionado campo
+  `classe_agressividade` (default CAA_II) às 3 entradas.
+- **MEDIUM corrigido** (`2adb447`): degrau em balanço não verificava
+  cortante (VRd1) — adicionado, mesma fórmula NBR 6118:2023 19.4.1 já
+  usada em `laje_escada.py`; confirmado que o degrau segue dispensando
+  estribo mesmo no caso mais fino (E4), agora com verificação formal.
+- **MEDIUM corrigido** (`2adb447`): cobrimento digitado sem checar Tabela
+  7.2/CAA — adicionado aviso não bloqueante (mesmo padrão do Blondel) nos
+  3 pipelines, comparando contra `COBRIMENTOS_E_FCK_MINIMO[caa]`.
+- **Exibição no memorial** (`383bfce`): seções de fissuração wiradas no
+  CLI (`cli/escada.py`) e na UI Qt (`ui/paginas/escada.py`) — cobrimento
+  e cortante já apareciam automaticamente por já estarem dentro dos
+  `ResultadoCalculo` existentes.
+- **LOW #3** (torque `mt·L/2` igual nas 3 vinculações assimétricas da viga
+  central) — registrado, sem correção (baixo risco de projeto).
+- **LOW #5** (sem compatibilização lance/patamar em escadas L/U) — fora de
+  escopo já documentado na spec 07.
+- **LOW #6 novo** (carga horizontal de guarda-corpo, 1 kN/m a 1,10 m,
+  ensinada no curso mas não modelada em nenhum pipeline de escada) —
+  lacuna de escopo documentada, sem correção nesta rodada (decisão de
+  produto pendente: se o público depende do software pro parapeito
+  também, vale um módulo dedicado numa sessão futura).
+
+## Próximos passos
+Auditoria original (Lajes→Vigas→Pilares→Escadas) está **100% fechada**.
+Nada pendente de correção crítica. Em aberto, sem urgência:
+1. Decidir se vale implementar o achado LOW #6 (guarda-corpo) — módulo
+   novo, não é gap de conformidade normativa (é ação de uso/NBR 6120, não
+   item da 6118), então é decisão de produto, não de auditoria.
+2. Perguntar ao Leonan o que vem depois: próximo módulo do
+   `dlima-estrutural` (ver `docs/estrutural-na-real-*.md` e
+   `docs/musso-vigas-concreto-armado.md` pra ideias de fontes já
+   estudadas) ou outra frente (Agência D'LIMA marketing, mestrado da
+   Mayara, concurso Perito ES — ver `MEMORY.md`).
+3. As transcrições da Trilha 12 (`docs/transcricoes-trilha12-escadas/`,
+   26 arquivos, módulos 84-88) são de curso pago de terceiro — **nunca
+   fazer push público**; seguem locais/privadas. Não terminei a
+   transcrição dos 50 vídeos completos (só os 26 relevantes pra
+   dimensionamento/detalhamento/ancoragem foram feitos, por pedido do
+   Leonan — módulos 89 (helicoidal, não implementado), 90 (bônus CYPE) e
+   91 (aulão) ficaram de fora, e os vídeos de modelagem em software
+   SAP2000/FTOOL também foram pulados, sem prejuízo pra auditoria).
 
 ## Arquivos-chave
-- `scratchpad/build_shots.py` — Edge headless → PNG 1080 (subprocess sequencial, user-data-dir único).
-- `scratchpad/build_artes.py:78` / `build_carrossel.py:171` — geram as export pages por slide.
-- `agencia/config/fonts-mont.css` — Montserrat subsetada; regenera com `scratchpad/build_fonts.py`.
-- `agencia/core/ciclo.py:publicaveis` — trava dura (só publica Status=Aprovado).
+- `docs/auditoria-escadas-musso-estrutural-na-real.md` — auditoria
+  completa de escadas, todos os achados corrigidos ou com decisão
+  registrada.
+- `C:\Users\leona\dlima-estrutural\src\estrutural\core\elementos\escadas\`
+  — `laje_escada.py`, `viga_escada.py`, `degrau.py` corrigidos nesta
+  sessão (fissuração + cortante + aviso de cobrimento).
+- `C:\Users\leona\dlima-estrutural\src\estrutural\cli\escada.py` e
+  `ui\paginas\escada.py` — memorial atualizado com as novas seções.
+- `docs/transcricoes-trilha12-escadas/` — 26 transcrições (módulos
+  84-88), locais/privadas, não commitadas para push público.
 
 ## Comandos / verificação
-- Testes agência: `python -m pytest tests/agencia/ -v` → último resultado: 13 passed.
-- Reexportar PNGs: `python scratchpad/build_artes.py && python scratchpad/build_carrossel.py && python scratchpad/build_shots.py`.
+- Rodar suíte do `dlima-estrutural`: `cd C:\Users\leona\dlima-estrutural &&
+  rtk proxy python -m pytest tests -q` (⚠️ nunca `pytest` puro — hook rtk
+  intercepta e retorna "No tests collected").
+- Último resultado: **1012 passed, 2 failed** (pré-existentes, E5a/E5b).
 
 ## Armadilhas / decisões
-- Metricool **não cria post IG sem mídia**, nem draft (`INSTAGRAM:MISSING_MEDIA`). Precisa de PNG/MP4 em URL pública.
-- Export page precisa de `font-family:'Mont'` em body/.frame (só existia em `.wrap`) senão cai pra serif.
-- Chrome faz handoff pra instância já aberta e sai sem capturar → usar **Edge** headless.
-- `--screenshot` do browser exige caminho de saída absoluto (Windows).
-- Notion `create-pages` cai com payload grande → lotes de 1-2 páginas.
-- Custo desta sessão chegou a ~US$193. Fazer o agendamento em sessão limpa.
+- **`rtk proxy python -m pytest` sempre**, nunca `pytest` puro.
+- **`pdftotext -enc UTF-8`** sempre — sem a flag, acentos saem quebrados.
+- **Preferência do Leonan (memória `feedback_auditoria_calculo_devagar.md`)**:
+  auditoria de cálculo estrutural vai devagar, um módulo por vez, com
+  checkpoint humano antes de corrigir HIGH — seguido em Escadas.
+- **Nunca inventar número de item de norma ou fórmula sem fonte primária
+  confirmada.**
+- **Material do curso Estrutural na Real é pago/de terceiro** — nunca
+  fazer push público de transcrições, planilhas ou PDFs do curso.
+- Sessão ficou cara (~$30+ na parte de auditoria + custo desta sessão de
+  correção) — intencional, autorizado pelo Leonan ("corrige tudo").
