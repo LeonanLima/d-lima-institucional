@@ -104,7 +104,8 @@
   <div class="warn" id="warn"></div>
 
 <script>
-const BACKEND = "http://127.0.0.1:8756/jarvis";
+const BACKEND = "/jarvis";
+const TOKEN = "__JARVIS_TOKEN__";
 const bodyEl = document.body;
 const statusEl = document.getElementById("status");
 const logEl = document.getElementById("log");
@@ -159,7 +160,7 @@ async function sendToBrain(text) {
   try {
     const res = await fetch(BACKEND, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "X-JARVIS-Token": TOKEN },
       body: JSON.stringify({ text })
     });
     const data = await res.json();

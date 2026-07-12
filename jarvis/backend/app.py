@@ -4,19 +4,23 @@ Recebe o texto que o navegador transcreveu, manda pro cerebro (claude CLI)
 e devolve a resposta em texto para o navegador falar.
 """
 import os
+import secrets
 import subprocess
 import shutil
 from collections import deque
 
-from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
+from flask import Flask, request, jsonify, abort
 
 import skills
 
-FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
+FRONTEND_FILE = os.path.join(os.path.dirname(__file__), "..", "frontend", "index.html")
+
+# Token de sessao gerado a cada inicializacao. E injetado na pagina servida e
+# exigido em todo request ao /jarvis. Sem CORS liberado + com este token, nem
+# sites externos nem outros processos conseguem disparar tarefas.
+SESSION_TOKEN = secrets.token_urlsafe(24)
 
 app = Flask(__name__)
-CORS(app)
 
 # Persona do JARVIS. Vira audio, entao: portugues, direto, sem markdown/emoji.
 PERSONA = (
@@ -126,9 +130,12 @@ def _ask_claude(user_text, extra_context=None):
 
 @app.route("/", methods=["GET"])
 def index():
-    """Serve a pagina do JARVIS a partir do proprio backend (localhost = contexto
-    seguro, necessario para o microfone e o reconhecimento de voz do Chrome)."""
-    return send_from_directory(FRONTEND_DIR, "index.html")
+    """Serve a pagina do JARVIS com o token de sessao injetado (localhost =
+    contexto seguro, necessario para o microfone/reconhecimento de voz)."""
+    with open(FRONTEND_FILE, "r", encoding="utf-8") as f:
+        html = f.read()
+    html = html.replace("__JARVIS_TOKEN__", SESSION_TOKEN)
+    return html, 200, {"Content-Type": "text/html; charset=utf-8"}
 
 
 @app.route("/health", methods=["GET"])
@@ -136,8 +143,18 @@ def health():
     return jsonify({"status": "ok"})
 
 
+def _authorized():
+    """Exige token de sessao correto E corpo JSON. Bloqueia sites externos
+    (preflight sem CORS) e outros processos (sem o token)."""
+    if not request.is_json:
+        return False
+    return request.headers.get("X-JARVIS-Token") == SESSION_TOKEN
+
+
 @app.route("/jarvis", methods=["POST"])
 def jarvis():
+    if not _authorized():
+        abort(403)
     data = request.get_json(silent=True) or {}
     user_text = (data.get("text") or "").strip()
     if not user_text:
