@@ -13,7 +13,9 @@ from flask import Flask, request, jsonify, abort
 
 import skills
 
-FRONTEND_FILE = os.path.join(os.path.dirname(__file__), "..", "frontend", "index.html")
+FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "..", "frontend")
+FRONTEND_FILE = os.path.join(FRONTEND_DIR, "index.html")
+APPJS_FILE = os.path.join(FRONTEND_DIR, "app.js")
 
 # Token de sessao gerado a cada inicializacao. E injetado na pagina servida e
 # exigido em todo request ao /jarvis. Sem CORS liberado + com este token, nem
@@ -137,6 +139,13 @@ def index():
         html = f.read()
     html = html.replace("__JARVIS_TOKEN__", SESSION_TOKEN)
     return html, 200, {"Content-Type": "text/html; charset=utf-8"}
+
+
+@app.route("/app.js", methods=["GET"])
+def appjs():
+    with open(APPJS_FILE, "r", encoding="utf-8") as f:
+        js = f.read()
+    return js, 200, {"Content-Type": "application/javascript; charset=utf-8"}
 
 
 @app.route("/health", methods=["GET"])
