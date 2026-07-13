@@ -89,6 +89,12 @@
   .log .jarvis { color: #eafaff; }
   .log .label { color: var(--cyan); letter-spacing: 0.1em; margin-right: 6px; }
   .warn { color: #ff8080; margin-top: 4vh; max-width: 80vw; text-align: center; }
+  .voicebar { margin-top: 2vh; display: flex; gap: 8px; align-items: center; font-size: 0.8rem; color: var(--cyan-dim); }
+  .voicebar select, .voicebar button {
+    background: #0a1626; color: #cfeefc; border: 1px solid var(--cyan-dim);
+    border-radius: 6px; padding: 4px 8px; font-size: 0.8rem; max-width: 60vw;
+  }
+  .voicebar button { cursor: pointer; }
 </style>
 </head>
 <body>
@@ -100,6 +106,11 @@
     <div class="core"></div>
   </div>
   <div class="status" id="status">Diga: Ei JARVIS</div>
+  <div class="voicebar">
+    <label for="voiceSel">Voz:</label>
+    <select id="voiceSel"></select>
+    <button id="voiceTest" type="button">testar</button>
+  </div>
   <div class="log" id="log"></div>
   <div class="warn" id="warn"></div>
 
@@ -123,15 +134,39 @@ let armed = false;      // ouviu a wake word, aguardando o comando
 let wakeRec = null;
 let stopped = false;
 
-// Escolhe a melhor voz: prefere pt masculina; senao qualquer pt.
-function pickVoice() {
+const voiceSel = document.getElementById("voiceSel");
+const voiceTest = document.getElementById("voiceTest");
+const SAVED_VOICE = "jarvis_voice";
+
+// Popula o seletor com TODAS as vozes do sistema e escolhe a melhor por padrao
+// (voz salva > pt masculina > qualquer pt > primeira). Sem adivinhar sozinho:
+// o usuario ve a lista real e escolhe a que soa melhor.
+function loadVoices() {
   const voices = window.speechSynthesis.getVoices();
+  if (!voices.length) return;
+  voiceSel.innerHTML = "";
+  voices.forEach((v, i) => {
+    const o = document.createElement("option");
+    o.value = v.name;
+    o.textContent = `${v.name} (${v.lang})`;
+    voiceSel.appendChild(o);
+  });
+  const salvo = localStorage.getItem(SAVED_VOICE);
   const pt = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith("pt"));
   const masc = pt.find(v => /male|masculin|ricardo|daniel|felipe|antonio|joao/i.test(v.name));
-  ptVoice = masc || pt[0] || null;
+  let escolhida = voices.find(v => v.name === salvo) || masc || pt[0] || voices[0];
+  ptVoice = escolhida;
+  if (escolhida) voiceSel.value = escolhida.name;
 }
-pickVoice();
-window.speechSynthesis.onvoiceschanged = pickVoice;
+loadVoices();
+window.speechSynthesis.onvoiceschanged = loadVoices;
+
+voiceSel.addEventListener("change", () => {
+  const voices = window.speechSynthesis.getVoices();
+  ptVoice = voices.find(v => v.name === voiceSel.value) || ptVoice;
+  if (ptVoice) localStorage.setItem(SAVED_VOICE, ptVoice.name);
+});
+voiceTest.addEventListener("click", () => speak("Bom dia, senhor. Sistemas em ordem."));
 
 function setState(cls, text) {
   bodyEl.classList.remove("listening", "thinking", "speaking");
