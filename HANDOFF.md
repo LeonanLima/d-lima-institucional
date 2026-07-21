@@ -1,43 +1,57 @@
-# HANDOFF — 2026-07-12 — Agência Automática D'LIMA — branch feat/agencia-automatica-dlima
+# HANDOFF — 2026-07-13 — feat/agencia-automatica-dlima (trabalho: JARVIS)
 
 ## Objetivo da sessão
-Rodar o 1º ciclo real da agência ponta a ponta: pautas → copy → artes → aprovação no
-Notion → export PNG/MP4 → agendamento no Metricool. **Concluído.**
+Construir um assistente pessoal estilo JARVIS (Homem de Ferro). Começou tentando via
+n8n+WhatsApp (bloqueou), pivotou para um JARVIS de voz local com o Claude Code como
+cérebro, evoluído até HUD holográfico + wake word + execução de tarefas nos projetos.
 
 ## Estado atual
-- **Feito e commitado (branch pushada em github.com/LeonanLima/d-lima-institucional, PÚBLICA):**
-  - Motor Python `agencia/` (núcleo + 11 prompts) — 13 testes pytest passando.
-  - 5 cards no Notion (database "Conteúdo D'LIMA", `data_source_id` `26403ca7-6f18-4db9-b805-86acd08ddcdd`), Status **Aprovado**, cada um com legenda + arte + imagens embutidas (URLs raw).
-  - 18 PNGs 1080 + 1 Reel MP4 em `docs/design/pecas/png|video/`. Fonte Montserrat subsetada (`agencia/config/fonts-mont.css`).
-  - **5 posts agendados no Metricool como RASCUNHO** (blogId 6413932, IG @leonan.dlima, draft=true, autoPublish=false):
-    - Sair do aluguel (carrossel) 15/07 · uuid 4579518231945364485
-    - Por que a obra estoura (Reel c/ trilha) 17/07 · uuid -4301832842765646043 · id 348504965
-    - Quanto custa o m² (carrossel) 21/07 · uuid -1866535704249873287
-    - 3 erros na fundação (feed) 24/07 · uuid 613835428435021409
-    - Casa pronta ou construir (carrossel) 28/07 · uuid -2532165691179054746
-- **Não commitado:** nada da agência (só pastas de outras tarefas: mestrado, transcricoes-trilha12, scratchpad de outra frente — não mexer).
+- **Feito e commitado** (tudo verde, servidor testado):
+  - JARVIS de voz local em `jarvis/` — v1 (voz), v2 (habilidades), v3 (executar
+    tarefas nos projetos), segurança (token+sem CORS), wake word "Ei JARVIS",
+    persona/voz estilo filme, seletor de voz, e HUD holográfico (canvas: reator,
+    anéis, visualizador de áudio reativo, boot, telemetria, barge-in, blips).
+    Último commit JARVIS: `21dc678`.
+  - Brief da voz realista ElevenLabs: `docs/superpowers/plans/2026-07-12-jarvis-elevenlabs-voz-realista.md` (commit `48c2e17`) — pronto p/ execução.
+  - Fix no repo `dlima-estrutural` (fora deste repo): golden da malha regenerado p/
+    cm inteiro; suíte 1080 passed. Commit lá: `79db2b5` (branch feat/api-fastapi-ponte).
+- **Em andamento:** nada aberto.
+- **Não commitado:** nada do JARVIS. (Só untracked de outros assuntos: docs/mestrado-*,
+  docs/transcricoes-*, scratchpad/* — ignorar.)
 
 ## Próximos passos (em ordem)
-1. Leonan abre cada rascunho no Metricool, revisa e muda de rascunho → agendado (ou publica).
-2. (Opcional) trocar a minha trilha do Reel por áudio em alta do Instagram, no próprio app.
-3. Após os posts saírem: fechar o loop — analista puxa métricas do Metricool e grava
-   `Aprendizado` via `agencia.core.memoria.registrar` (arquivo `agencia/.memoria.json`).
-4. 2º ciclo: gerar novas pautas já com `top_temas` da memória.
+1. (Quando Leonan tiver conta+API key ElevenLabs) Implementar o brief
+   `docs/superpowers/plans/2026-07-12-jarvis-elevenlabs-voz-realista.md` — endpoint
+   `/speak` no backend + `speak()` no frontend com fallback. Mecânico.
+2. (Opcional) Cérebro por API rápida no lugar de `claude -p` p/ respostas mais ágeis
+   (precisa de chave/custo — decidir com Leonan).
+3. (Opcional) Voz masculina: se o seletor não listar voz masculina pt-BR, instalar
+   vozes no Windows (Config → Hora e Idioma → Fala) — ou seguir p/ ElevenLabs.
+4. Pendências antigas não-JARVIS: ver memória project_assistente_jarvis_n8n
+   (recebimento WhatsApp bloqueado até hospedar n8n em URL fixa).
 
 ## Arquivos-chave
-- `scratchpad/build_reel.py` + `build_reel_mp4.py` — roteiro do Reel + montagem MP4 (Edge screenshot + ffmpeg zoompan + trilha Dm sintetizada).
-- `scratchpad/build_artes.py` / `build_carrossel.py` / `build_shots.py` — artes e export PNG.
-- `agencia/README.md` — runbook do ciclo e trava de aprovação.
+- `jarvis/backend/app.py` — Flask: serve HUD, token de sessão, `/jarvis` (cérebro via
+  `claude -p` por stdin), `/app.js`, roteamento skills + execução em projeto c/ confirmação.
+- `jarvis/backend/skills.py` — habilidades diretas (abrir/notas/hora/cálculo) + lista
+  branca de projetos + confirmação falada.
+- `jarvis/frontend/app.js` — HUD canvas, wake word, TTS, visualizador reativo.
+- `jarvis/data/projects.json` — lista branca (nome falado→pasta); `notes.json` é gitignored.
 
 ## Comandos / verificação
-- Testes: `python -m pytest tests/agencia/ -v` → 13 passed.
-- Reexportar imagens: `python scratchpad/build_artes.py && build_carrossel.py && build_shots.py`.
-- Rebuild Reel: `python scratchpad/build_reel.py && python scratchpad/build_reel_mp4.py` (ffmpeg via WinGet Gyan).
+- Rodar: `pip install -r jarvis/requirements.txt` (flask); `python jarvis/backend/app.py`
+  (porta 8756); abrir `http://127.0.0.1:8756/` no **Chrome**; permitir microfone.
+- Usar: falar "Ei JARVIS, <comando>"; p/ tarefa em projeto: "no projeto <nome>, <tarefa>"
+  → ele pede "Confirma?" → dizer "confirma".
+- Último teste: backend `/health` 200; `/app.js` 200 (13KB); persona respondeu
+  "...senhor..."; tarefa real no estrutural rodou os testes (achou os 2 golden, já corrigidos).
 
 ## Armadilhas / decisões
-- Metricool exige mídia em URL pública → resolvido com **GitHub raw** (repo é público; imagens de marketing, sem segredo). Para atualizar mídia num rascunho existente, use `?v=N` na URL raw pra furar cache do Metricool (foi assim que troquei o Reel).
-- Export page precisa de `font-family:'Mont'` em body/.frame senão cai pra serif.
-- **Chrome faz handoff pra instância aberta e não captura → usar Edge headless.**
-- Screenshot exige caminho de saída absoluto Windows; render via `subprocess.run` sequencial com `--user-data-dir` único e `--virtual-time-budget=4000`.
-- Decisão de marca: Reel é **texto-movimento** no visual D'LIMA + **trilha original** (acorde Dm gerado por ffmpeg, sem direito de terceiro). NÃO fabricar filmagem de obra com IA.
-- Custo desta sessão: ~US$315. Próximo ciclo/ajustes: sessão limpa.
+- `claude -p` recebe o prompt por **stdin** (arg estoura o limite de linha do Windows).
+- n8n **local** não serve p/ receber WhatsApp (túnel efêmero); só com host fixo.
+- Voz idêntica ao ator do filme: não fazer (voz de pessoa real). HUD é design
+  **original** inspirado (não copiar assets Marvel).
+- `--dangerously-skip-permissions` na execução em projeto é intencional (Leonan escolheu
+  poder total), protegido por token + lista branca + confirmação falada. Manter guardrails.
+- Sessão ficou cara por automação de navegador — na próxima, guiar Leonan por passos
+  em vez de controlar o browser quando possível.

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Kit D'LIMA Construtor | Planilha, checklists e aulas para construir sem estourar o orçamento</title>
+<meta name="description" content="Planilha de orçamento e cronograma, checklists de etapa, guias técnicos e 3 aulas do engenheiro Leonan Lima (CREA) para você planejar sua obra do jeito certo, sem estourar o orçamento.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://dlimaengenharia.org/kit-construtor">
+<meta name="theme-color" content="#1C1C1C">
+
+<meta property="og:type" content="product">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="D'LIMA Engenharia">
+<meta property="og:title" content="Kit D'LIMA Construtor — planeje sua obra sem estourar o orçamento">
+<meta property="og:description" content="Planilha, checklists, guias técnicos e 3 aulas do engenheiro Leonan Lima (CREA).">
+<meta property="og:image" content="https://dlimaengenharia.org/static/og-image.jpg">
+<meta property="og:url" content="https://dlimaengenharia.org/kit-construtor">
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-DPCLJ7WS4R"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-DPCLJ7WS4R');
+</script>
+
+<style>
+  :root{
+    --carvao:#1C1C1C; --carvao-2:#141414; --dourado:#C9A84C; --dourado-2:#e0c476;
+    --verde:#2D5016; --branco:#FFFFFF; --texto-claro:#E9E6DD; --cinza-suave:#9a9689;
+    --max:1080px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--carvao); color:var(--texto-claro);
+    font-family:'Georgia','Times New Roman',serif;
+    line-height:1.55;
+  }
+  h1,h2,h3,.brand{font-family:'Helvetica Neue',Arial,sans-serif;}
+  a{color:inherit;}
+  img{max-width:100%; display:block;}
+  .wrap{max-width:var(--max); margin:0 auto; padding:0 20px;}
+  .btn{
+    display:inline-block; background:var(--dourado); color:var(--carvao-2);
+    font-family:'Helvetica Neue',Arial,sans-serif; font-weight:700; text-decoration:none;
+    padding:16px 30px; border-radius:6px; font-size:1.05rem; letter-spacing:.2px;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .btn:hover{background:var(--dourado-2); transform:translateY(-1px);}
+  .btn-outline{
+    display:inline-block; border:1px solid var(--dourado); color:var(--dourado);
+    font-family:'Helvetica Neue',Arial,sans-serif; font-weight:600; text-decoration:none;
+    padding:13px 26px; border-radius:6px; font-size:.95rem;
+  }
+  .center{text-align:center;}
+  .muted{color:var(--cinza-suave); font-size:.92rem;}
+
+  /* topbar */
+  .topbar{background:var(--carvao-2); border-bottom:1px solid #2a2a2a; padding:14px 0;}
+  .topbar .wrap{display:flex; align-items:center; justify-content:space-between;}
+  .brand{color:var(--dourado); font-weight:700; font-size:1.05rem; text-decoration:none; letter-spacing:.3px;}
+
+  /* hero */
+  .hero{padding:56px 0 40px; background:radial-gradient(ellipse at top, #232323 0%, var(--carvao) 60%);}
+  .kicker{color:var(--dourado); font-family:'Helvetica Neue',Arial,sans-serif; font-weight:700; font-size:.85rem; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:14px;}
+  h1{font-size:2.3rem; line-height:1.18; color:var(--branco); margin:0 0 18px;}
+  h1 em{color:var(--dourado); font-style:normal;}
+  .hero-sub{font-size:1.12rem; color:var(--texto-claro); max-width:640px; margin:0 0 26px;}
+  .hero-cta{margin-bottom:10px;}
+
+  /* dor */
+  .dor{padding:50px 0; background:var(--carvao-2);}
+  .dor h2{color:var(--branco); font-size:1.7rem; margin:0 0 8px;}
+  .dor .muted{margin-bottom:26px;}
+  .dor-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px;}
+  .dor-item{background:var(--carvao); border:1px solid #2a2a2a; border-left:3px solid var(--dourado); border-radius:6px; padding:18px 20px;}
+  .dor-item b{color:var(--branco); font-family:'Helvetica Neue',Arial,sans-serif;}
+
+  /* conteudo */
+  .conteudo{padding:56px 0;}
+  .conteudo h2{color:var(--branco); font-size:1.7rem; margin:0 0 8px; text-align:center;}
+  .conteudo>.wrap>.muted{text-align:center; margin-bottom:36px;}
+  .itens{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px;}
+  .item{background:var(--carvao-2); border:1px solid #2a2a2a; border-radius:8px; padding:24px;}
+  .item .tag{color:var(--dourado); font-family:'Helvetica Neue',Arial,sans-serif; font-weight:700; font-size:.72rem; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; display:block;}
+  .item h3{color:var(--branco); font-size:1.12rem; margin:0 0 8px;}
+  .item p{color:var(--texto-claro); font-size:.95rem; margin:0;}
+
+  /* bonus aulas */
+  .aulas{padding:50px 0; background:var(--carvao-2);}
+  .aulas h2{color:var(--branco); font-size:1.5rem; margin:0 0 22px;}
+  .aula-row{display:flex; gap:16px; align-items:flex-start; margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid #2a2a2a;}
+  .aula-row:last-child{border-bottom:none; margin-bottom:0; padding-bottom:0;}
+  .aula-num{font-family:'Helvetica Neue',Arial,sans-serif; font-weight:700; color:var(--dourado); font-size:1.4rem; min-width:36px;}
+  .aula-row h3{color:var(--branco); font-family:'Helvetica Neue',Arial,sans-serif; font-size:1.02rem; margin:0 0 4px;}
+  .aula-row p{margin:0; color:var(--texto-claro); font-size:.95rem;}
+
+  /* autoridade */
+  .autoridade{padding:56px 0;}
+  .autoridade .grid{display:grid; grid-template-columns:200px 1fr; gap:32px; align-items:center;}
+  .autoridade img{border-radius:8px; border:1px solid #2a2a2a;}
+  .autoridade h2{color:var(--branco); font-size:1.4rem; margin:0 0 10px;}
+  .autoridade p{color:var(--texto-claro);}
+  @media (max-width:640px){ .autoridade .grid{grid-template-columns:1fr; text-align:center;} .autoridade img{width:160px; margin:0 auto;} }
+
+  /* preco */
+  .preco{padding:56px 0; background:linear-gradient(180deg, var(--carvao-2), var(--carvao)); text-align:center; border-top:1px solid #2a2a2a; border-bottom:1px solid #2a2a2a;}
+  .preco h2{color:var(--branco); font-size:1.7rem; margin:0 0 6px;}
+  .preco .muted{margin-bottom:26px;}
+  .price-card{max-width:440px; margin:0 auto; background:var(--carvao-2); border:1px solid var(--dourado); border-radius:10px; padding:34px 28px;}
+  .price-card .de{color:var(--cinza-suave); text-decoration:line-through; font-size:1.1rem;}
+  .price-card .por{color:var(--dourado); font-family:'Helvetica Neue',Arial,sans-serif; font-weight:700; font-size:2.6rem; margin:4px 0 4px;}
+  .price-card .cond{color:var(--cinza-suave); font-size:.85rem; margin-bottom:22px;}
+  .price-card ul{list-style:none; padding:0; margin:0 0 24px; text-align:left;}
+  .price-card li{padding:6px 0; color:var(--texto-claro); font-size:.95rem;}
+  .price-card li::before{content:"✓ "; color:var(--dourado); font-weight:700;}
+
+  /* faq */
+  .faq{padding:56px 0;}
+  .faq h2{color:var(--branco); font-size:1.5rem; margin:0 0 26px; text-align:center;}
+  details{background:var(--carvao-2); border:1px solid #2a2a2a; border-radius:6px; padding:16px 20px; margin-bottom:12px;}
+  summary{color:var(--branco); font-family:'Helvetica Neue',Arial,sans-serif; font-weight:600; cursor:pointer; font-size:1rem;}
+  details p{color:var(--texto-claro); margin:12px 0 0; font-size:.95rem;}
+
+  /* cta final */
+  .cta-final{padding:60px 0 70px; text-align:center; background:radial-gradient(ellipse at bottom, #232323 0%, var(--carvao) 60%);}
+  .cta-final h2{color:var(--branco); font-size:1.6rem; margin:0 0 10px;}
+  .cta-final .muted{margin-bottom:26px;}
+
+  footer{background:var(--carvao-2); border-top:1px solid #2a2a2a; padding:26px 0; text-align:center;}
+  footer .muted{margin:4px 0;}
+
+  .whatsapp-float{
+    position:fixed; bottom:20px; right:20px; z-index:50;
+    background:#25D366; color:#fff; border-radius:50px; padding:14px 20px;
+    font-family:'Helvetica Neue',Arial,sans-serif; font-weight:700; font-size:.9rem;
+    text-decoration:none; box-shadow:0 6px 18px rgba(0,0,0,.35); display:flex; align-items:center; gap:8px;
+  }
+  @media (max-width:520px){ h1{font-size:1.7rem;} .hero-sub{font-size:1rem;} .price-card .por{font-size:2.1rem;} }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a href="/" class="brand">D'LIMA ENGENHARIA</a>
+    <span class="muted">Kit D'LIMA Construtor</span>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="kicker">Kit D'LIMA Construtor</div>
+    <h1>Sua obra não vai estourar o orçamento por falta de dinheiro.<br>Vai estourar por <em>falta de planejamento</em>.</h1>
+    <p class="hero-sub">Planilha de orçamento e cronograma, checklists de cada etapa, guias técnicos diretos e 3 aulas minhas ensinando a usar tudo isso na sua obra — antes de assentar o primeiro tijolo.</p>
+    <div class="hero-cta">
+      <a href="#preco" class="btn">Quero o Kit agora</a>
+    </div>
+    <p class="muted">Acesso imediato após a confirmação. Sem letra miúda.</p>
+  </div>
+</section>
+
+<section class="dor">
+  <div class="wrap">
+    <h2>Se você reconhece alguma dessas situações, o Kit foi feito pra você</h2>
+    <p class="muted">São os mesmos erros que eu vejo toda semana em obra.</p>
+    <div class="dor-grid">
+      <div class="dor-item"><b>Comprar material sem lista quantificada</b><br>e descobrir que faltou ferro na semana da laje — ou sobrou cimento vencendo no canto.</div>
+      <div class="dor-item"><b>Contratar mão de obra "no combinado de boca"</b><br>e discutir depois o que "sempre fez assim" x o que estava no seu projeto.</div>
+      <div class="dor-item"><b>Não saber se a obra está no orçamento</b><br>até o dinheiro acabar no meio do caminho — tarde demais pra corrigir.</div>
+      <div class="dor-item"><b>Fechar parede sem testar hidráulica e elétrica</b><br>e descobrir vazamento ou fiação errada depois do reboco pronto.</div>
+    </div>
+  </div>
+</section>
+
+<section class="conteudo">
+  <div class="wrap">
+    <h2>O que vem dentro do Kit</h2>
+    <p class="muted">Tudo o que eu uso com meus próprios clientes, organizado pra você aplicar sozinho.</p>
+    <div class="itens">
+      <div class="item"><span class="tag">Planilha</span><h3>Orçamento, cronograma e controle de gastos</h3><p>Quantitativo por etapa, comparação previsto × realizado com cálculo automático, cronograma com status e uma aba só pra lançar cada saída de dinheiro no dia.</p></div>
+      <div class="item"><span class="tag">Checklist</span><h3>Checklist de Etapas da Obra</h3><p>7 etapas — do "antes de começar" (documentação, alvará, ART) até a entrega — com os itens que você confere antes de liberar a próxima fase.</p></div>
+      <div class="item"><span class="tag">Guia técnico</span><h3>Fundação Sem Erro</h3><p>O que decide a fundação é o solo do seu terreno, não o costume. Sinais de recalque e a sequência certa de execução.</p></div>
+      <div class="item"><span class="tag">Guia técnico</span><h3>Os Erros que Estouram o Orçamento</h3><p>8 vazamentos de dinheiro mais comuns em obra — e o antídoto direto pra cada um.</p></div>
+      <div class="item"><span class="tag">Guia técnico</span><h3>Contratar e Fiscalizar Mão de Obra</h3><p>Como selecionar, o que exigir no contrato, regra de pagamento por etapa concluída e os sinais de alerta.</p></div>
+      <div class="item"><span class="tag">Modelo pronto</span><h3>Escopo de Serviço D'LIMA</h3><p>Contrato simples de empreitada pra preencher e assinar — transforma "combinado de boca" em acordo que protege os dois lados.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="aulas">
+  <div class="wrap">
+    <h2>+ 3 aulas comigo, direto ao ponto</h2>
+    <div class="aula-row">
+      <div class="aula-num">01</div>
+      <div><h3>Como ler um projeto</h3><p>Prancha por prancha: o que cada uma significa e os 4 pontos que você confere pra ver se a obra tá saindo igual ao papel.</p></div>
+    </div>
+    <div class="aula-row">
+      <div class="aula-num">02</div>
+      <div><h3>Como orçar com preços da sua região</h3><p>Eu preencho a planilha ao vivo, com você, etapa por etapa — pra você sair sabendo aplicar na sua obra no mesmo dia.</p></div>
+    </div>
+    <div class="aula-row">
+      <div class="aula-num">03</div>
+      <div><h3>Os 5 erros que eu mais vejo em obra</h3><p>Direto ao ponto, com casos reais, pra você não repetir o que quase todo mundo repete.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="autoridade">
+  <div class="wrap grid">
+    <img src="/static/leonan-engenheiro.jpg" alt="Leonan Lima, engenheiro civil">
+    <div>
+      <h2>Quem monta esse método sou eu</h2>
+      <p>Sou Leonan Lima, engenheiro civil, CREA ativo, e toco a D'LIMA em São Mateus/ES. Não vendo projeto pronto de terceiro nem promessa vazia — o Kit é o mesmo método que eu uso pra planejar e acompanhar obra dos meus próprios clientes, organizado pra você aplicar sozinho. Se algo aqui não servir pro seu caso, prefiro te falar isso do que te vender errado.</p>
+    </div>
+  </div>
+</section>
+
+<section class="preco" id="preco">
+  <div class="wrap">
+    <h2>Kit D'LIMA Construtor</h2>
+    <p class="muted">Acesso imediato. Uma vez só, sem mensalidade.</p>
+    <div class="price-card">
+      <div class="de">De R$ 197</div>
+      <div class="por">R$ 97</div>
+      <div class="cond">ou 3x de R$ 33,67 no cartão</div>
+      <ul>
+        <li>Planilha de Obra D'LIMA (orçamento + cronograma + gastos)</li>
+        <li>Checklist de Etapas da Obra</li>
+        <li>3 guias técnicos (fundação, orçamento, contratação)</li>
+        <li>Modelo de Escopo de Serviço</li>
+        <li>3 aulas em vídeo com o Leonan</li>
+      </ul>
+      <!-- TODO: trocar o href abaixo pelo link de checkout (Hotmart/Kiwify) assim que estiver publicado -->
+      <a class="btn" href="https://wa.me/5528999646592?text=Quero%20o%20Kit%20D%27LIMA%20Construtor" style="width:100%;">Quero o Kit agora</a>
+    </div>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="wrap">
+    <h2>Perguntas antes de decidir</h2>
+    <details>
+      <summary>O Kit substitui o projeto e o engenheiro responsável pela obra?</summary>
+      <p>Não. O Kit é o seu planejamento — orçamento, cronograma, checklist e contrato. A aprovação do projeto na prefeitura e a responsabilidade técnica da obra continuam sendo de um profissional habilitado. O Kit te faz chegar nessa conversa sabendo exatamente o que pedir.</p>
+    </details>
+    <details>
+      <summary>Serve pra quem já está em obra, não só pra quem vai começar?</summary>
+      <p>Serve. Muita gente entra em obra sem planilha nem checklist e percebe o problema no meio do caminho. Dá pra aplicar o Controle de Gastos e o Checklist a partir da etapa em que você estiver agora.</p>
+    </details>
+    <details>
+      <summary>Funciona pra chalé ou kitnet, não só pra casa?</summary>
+      <p>Sim. A estrutura de etapas (fundação, alvenaria, cobertura, instalações, acabamento) é a mesma — muda a escala, não o método.</p>
+    </details>
+    <details>
+      <summary>Como recebo o material?</summary>
+      <p>Acesso imediato após a confirmação: planilha em Excel, PDFs pra baixar e imprimir, e as 3 aulas em vídeo.</p>
+    </details>
+    <details>
+      <summary>E se eu tiver dúvida se serve pro meu caso?</summary>
+      <p>Me chama no WhatsApp e conta sua situação antes de comprar. Prefiro te responder do que te vender errado.</p>
+    </details>
+  </div>
+</section>
+
+<section class="cta-final">
+  <div class="wrap">
+    <h2>Quem constrói com método discute com papel na mão.<br>Quem constrói no improviso, discute no prejuízo.</h2>
+    <p class="muted">Acesso imediato. R$ 97 à vista ou 3x de R$ 33,67.</p>
+    <a href="#preco" class="btn">Quero o Kit agora</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p class="muted">D'LIMA Engenharia — Leonan Lima, Engenheiro Civil, CREA</p>
+    <p class="muted">São Mateus/ES · WhatsApp (28) 99964-6592 · <a href="/">dlimaengenharia.org</a></p>
+  </div>
+</footer>
+
+<a class="whatsapp-float" href="https://wa.me/5528999646592?text=Tenho%20uma%20d%C3%BAvida%20sobre%20o%20Kit%20D%27LIMA%20Construtor" target="_blank" rel="noopener">Falar no WhatsApp</a>
+
+</body>
+</html>
