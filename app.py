@@ -37,6 +37,11 @@ def v3():
     return render_template("v3.html")
 
 
+@app.route("/site-gratis")
+def site_gratis():
+    return render_template("site-gratis.html")
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
